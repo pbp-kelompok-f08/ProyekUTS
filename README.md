@@ -18,7 +18,7 @@
 <details>
   <summary>Lihat Deskripsi</summary>
 
-Temui platform sosial media baru yang menggabungkan keseruan berbagi cerita dan aktivitas nyata! Di sini, kamu bisa membuat threads seru seperti Twitter, booking venue favorit untuk kegiatan, dan ikut **Open Party / Find Party** untuk olahraga sesuai minatmu. Semua konten dan event tersusun rapi berdasarkan kategori, jadi lebih mudah menemukan apa yang kamu suka.
+Temui platform sosial media baru yang menggabungkan keseruan berbagi cerita dan aktivitas nyata! Di sini, kamu bisa membuat threads seru seperti Twitter, booking lapangan favorit untuk kegiatan, dan ikut **Open Party / Find Party** untuk olahraga sesuai minatmu. Semua konten dan event tersusun rapi berdasarkan kategori, jadi lebih mudah menemukan apa yang kamu suka.
 
 ### Keunggulan dan Manfaat:
 - **Share & Connect:** Bikin threads, diskusi, dan temukan komunitas dengan minat sama.  
