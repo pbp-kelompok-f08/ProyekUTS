@@ -47,14 +47,13 @@ Temui platform sosial media baru yang menggabungkan keseruan berbagi cerita dan 
 - **Fitur:** Pengguna dapat membuat atau bergabung dengan acara olahraga sesuai minat dan lokasi.  
 - **Fungsi:** Meningkatkan partisipasi dalam kegiatan olahraga komunitas.
 
-### 4. Kategori
-- **Fitur:** Mengelompokkan konten dan acara berdasarkan kategori seperti olahraga, komunitas, lokasi, dll.  
-- **Fungsi:** Memudahkan navigasi dan pencarian informasi.
-
-### 5. Pengguna
+### 4. Pengguna
 - **Fitur:** Manajemen akun pengguna, termasuk registrasi, login, profil, dan pengaturan privasi.  
 - **Fungsi:** Personalisasi pengalaman pengguna dan kontrol akses.
 
+### 5. XXXXXX
+- **Fitur:**  isi sini
+- **Fungsi:** isi sini
 </details>
 
 ---
@@ -62,6 +61,28 @@ Temui platform sosial media baru yang menggabungkan keseruan berbagi cerita dan 
 ## 📊 Sumber Initial Dataset
 <details>
   <summary>Lihat Dataset</summary>
+
+### 1. Postingan (Threads)
+- **Dataset:** Dataset apa 
+- **Link:**
+
+### 2. Venue (Booking Venue)
+- **Dataset:** Dataset apa 
+- **Link:**
+
+### 3. Match (Open Party / Find Party)
+- **Dataset:** Dataset apa 
+- **Link:**
+
+### 4. Pengguna
+- **Dataset:** Dataset apa 
+- **Link:**
+
+### 5. XXXXXX
+- **Dataset:** Dataset apa 
+- **Link:**
+  
+  
 
 (Tuliskan sumber dataset kategori utama produk)  
 
@@ -73,7 +94,8 @@ Temui platform sosial media baru yang menggabungkan keseruan berbagi cerita dan 
 <details>
   <summary>Lihat Role</summary>
 
-- **User:** Pengguna aplikasi  
+- **User:** Pengguna aplikasi
+- **Admin:** 
 
 </details>
 
