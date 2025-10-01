@@ -1,4 +1,4 @@
-# 📌 Proyek Django PBP08
+# 📌 Proyek Django F08
 
 ## 👥 Anggota Kelompok
 <details>
@@ -35,9 +35,25 @@ Temui platform sosial media baru yang menggabungkan keseruan berbagi cerita dan 
 <details>
   <summary>Lihat Modul</summary>
 
-- Modul 1: (isi nama modul/fitur)  
-- Modul 2: (isi nama modul/fitur)  
-- Modul 3: (isi nama modul/fitur)  
+### 1. Postingan (Threads)
+- **Fitur:** Pengguna dapat membuat, membaca, dan berinteraksi dengan postingan berbasis teks, mirip dengan Twitter.  
+- **Fungsi:** Diskusi, berbagi informasi, dan interaksi sosial.
+
+### 2. Venue (Booking Venue)
+- **Fitur:** Pengguna dapat mencari, melihat detail, dan memesan venue untuk kegiatan olahraga atau acara komunitas.  
+- **Fungsi:** Mempermudah pencarian dan reservasi tempat.
+
+### 3. Match (Open Party / Find Party)
+- **Fitur:** Pengguna dapat membuat atau bergabung dengan acara olahraga sesuai minat dan lokasi.  
+- **Fungsi:** Meningkatkan partisipasi dalam kegiatan olahraga komunitas.
+
+### 4. Kategori
+- **Fitur:** Mengelompokkan konten dan acara berdasarkan kategori seperti olahraga, komunitas, lokasi, dll.  
+- **Fungsi:** Memudahkan navigasi dan pencarian informasi.
+
+### 5. Pengguna
+- **Fitur:** Manajemen akun pengguna, termasuk registrasi, login, profil, dan pengaturan privasi.  
+- **Fungsi:** Personalisasi pengalaman pengguna dan kontrol akses.
 
 </details>
 
