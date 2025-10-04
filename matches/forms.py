@@ -1,14 +1,6 @@
 from django import forms
-from django.db.utils import OperationalError, ProgrammingError
 
 from .models import Match, Participation, SportCategory
-
-
-def _safe_category_queryset():
-    try:
-        return SportCategory.objects.all()
-    except (OperationalError, ProgrammingError):
-        return SportCategory.objects.none()
 
 
 class MatchForm(forms.ModelForm):
@@ -35,10 +27,6 @@ class MatchForm(forms.ModelForm):
             )
         return max_members
 
-    def __init__(self, *args, **kwargs):
-        super().__init__(*args, **kwargs)
-        self.fields["category"].queryset = _safe_category_queryset()
-
 
 class ParticipationForm(forms.ModelForm):
     class Meta:
@@ -49,17 +37,13 @@ class ParticipationForm(forms.ModelForm):
 
 class MatchSearchForm(forms.Form):
     category = forms.ModelChoiceField(
-        queryset=SportCategory.objects.none(),
+        queryset=SportCategory.objects.all(),
         required=False,
         empty_label="Semua kategori",
     )
     keyword = forms.CharField(
         max_length=100, required=False, label="Kata kunci"
     )
-
-    def __init__(self, *args, **kwargs):
-        super().__init__(*args, **kwargs)
-        self.fields["category"].queryset = _safe_category_queryset()
     available_only = forms.BooleanField(
         required=False, initial=False, label="Hanya yang slot tersedia"
     )

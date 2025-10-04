@@ -3,77 +3,66 @@
 {% block title %}Match Olahraga{% endblock %}
 
 {% block content %}
-{% if not database_ready %}
-    <section>
-        <p>
-            Basis data untuk modul match belum tersedia. Jalankan
-            <code>python manage.py migrate</code> lalu muat ulang halaman ini untuk
-            melanjutkan.
-        </p>
-    </section>
-{% else %}
-    <section>
-        <h2>Cari Match</h2>
-        <form id="match-search-form" method="get" action="">
-            {{ search_form.as_p }}
-            <button type="submit">Cari</button>
-        </form>
-    </section>
+<section>
+    <h2>Cari Match</h2>
+    <form id="match-search-form" method="get" action="">
+        {{ search_form.as_p }}
+        <button type="submit">Cari</button>
+    </form>
+</section>
 
-    <section>
-        <h2>Buat Match Baru</h2>
-        <form id="match-create-form" method="post" action="{% url 'matches:create_match' %}">
-            {% csrf_token %}
-            {{ match_form.as_p }}
-            <button type="submit">Buat Match</button>
-        </form>
-    </section>
+<section>
+    <h2>Buat Match Baru</h2>
+    <form id="match-create-form" method="post" action="{% url 'matches:create_match' %}">
+        {% csrf_token %}
+        {{ match_form.as_p }}
+        <button type="submit">Buat Match</button>
+    </form>
+</section>
 
-    <section>
-        <h2>Daftar Match</h2>
-        <div id="match-list">
-            {% if has_any_match %}
-                {% for category, matches in grouped_matches %}
-                    {% if matches %}
-                        <section data-category="{{ category.slug }}">
-                            <h3>{{ category.name }}</h3>
-                            {% for match in matches %}
-                                <article data-match-id="{{ match.id }}">
-                                    <h4>{{ match.title }}</h4>
-                                    <p>Lokasi: {{ match.location }}</p>
-                                    <p>Waktu: {{ match.event_date|date:"d M Y H:i" }}</p>
-                                    <p>Slot: {{ match.current_members }} / {{ match.max_members }} (tersisa {{ match.available_slots }})</p>
-                                    {% if match.description %}
-                                        <p>{{ match.description }}</p>
-                                    {% endif %}
-                                    <form class="booking-form" data-match-id="{{ match.id }}" method="post" action="{% url 'matches:book_match' match.id %}">
-                                        {% csrf_token %}
-                                        <p>
-                                            <label>Nama<br><input type="text" name="name" required></label>
-                                        </p>
-                                        <p>
-                                            <label>Kontak<br><input type="text" name="contact" required></label>
-                                        </p>
-                                        <p>
-                                            <label>Catatan<br><textarea name="message" rows="3"></textarea></label>
-                                        </p>
-                                        <button type="submit">Gabung Match</button>
-                                    </form>
-                                </article>
-                            {% endfor %}
-                        </section>
-                    {% endif %}
-                {% endfor %}
-            {% else %}
-                <p>Belum ada match yang tersedia.</p>
-            {% endif %}
-        </div>
-    </section>
-{% endif %}
+<section>
+    <h2>Daftar Match</h2>
+    <div id="match-list">
+        {% if has_any_match %}
+            {% for category, matches in grouped_matches %}
+                {% if matches %}
+                    <section data-category="{{ category.slug }}">
+                        <h3>{{ category.name }}</h3>
+                        {% for match in matches %}
+                            <article data-match-id="{{ match.id }}">
+                                <h4>{{ match.title }}</h4>
+                                <p>Lokasi: {{ match.location }}</p>
+                                <p>Waktu: {{ match.event_date|date:"d M Y H:i" }}</p>
+                                <p>Slot: {{ match.current_members }} / {{ match.max_members }} (tersisa {{ match.available_slots }})</p>
+                                {% if match.description %}
+                                    <p>{{ match.description }}</p>
+                                {% endif %}
+                                <form class="booking-form" data-match-id="{{ match.id }}" method="post" action="{% url 'matches:book_match' match.id %}">
+                                    {% csrf_token %}
+                                    <p>
+                                        <label>Nama<br><input type="text" name="name" required></label>
+                                    </p>
+                                    <p>
+                                        <label>Kontak<br><input type="text" name="contact" required></label>
+                                    </p>
+                                    <p>
+                                        <label>Catatan<br><textarea name="message" rows="3"></textarea></label>
+                                    </p>
+                                    <button type="submit">Gabung Match</button>
+                                </form>
+                            </article>
+                        {% endfor %}
+                    </section>
+                {% endif %}
+            {% endfor %}
+        {% else %}
+            <p>Belum ada match yang tersedia.</p>
+        {% endif %}
+    </div>
+</section>
 {% endblock %}
 
 {% block extra_scripts %}
-{% if database_ready %}
 <script>
 (function() {
     const searchForm = document.getElementById('match-search-form');
@@ -216,5 +205,4 @@
     attachBookingHandlers();
 })();
 </script>
-{% endif %}
 {% endblock %}

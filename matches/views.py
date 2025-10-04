@@ -1,5 +1,4 @@
 from django.db.models import Count, F, Q
-from django.db.utils import OperationalError, ProgrammingError
 from django.http import JsonResponse
 from django.shortcuts import get_object_or_404, render
 from django.views.decorators.http import require_http_methods
@@ -23,16 +22,6 @@ def _ensure_default_categories() -> None:
         SportCategory.objects.get_or_create(name=name)
 
 
-def _database_ready() -> bool:
-    try:
-        SportCategory.objects.exists()
-        Match.objects.exists()
-        Participation.objects.exists()
-    except (OperationalError, ProgrammingError):
-        return False
-    return True
-
-
 def _serialize_match(match: Match) -> dict:
     return {
         "id": match.id,
@@ -50,29 +39,6 @@ def _serialize_match(match: Match) -> dict:
 
 @require_http_methods(["GET"])
 def match_dashboard(request):
-    database_ready = _database_ready()
-
-    if not database_ready:
-        context = {
-            "database_ready": False,
-            "grouped_matches": [],
-            "match_form": None,
-            "participation_form": None,
-            "search_form": None,
-            "has_any_match": False,
-        }
-
-        if request.headers.get("x-requested-with") == "XMLHttpRequest":
-            return JsonResponse(
-                {
-                    "groups": [],
-                    "error": "Basis data belum siap. Jalankan migrasi dengan python manage.py migrate.",
-                },
-                status=503,
-            )
-
-        return render(request, "matches/dashboard.html", context)
-
     _ensure_default_categories()
 
     matches = (
@@ -125,7 +91,6 @@ def match_dashboard(request):
         return JsonResponse({"groups": payload})
 
     context = {
-        "database_ready": True,
         "grouped_matches": grouped_matches,
         "match_form": MatchForm(),
         "participation_form": ParticipationForm(),
@@ -137,19 +102,6 @@ def match_dashboard(request):
 
 @require_http_methods(["POST"])
 def create_match(request):
-    if not _database_ready():
-        return JsonResponse(
-            {
-                "success": False,
-                "errors": {
-                    "__all__": [
-                        "Basis data belum siap. Jalankan python manage.py migrate sebelum membuat match."
-                    ]
-                },
-            },
-            status=503,
-        )
-
     form = MatchForm(request.POST)
     if form.is_valid():
         match = form.save()
@@ -167,19 +119,6 @@ def create_match(request):
 
 @require_http_methods(["POST"])
 def book_match(request, pk: int):
-    if not _database_ready():
-        return JsonResponse(
-            {
-                "success": False,
-                "errors": {
-                    "__all__": [
-                        "Basis data belum siap. Jalankan python manage.py migrate sebelum melakukan booking."
-                    ]
-                },
-            },
-            status=503,
-        )
-
     match = get_object_or_404(Match.objects.select_related("category"), pk=pk)
 
     if match.available_slots <= 0:
