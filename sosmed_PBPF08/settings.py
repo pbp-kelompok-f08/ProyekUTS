@@ -36,7 +36,6 @@ ALLOWED_HOSTS = ["localhost", "127.0.0.1", 'm-naufal41-sosmed.pbp.cs.ui.ac.id']
 # Application definition
 
 INSTALLED_APPS = [
-    'django.contrib.admin',
     'django.contrib.auth',
     'django.contrib.contenttypes',
     'django.contrib.sessions',
