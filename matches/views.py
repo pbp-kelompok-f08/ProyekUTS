@@ -1,4 +1,6 @@
+from django.db import connection
 from django.db.models import Count, F, Q
+from django.db.utils import OperationalError, ProgrammingError
 from django.http import JsonResponse
 from django.shortcuts import get_object_or_404, render
 from django.views.decorators.http import require_http_methods
@@ -17,7 +19,26 @@ DEFAULT_CATEGORIES = [
 ]
 
 
+def _is_schema_ready() -> bool:
+    """Check whether the tables required for the match feature exist."""
+
+    try:
+        existing_tables = set(connection.introspection.table_names())
+    except (OperationalError, ProgrammingError):
+        return False
+
+    required_tables = {
+        SportCategory._meta.db_table,
+        Match._meta.db_table,
+        Participation._meta.db_table,
+    }
+    return required_tables.issubset(existing_tables)
+
+
 def _ensure_default_categories() -> None:
+    if not _is_schema_ready():
+        return
+
     for name in DEFAULT_CATEGORIES:
         SportCategory.objects.get_or_create(name=name)
 
@@ -39,6 +60,30 @@ def _serialize_match(match: Match) -> dict:
 
 @require_http_methods(["GET"])
 def match_dashboard(request):
+    schema_ready = _is_schema_ready()
+
+    if not schema_ready:
+        context = {
+            "schema_ready": False,
+            "grouped_matches": [],
+            "match_form": MatchForm(),
+            "participation_form": ParticipationForm(),
+            "search_form": MatchSearchForm(),
+            "has_any_match": False,
+        }
+
+        if request.headers.get("x-requested-with") == "XMLHttpRequest":
+            return JsonResponse(
+                {
+                    "groups": [],
+                    "schema_ready": False,
+                    "message": "Database belum dimigrasikan. Jalankan python manage.py migrate.",
+                },
+                status=503,
+            )
+
+        return render(request, "matches/dashboard.html", context, status=503)
+
     _ensure_default_categories()
 
     matches = (
@@ -96,12 +141,26 @@ def match_dashboard(request):
         "participation_form": ParticipationForm(),
         "search_form": search_form,
         "has_any_match": has_any_match,
+        "schema_ready": True,
     }
     return render(request, "matches/dashboard.html", context)
 
 
 @require_http_methods(["POST"])
 def create_match(request):
+    if not _is_schema_ready():
+        return JsonResponse(
+            {
+                "success": False,
+                "errors": {
+                    "__all__": [
+                        "Database belum dimigrasikan. Jalankan python manage.py migrate terlebih dahulu.",
+                    ]
+                },
+            },
+            status=503,
+        )
+
     form = MatchForm(request.POST)
     if form.is_valid():
         match = form.save()
@@ -119,6 +178,19 @@ def create_match(request):
 
 @require_http_methods(["POST"])
 def book_match(request, pk: int):
+    if not _is_schema_ready():
+        return JsonResponse(
+            {
+                "success": False,
+                "errors": {
+                    "__all__": [
+                        "Database belum dimigrasikan. Jalankan python manage.py migrate terlebih dahulu.",
+                    ]
+                },
+            },
+            status=503,
+        )
+
     match = get_object_or_404(Match.objects.select_related("category"), pk=pk)
 
     if match.available_slots <= 0:

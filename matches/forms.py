@@ -1,6 +1,19 @@
 from django import forms
+from django.db import connection
+from django.db.utils import OperationalError, ProgrammingError
 
 from .models import Match, Participation, SportCategory
+
+
+def _is_category_table_ready() -> bool:
+    """Return True when the sport category table is available."""
+
+    try:
+        existing_tables = set(connection.introspection.table_names())
+    except (OperationalError, ProgrammingError):
+        return False
+
+    return SportCategory._meta.db_table in existing_tables
 
 
 class MatchForm(forms.ModelForm):
@@ -27,6 +40,13 @@ class MatchForm(forms.ModelForm):
             )
         return max_members
 
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+
+        if not _is_category_table_ready():
+            self.fields["category"].queryset = SportCategory.objects.none()
+            self.fields["category"].disabled = True
+
 
 class ParticipationForm(forms.ModelForm):
     class Meta:
@@ -47,3 +67,10 @@ class MatchSearchForm(forms.Form):
     available_only = forms.BooleanField(
         required=False, initial=False, label="Hanya yang slot tersedia"
     )
+
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+
+        if not _is_category_table_ready():
+            self.fields["category"].queryset = SportCategory.objects.none()
+            self.fields["category"].disabled = True
