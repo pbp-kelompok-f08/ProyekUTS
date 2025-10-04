@@ -3,6 +3,77 @@
 {% block title %}Match Olahraga{% endblock %}
 
 {% block content %}
+<style>
+    .modal {
+        position: fixed;
+        inset: 0;
+        display: none;
+        align-items: center;
+        justify-content: center;
+        z-index: 1000;
+    }
+
+    .modal[data-open="true"] {
+        display: flex;
+    }
+
+    .modal-overlay {
+        position: absolute;
+        inset: 0;
+        background: rgba(0, 0, 0, 0.5);
+    }
+
+    .modal-content {
+        position: relative;
+        background: #fff;
+        padding: 1.5rem;
+        border-radius: 0.5rem;
+        box-shadow: 0 10px 25px rgba(0, 0, 0, 0.2);
+        max-width: 480px;
+        width: 90%;
+        max-height: 90vh;
+        overflow-y: auto;
+    }
+
+    .modal-close {
+        position: absolute;
+        top: 0.75rem;
+        right: 0.75rem;
+        background: transparent;
+        border: none;
+        font-size: 1.5rem;
+        cursor: pointer;
+    }
+
+    .modal-actions {
+        display: flex;
+        justify-content: flex-end;
+        gap: 0.75rem;
+        margin-top: 1.5rem;
+    }
+
+    .modal-actions button {
+        padding: 0.5rem 1rem;
+        cursor: pointer;
+    }
+
+    .form-errors {
+        margin-top: 0.75rem;
+        padding: 0.75rem;
+        border-radius: 0.375rem;
+        background-color: #fed7d7;
+        border: 1px solid #f56565;
+        color: #742a2a;
+    }
+
+    .form-errors p {
+        margin: 0;
+    }
+
+    [hidden] {
+        display: none !important;
+    }
+</style>
 {% if not schema_ready %}
 <section class="system-message">
     <h2>Basis Data Belum Siap</h2>
@@ -23,12 +94,30 @@
 
 <section>
     <h2>Buat Match Baru</h2>
+    <button type="button" id="open-create-modal" {% if not schema_ready %}disabled{% endif %}>Buat Match</button>
     <form id="match-create-form" method="post" action="{% url 'matches:create_match' %}">
         {% csrf_token %}
         {{ match_form.as_p }}
         <button type="submit" {% if not schema_ready %}disabled{% endif %}>Buat Match</button>
     </form>
 </section>
+
+<div id="create-match-modal" class="modal" data-open="false" aria-hidden="true">
+    <div class="modal-overlay" role="presentation"></div>
+    <div class="modal-content" role="dialog" aria-modal="true" aria-labelledby="create-match-modal-title">
+        <button type="button" class="modal-close" aria-label="Tutup">&times;</button>
+        <h3 id="create-match-modal-title">Buat Match Baru</h3>
+        <form id="match-create-form" method="post" action="{% url 'matches:create_match' %}">
+            {% csrf_token %}
+            {{ match_form.as_p }}
+            <div id="create-form-errors" class="form-errors" role="alert" aria-live="assertive" hidden></div>
+            <div class="modal-actions">
+                <button type="button" class="modal-cancel">Batal</button>
+                <button type="submit">Simpan</button>
+            </div>
+        </form>
+    </div>
+</div>
 
 <section>
     <h2>Daftar Match</h2>
@@ -80,10 +169,95 @@
 {% if schema_ready %}
 <script>
 (function() {
+    const body = document.body;
     const searchForm = document.getElementById('match-search-form');
     const createForm = document.getElementById('match-create-form');
     const matchList = document.getElementById('match-list');
     const csrfToken = getCookie('csrftoken');
+    const modal = document.getElementById('create-match-modal');
+    const openModalButton = document.getElementById('open-create-modal');
+    const modalOverlay = modal ? modal.querySelector('.modal-overlay') : null;
+    const modalClose = modal ? modal.querySelector('.modal-close') : null;
+    const modalCancel = modal ? modal.querySelector('.modal-cancel') : null;
+    const createErrors = document.getElementById('create-form-errors');
+    const createSubmit = createForm ? createForm.querySelector('button[type="submit"]') : null;
+    const originalSubmitLabel = createSubmit ? createSubmit.textContent : '';
+
+    function escapeHtml(value) {
+        if (value == null) {
+            return '';
+        }
+        return String(value)
+            .replace(/&/g, '&amp;')
+            .replace(/</g, '&lt;')
+            .replace(/>/g, '&gt;')
+            .replace(/"/g, '&quot;')
+            .replace(/'/g, '&#x27;');
+    }
+
+    function setCreateErrors(messages) {
+        if (!createErrors) {
+            return;
+        }
+        const list = (messages || []).filter(Boolean);
+        if (!list.length) {
+            createErrors.innerHTML = '';
+            createErrors.setAttribute('hidden', '');
+            return;
+        }
+
+        createErrors.innerHTML = list
+            .map(message => `<p>${escapeHtml(message)}</p>`)
+            .join('');
+        createErrors.removeAttribute('hidden');
+    }
+
+    function openModal() {
+        if (!modal) {
+            return;
+        }
+        modal.setAttribute('data-open', 'true');
+        modal.setAttribute('aria-hidden', 'false');
+        body.style.overflow = 'hidden';
+        setCreateErrors([]);
+        const firstInput = modal.querySelector('.modal-content form input, .modal-content form textarea, .modal-content form select');
+        if (firstInput) {
+            firstInput.focus();
+        }
+    }
+
+    function closeModal() {
+        if (!modal) {
+            return;
+        }
+        modal.setAttribute('data-open', 'false');
+        modal.setAttribute('aria-hidden', 'true');
+        body.style.overflow = '';
+        setCreateErrors([]);
+    }
+
+    function bindModalEvents() {
+        if (!modal) {
+            return;
+        }
+
+        if (openModalButton) {
+            openModalButton.addEventListener('click', openModal);
+        }
+
+        const closeActions = [modalOverlay, modalClose, modalCancel];
+        closeActions.forEach(element => {
+            if (element) {
+                element.addEventListener('click', closeModal);
+            }
+        });
+
+        document.addEventListener('keydown', function(event) {
+            if (event.key === 'Escape' && modal.getAttribute('data-open') === 'true') {
+                closeModal();
+            }
+        });
+    }
 
     function renderGroups(groups) {
         if (!groups || groups.length === 0) {
@@ -91,17 +265,28 @@
             return;
         }
 
+        const csrfField = csrfToken
+            ? `<input type="hidden" name="csrfmiddlewaretoken" value="${escapeHtml(csrfToken)}">`
+            : '';
+
         const sectionHtml = groups.map(group => {
             const matchesHtml = group.matches.map(match => {
-                const descriptionHtml = match.description ? `<p>${match.description}</p>` : '';
+                const matchId = escapeHtml(match.id);
+                const descriptionHtml = match.description
+                    ? `<p>${escapeHtml(match.description)}</p>`
+                    : '';
+                const formattedDate = match.event_date
+                    ? new Date(match.event_date).toLocaleString('id-ID')
+                    : '';
                 return `
-                    <article data-match-id="${match.id}">
-                        <h4>${match.title}</h4>
-                        <p>Lokasi: ${match.location}</p>
-                        <p>Waktu: ${new Date(match.event_date).toLocaleString('id-ID')}</p>
-                        <p>Slot: ${match.current_members} / ${match.max_members} (tersisa ${match.available_slots})</p>
+                    <article data-match-id="${matchId}">
+                        <h4>${escapeHtml(match.title)}</h4>
+                        <p>Lokasi: ${escapeHtml(match.location)}</p>
+                        <p>Waktu: ${escapeHtml(formattedDate)}</p>
+                        <p>Slot: ${escapeHtml(match.current_members)} / ${escapeHtml(match.max_members)} (tersisa ${escapeHtml(match.available_slots)})</p>
                         ${descriptionHtml}
-                        <form class="booking-form" data-match-id="${match.id}" method="post" action="/matches/${match.id}/book/">
+                        <form class="booking-form" data-match-id="${matchId}" method="post" action="/matches/${matchId}/book/">
+                            ${csrfField}
                             <p>
                                 <label>Nama<br><input type="text" name="name" required></label>
                             </p>
@@ -118,8 +303,8 @@
             }).join('');
 
             return `
-                <section data-category="${group.category_slug}">
-                    <h3>${group.category}</h3>
+                <section data-category="${escapeHtml(group.category_slug)}">
+                    <h3>${escapeHtml(group.category)}</h3>
                     ${matchesHtml}
                 </section>
             `;
@@ -134,46 +319,74 @@
         const params = new URLSearchParams(formData || new FormData(searchForm));
         const queryString = params.toString();
         const url = queryString ? `${endpoint}?${queryString}` : endpoint;
-        const response = await fetch(url, {
-            headers: {
-                'X-Requested-With': 'XMLHttpRequest'
+        try {
+            const response = await fetch(url, {
+                headers: {
+                    'X-Requested-With': 'XMLHttpRequest'
+                }
+            });
+
+            if (!response.ok) {
+                showToast('Gagal memuat data match.', 'error');
+                return null;
             }
-        });
 
-        if (!response.ok) {
-            showToast('Gagal memuat data match.', 'error');
-            return;
+            const data = await response.json();
+            renderGroups(data.groups || []);
+            return data;
+        } catch (error) {
+            console.error(error);
+            showToast('Terjadi kesalahan saat mengambil data match.', 'error');
+            return null;
         }
-
-        const data = await response.json();
-        renderGroups(data.groups || []);
-        return data;
     }
 
     async function handleCreate(event) {
         event.preventDefault();
         const formData = new FormData(createForm);
 
-        const response = await fetch(createForm.action, {
-            method: 'POST',
-            headers: {
-                'X-CSRFToken': csrfToken,
-                'X-Requested-With': 'XMLHttpRequest'
-            },
-            body: formData
-        });
-
-        if (!response.ok) {
-            const errorData = await response.json();
-            const messages = Object.values(errorData.errors || {}).flat().join(' ');
-            showToast(messages || 'Gagal membuat match baru.', 'error');
-            return;
+        if (createSubmit) {
+            createSubmit.disabled = true;
+            createSubmit.textContent = 'Menyimpan...';
         }
 
-        await response.json();
-        createForm.reset();
-        showToast('Match baru berhasil dibuat.', 'success');
-        await loadMatches();
+        try {
+            const response = await fetch(createForm.action, {
+                method: 'POST',
+                headers: {
+                    'X-CSRFToken': csrfToken,
+                    'X-Requested-With': 'XMLHttpRequest'
+                },
+                body: formData
+            });
+
+            const payload = await response
+                .json()
+                .catch(() => ({ success: false }));
+
+            if (!response.ok || !payload.success) {
+                const messages = Object.values(payload.errors || {})
+                    .flat()
+                    .filter(Boolean);
+                setCreateErrors(messages);
+                showToast(messages.join(' ') || 'Gagal membuat match baru.', 'error');
+                return;
+            }
+
+            setCreateErrors([]);
+            createForm.reset();
+            showToast(payload.message || 'Match baru berhasil dibuat.', 'success');
+            closeModal();
+            await loadMatches();
+        } catch (error) {
+            console.error(error);
+            showToast('Terjadi kesalahan jaringan. Coba lagi nanti.', 'error');
+        } finally {
+            if (createSubmit) {
+                createSubmit.disabled = false;
+                createSubmit.textContent = originalSubmitLabel;
+            }
+        }
     }
 
     async function handleBooking(event) {
@@ -181,26 +394,47 @@
         const form = event.target;
         const formData = new FormData(form);
 
-        const response = await fetch(form.action, {
-            method: 'POST',
-            headers: {
-                'X-CSRFToken': csrfToken,
-                'X-Requested-With': 'XMLHttpRequest'
-            },
-            body: formData
-        });
-
-        const data = await response.json();
-
-        if (!response.ok || !data.success) {
-            const messages = Object.values(data.errors || {}).flat().join(' ');
-            showToast(messages || 'Tidak dapat mendaftar pada match ini.', 'error');
-            return;
+        const submitButton = form.querySelector('button[type="submit"]');
+        if (submitButton) {
+            submitButton.disabled = true;
+            submitButton.textContent = 'Memproses...';
         }
 
-        form.reset();
-        showToast('Kamu berhasil mendaftar pada match ini.', 'success');
-        await loadMatches();
+        try {
+            const response = await fetch(form.action, {
+                method: 'POST',
+                headers: {
+                    'X-CSRFToken': csrfToken,
+                    'X-Requested-With': 'XMLHttpRequest'
+                },
+                body: formData
+            });
+
+            const data = await response
+                .json()
+                .catch(() => ({ success: false }));
+
+            if (!response.ok || !data.success) {
+                const messages = Object.values(data.errors || {})
+                    .flat()
+                    .filter(Boolean)
+                    .join(' ');
+                showToast(messages || 'Tidak dapat mendaftar pada match ini.', 'error');
+                return;
+            }
+
+            form.reset();
+            showToast(data.message || 'Kamu berhasil mendaftar pada match ini.', 'success');
+            await loadMatches();
+        } catch (error) {
+            console.error(error);
+            showToast('Terjadi kesalahan jaringan. Coba lagi nanti.', 'error');
+        } finally {
+            if (submitButton) {
+                submitButton.disabled = false;
+                submitButton.textContent = 'Gabung Match';
+            }
+        }
     }
 
     function attachBookingHandlers() {
@@ -216,8 +450,11 @@
         loadMatches(formData);
     });
 
-    createForm.addEventListener('submit', handleCreate);
+    if (createForm) {
+        createForm.addEventListener('submit', handleCreate);
+    }
     attachBookingHandlers();
+    bindModalEvents();
 })();
 </script>
 {% endif %}
