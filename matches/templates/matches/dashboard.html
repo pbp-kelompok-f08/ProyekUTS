@@ -30,22 +30,6 @@
     </form>
 </section>
 
-<div id="create-match-modal" class="modal" data-open="false" aria-hidden="true">
-    <div class="modal-overlay" role="presentation"></div>
-    <div class="modal-content" role="dialog" aria-modal="true" aria-labelledby="create-match-modal-title">
-        <button type="button" class="modal-close" aria-label="Tutup">&times;</button>
-        <h3 id="create-match-modal-title">Buat Match Baru</h3>
-        <form id="match-create-form" method="post" action="{% url 'matches:create_match' %}">
-            {% csrf_token %}
-            {{ match_form.as_p }}
-            <div class="modal-actions">
-                <button type="button" class="modal-cancel">Batal</button>
-                <button type="submit">Simpan</button>
-            </div>
-        </form>
-    </div>
-</div>
-
 <section>
     <h2>Daftar Match</h2>
     <div id="match-list">
@@ -96,61 +80,10 @@
 {% if schema_ready %}
 <script>
 (function() {
-    const body = document.body;
     const searchForm = document.getElementById('match-search-form');
     const createForm = document.getElementById('match-create-form');
     const matchList = document.getElementById('match-list');
     const csrfToken = getCookie('csrftoken');
-    const modal = document.getElementById('create-match-modal');
-    const openModalButton = document.getElementById('open-create-modal');
-    const modalOverlay = modal ? modal.querySelector('.modal-overlay') : null;
-    const modalClose = modal ? modal.querySelector('.modal-close') : null;
-    const modalCancel = modal ? modal.querySelector('.modal-cancel') : null;
-
-    function openModal() {
-        if (!modal) {
-            return;
-        }
-        modal.setAttribute('data-open', 'true');
-        modal.setAttribute('aria-hidden', 'false');
-        body.style.overflow = 'hidden';
-        const firstInput = modal.querySelector('.modal-content form input, .modal-content form textarea, .modal-content form select');
-        if (firstInput) {
-            firstInput.focus();
-        }
-    }
-
-    function closeModal() {
-        if (!modal) {
-            return;
-        }
-        modal.setAttribute('data-open', 'false');
-        modal.setAttribute('aria-hidden', 'true');
-        body.style.overflow = '';
-    }
-
-    function bindModalEvents() {
-        if (!modal) {
-            return;
-        }
-
-        if (openModalButton) {
-            openModalButton.addEventListener('click', openModal);
-        }
-
-        const closeActions = [modalOverlay, modalClose, modalCancel];
-        closeActions.forEach(element => {
-            if (element) {
-                element.addEventListener('click', closeModal);
-            }
-        });
-
-        document.addEventListener('keydown', function(event) {
-            if (event.key === 'Escape' && modal.getAttribute('data-open') === 'true') {
-                closeModal();
-            }
-        });
-    }
 
     function renderGroups(groups) {
         if (!groups || groups.length === 0) {
@@ -240,7 +173,6 @@
         await response.json();
         createForm.reset();
         showToast('Match baru berhasil dibuat.', 'success');
-        closeModal();
         await loadMatches();
     }
 
@@ -286,7 +218,6 @@
 
     createForm.addEventListener('submit', handleCreate);
     attachBookingHandlers();
-    bindModalEvents();
 })();
 </script>
 {% endif %}
