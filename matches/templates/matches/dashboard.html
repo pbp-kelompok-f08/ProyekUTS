@@ -95,6 +95,11 @@
 <section>
     <h2>Buat Match Baru</h2>
     <button type="button" id="open-create-modal" {% if not schema_ready %}disabled{% endif %}>Buat Match</button>
+    <form id="match-create-form" method="post" action="{% url 'matches:create_match' %}">
+        {% csrf_token %}
+        {{ match_form.as_p }}
+        <button type="submit" {% if not schema_ready %}disabled{% endif %}>Buat Match</button>
+    </form>
 </section>
 
 <div id="create-match-modal" class="modal" data-open="false" aria-hidden="true">
