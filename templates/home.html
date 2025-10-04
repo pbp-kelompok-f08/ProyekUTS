@@ -1,0 +1,24 @@
+{% extends "base.html" %}
+
+{% block title %}Beranda | Sosmed Olahraga{% endblock %}
+
+{% block content %}
+<section style="max-width: 720px; margin: 0 auto; text-align: center; padding: 2rem 1rem;">
+    <h2 style="font-size: 2rem; margin-bottom: 1rem;">Selamat datang di Sosmed Olahraga</h2>
+    <p style="margin-bottom: 2rem; line-height: 1.6;">
+        Temukan partner olahraga, buat match baru, atau bergabung dengan komunitas olahraga di sekitar kamu.
+    </p>
+    <a href="{% url 'matches:dashboard' %}"
+       style="
+           display: inline-block;
+           padding: 0.75rem 1.5rem;
+           background-color: #2563eb;
+           color: #ffffff;
+           border-radius: 9999px;
+           text-decoration: none;
+           font-weight: bold;
+       ">
+        Lihat Match yang Tersedia
+    </a>
+</section>
+{% endblock %}

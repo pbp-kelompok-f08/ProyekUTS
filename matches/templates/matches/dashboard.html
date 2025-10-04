@@ -3,72 +3,204 @@
 {% block title %}Match Olahraga{% endblock %}
 
 {% block content %}
+<style>
+    .modal {
+        position: fixed;
+        inset: 0;
+        display: none;
+        align-items: center;
+        justify-content: center;
+        z-index: 1000;
+    }
+
+    .modal[data-open="true"] {
+        display: flex;
+    }
+
+    .modal-overlay {
+        position: absolute;
+        inset: 0;
+        background: rgba(0, 0, 0, 0.5);
+    }
+
+    .modal-content {
+        position: relative;
+        background: #fff;
+        padding: 1.5rem;
+        border-radius: 0.5rem;
+        box-shadow: 0 10px 25px rgba(0, 0, 0, 0.2);
+        max-width: 480px;
+        width: 90%;
+        max-height: 90vh;
+        overflow-y: auto;
+    }
+
+    .modal-close {
+        position: absolute;
+        top: 0.75rem;
+        right: 0.75rem;
+        background: transparent;
+        border: none;
+        font-size: 1.5rem;
+        cursor: pointer;
+    }
+
+    .modal-actions {
+        display: flex;
+        justify-content: flex-end;
+        gap: 0.75rem;
+        margin-top: 1.5rem;
+    }
+
+    .modal-actions button {
+        padding: 0.5rem 1rem;
+        cursor: pointer;
+    }
+</style>
+{% if not schema_ready %}
+<section class="system-message">
+    <h2>Basis Data Belum Siap</h2>
+    <p>
+        Untuk menggunakan fitur match, jalankan perintah
+        <code>python manage.py migrate</code> agar tabel yang diperlukan tersedia.
+    </p>
+</section>
+{% endif %}
+
 <section>
     <h2>Cari Match</h2>
     <form id="match-search-form" method="get" action="">
         {{ search_form.as_p }}
-        <button type="submit">Cari</button>
+        <button type="submit" {% if not schema_ready %}disabled{% endif %}>Cari</button>
     </form>
 </section>
 
 <section>
     <h2>Buat Match Baru</h2>
-    <form id="match-create-form" method="post" action="{% url 'matches:create_match' %}">
-        {% csrf_token %}
-        {{ match_form.as_p }}
-        <button type="submit">Buat Match</button>
-    </form>
+    <button type="button" id="open-create-modal" {% if not schema_ready %}disabled{% endif %}>Buat Match</button>
 </section>
+
+<div id="create-match-modal" class="modal" data-open="false" aria-hidden="true">
+    <div class="modal-overlay" role="presentation"></div>
+    <div class="modal-content" role="dialog" aria-modal="true" aria-labelledby="create-match-modal-title">
+        <button type="button" class="modal-close" aria-label="Tutup">&times;</button>
+        <h3 id="create-match-modal-title">Buat Match Baru</h3>
+        <form id="match-create-form" method="post" action="{% url 'matches:create_match' %}">
+            {% csrf_token %}
+            {{ match_form.as_p }}
+            <div class="modal-actions">
+                <button type="button" class="modal-cancel">Batal</button>
+                <button type="submit">Simpan</button>
+            </div>
+        </form>
+    </div>
+</div>
 
 <section>
     <h2>Daftar Match</h2>
     <div id="match-list">
-        {% if has_any_match %}
-            {% for category, matches in grouped_matches %}
-                {% if matches %}
-                    <section data-category="{{ category.slug }}">
-                        <h3>{{ category.name }}</h3>
-                        {% for match in matches %}
-                            <article data-match-id="{{ match.id }}">
-                                <h4>{{ match.title }}</h4>
-                                <p>Lokasi: {{ match.location }}</p>
-                                <p>Waktu: {{ match.event_date|date:"d M Y H:i" }}</p>
-                                <p>Slot: {{ match.current_members }} / {{ match.max_members }} (tersisa {{ match.available_slots }})</p>
-                                {% if match.description %}
-                                    <p>{{ match.description }}</p>
-                                {% endif %}
-                                <form class="booking-form" data-match-id="{{ match.id }}" method="post" action="{% url 'matches:book_match' match.id %}">
-                                    {% csrf_token %}
-                                    <p>
-                                        <label>Nama<br><input type="text" name="name" required></label>
-                                    </p>
-                                    <p>
-                                        <label>Kontak<br><input type="text" name="contact" required></label>
-                                    </p>
-                                    <p>
-                                        <label>Catatan<br><textarea name="message" rows="3"></textarea></label>
-                                    </p>
-                                    <button type="submit">Gabung Match</button>
-                                </form>
-                            </article>
-                        {% endfor %}
-                    </section>
-                {% endif %}
-            {% endfor %}
+        {% if schema_ready %}
+            {% if has_any_match %}
+                {% for category, matches in grouped_matches %}
+                    {% if matches %}
+                        <section data-category="{{ category.slug }}">
+                            <h3>{{ category.name }}</h3>
+                            {% for match in matches %}
+                                <article data-match-id="{{ match.id }}">
+                                    <h4>{{ match.title }}</h4>
+                                    <p>Lokasi: {{ match.location }}</p>
+                                    <p>Waktu: {{ match.event_date|date:"d M Y H:i" }}</p>
+                                    <p>Slot: {{ match.current_members }} / {{ match.max_members }} (tersisa {{ match.available_slots }})</p>
+                                    {% if match.description %}
+                                        <p>{{ match.description }}</p>
+                                    {% endif %}
+                                    <form class="booking-form" data-match-id="{{ match.id }}" method="post" action="{% url 'matches:book_match' match.id %}">
+                                        {% csrf_token %}
+                                        <p>
+                                            <label>Nama<br><input type="text" name="name" required></label>
+                                        </p>
+                                        <p>
+                                            <label>Kontak<br><input type="text" name="contact" required></label>
+                                        </p>
+                                        <p>
+                                            <label>Catatan<br><textarea name="message" rows="3"></textarea></label>
+                                        </p>
+                                        <button type="submit">Gabung Match</button>
+                                    </form>
+                                </article>
+                            {% endfor %}
+                        </section>
+                    {% endif %}
+                {% endfor %}
+            {% else %}
+                <p>Belum ada match yang tersedia.</p>
+            {% endif %}
         {% else %}
-            <p>Belum ada match yang tersedia.</p>
+            <p>Data match belum tersedia karena basis data belum dimigrasikan.</p>
         {% endif %}
     </div>
 </section>
 {% endblock %}
 
 {% block extra_scripts %}
+{% if schema_ready %}
 <script>
 (function() {
+    const body = document.body;
     const searchForm = document.getElementById('match-search-form');
     const createForm = document.getElementById('match-create-form');
     const matchList = document.getElementById('match-list');
     const csrfToken = getCookie('csrftoken');
+    const modal = document.getElementById('create-match-modal');
+    const openModalButton = document.getElementById('open-create-modal');
+    const modalOverlay = modal ? modal.querySelector('.modal-overlay') : null;
+    const modalClose = modal ? modal.querySelector('.modal-close') : null;
+    const modalCancel = modal ? modal.querySelector('.modal-cancel') : null;
+
+    function openModal() {
+        if (!modal) {
+            return;
+        }
+        modal.setAttribute('data-open', 'true');
+        modal.setAttribute('aria-hidden', 'false');
+        body.style.overflow = 'hidden';
+        const firstInput = modal.querySelector('.modal-content form input, .modal-content form textarea, .modal-content form select');
+        if (firstInput) {
+            firstInput.focus();
+        }
+    }
+
+    function closeModal() {
+        if (!modal) {
+            return;
+        }
+        modal.setAttribute('data-open', 'false');
+        modal.setAttribute('aria-hidden', 'true');
+        body.style.overflow = '';
+    }
+
+    function bindModalEvents() {
+        if (!modal) {
+            return;
+        }
+
+        if (openModalButton) {
+            openModalButton.addEventListener('click', openModal);
+        }
+
+        const closeActions = [modalOverlay, modalClose, modalCancel];
+        closeActions.forEach(element => {
+            if (element) {
+                element.addEventListener('click', closeModal);
+            }
+        });
+
+        document.addEventListener('keydown', function(event) {
+            if (event.key === 'Escape' && modal.getAttribute('data-open') === 'true') {
+                closeModal();
+            }
+        });
+    }
 
     function renderGroups(groups) {
         if (!groups || groups.length === 0) {
@@ -158,6 +290,7 @@
         await response.json();
         createForm.reset();
         showToast('Match baru berhasil dibuat.', 'success');
+        closeModal();
         await loadMatches();
     }
 
@@ -203,6 +336,8 @@
 
     createForm.addEventListener('submit', handleCreate);
     attachBookingHandlers();
+    bindModalEvents();
 })();
 </script>
+{% endif %}
 {% endblock %}
