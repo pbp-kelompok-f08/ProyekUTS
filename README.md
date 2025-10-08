@@ -48,7 +48,7 @@ Temui platform sosial media baru yang menggabungkan keseruan berbagi cerita dan 
 - **Fungsi:** Meningkatkan partisipasi dalam kegiatan olahraga komunitas.
 
 ### 4. Pengguna
-- **Fitur:** Manajemen akun pengguna, termasuk registrasi, login, profil, dan pengaturan privasi.  
+- **Fitur:** Manajemen akun pengguna, termasuk registrasi, login, profil, dan pengaturan privasi. Pengguna juga dapat mengkustomisasi dan mengedit profile mereka
 - **Fungsi:** Personalisasi pengalaman pengguna dan kontrol akses.
 
 ### 5. Live Chat
@@ -67,14 +67,10 @@ Temui platform sosial media baru yang menggabungkan keseruan berbagi cerita dan 
 - **Link:** https://www.kaggle.com/datasets/danielgrijalvas/twitter-threads
 
 ### 2. Venue (Booking Venue)
-- **Dataset:** Dataset apa 
-- **Link:**
+- **Dataset:** Football Stadium
+- **Link:** https://www.kaggle.com/datasets/imtkaggleteam/football-stadiums
 
 ### 3. Match (Open Party / Find Party)
-- **Dataset:** Dataset apa 
-- **Link:**
-
-### 4. Pengguna
 - **Dataset:** Dataset apa 
 - **Link:**
 
@@ -90,13 +86,10 @@ Temui platform sosial media baru yang menggabungkan keseruan berbagi cerita dan 
 
 ---
 
-## 👤 Role / Peran Pengguna
+## 👤 Pengguna Website
 <details>
-  <summary>Lihat Role</summary>
-
-- **User:** Pengguna aplikasi
-- **Admin:** 
-
+  <summary>Lihat User</summary>
+Hoppin ditujukan bagi seluruh individu yang memiliki minat terhadap aktivitas olahraga, baik pemula maupun mereka yang telah rutin berolahraga. Platform ini menjadi wadah bagi masyarakat yang ingin tetap aktif, membangun relasi sosial, serta berpartisipasi dalam berbagai kegiatan olahraga di sekitar mereka. Melalui fitur seperti threads interaktif, sistem booking venue, dan Open Party / Find Party, Hoppin mempermudah pengguna untuk berbagi pengalaman, menemukan komunitas dengan minat serupa, serta berpartisipasi dalam event olahraga dengan mudah. Selain itu, Hoppin juga memberikan peluang bagi penyedia fasilitas olahraga, pelatih, dan penyelenggara acara untuk memperluas jangkauan audiensnya secara efisien. Dengan menggabungkan interaksi digital dan aktivitas nyata, Hoppin hadir sebagai platform yang mendukung gaya hidup sehat, aktif, dan terhubung bagi semua kalangan.
 </details>
 
 ---
