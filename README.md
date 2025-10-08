@@ -78,7 +78,7 @@ untuk fitur" seperti match akan dibuatkan data dummy berdasarkan data venue yang
 
 ## 👤 Pengguna Website
 <details>
-<summary>## Role & Hak Akses</summary>
+<summary>Role & Hak Akses</summary>
 
 ### 1) **User (Pengguna Umum)**
 Pengguna inti aplikasi **Hoppin** untuk berinteraksi dan ikut kegiatan olahraga.
