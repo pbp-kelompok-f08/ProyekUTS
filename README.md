@@ -51,9 +51,9 @@ Temui platform sosial media baru yang menggabungkan keseruan berbagi cerita dan 
 - **Fitur:** Manajemen akun pengguna, termasuk registrasi, login, profil, dan pengaturan privasi.  
 - **Fungsi:** Personalisasi pengalaman pengguna dan kontrol akses.
 
-### 5. XXXXXX
-- **Fitur:**  isi sini
-- **Fungsi:** isi sini
+### 5. Live Chat
+- **Fitur:**  Pengguna dapat mengirim pesan kepada pengguna lain secara real time. 
+- **Fungsi:** Mempermudah proses booking atau matching dengan komunikasi.
 </details>
 
 ---
