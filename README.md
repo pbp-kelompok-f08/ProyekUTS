@@ -70,18 +70,8 @@ Temui platform sosial media baru yang menggabungkan keseruan berbagi cerita dan 
 - **Dataset:** Football Stadium
 - **Link:** https://www.kaggle.com/datasets/imtkaggleteam/football-stadiums
 
-### 3. Match (Open Party / Find Party)
-- **Dataset:** Dataset apa 
-- **Link:**
-
-### 5. Live Chat
-- **Dataset:** - 
-- **Link:** -
-  
-  
-
-(Tuliskan sumber dataset kategori utama produk)  
-
+### note:
+untuk fitur" seperti match akan dibuatkan data dummy berdasarkan data venue yang ada.
 </details>
 
 ---
