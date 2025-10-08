@@ -64,7 +64,7 @@ Temui platform sosial media baru yang menggabungkan keseruan berbagi cerita dan 
 
 ### 1. Postingan (Threads)
 - **Dataset:** Dataset apa 
-- **Link:**
+- **Link:** https://www.kaggle.com/datasets/danielgrijalvas/twitter-threads
 
 ### 2. Venue (Booking Venue)
 - **Dataset:** Dataset apa 
