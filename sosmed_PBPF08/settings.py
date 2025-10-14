@@ -33,6 +33,10 @@ DEBUG = True
 ALLOWED_HOSTS = ["localhost", "127.0.0.1", 'm-naufal41-sosmed.pbp.cs.ui.ac.id']
 
 
+AUTH_USER_MODEL = 'accounts.CustomUser' 
+LOGIN_REDIRECT_URL = 'dashboard' 
+LOGOUT_REDIRECT_URL = 'login'
+
 # Application definition
 
 INSTALLED_APPS = [
@@ -43,6 +47,7 @@ INSTALLED_APPS = [
     'django.contrib.messages',
     'django.contrib.staticfiles',
     'liveChat',
+    'accounts',
 ]
 
 MIDDLEWARE = [
