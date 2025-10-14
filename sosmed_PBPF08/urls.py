@@ -19,6 +19,7 @@ from django.urls import path, include
 
 urlpatterns = [
     path('admin/', admin.site.urls),
-    path('liveChat/', include('liveChat.urls')),
-    path('accounts/', include('accounts.urls')),
+    path('liveChat/', include('liveChat.urls', namespace='livechat')),
+    path('accounts/', include('accounts.urls', namespace='accounts')),
+    path('matches/', include('matches.urls', namespace='matches')),
 ]
