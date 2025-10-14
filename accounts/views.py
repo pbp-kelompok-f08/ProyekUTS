@@ -41,7 +41,7 @@ def register_ajax(request):
 def dashboard(request: HttpRequest):
     print(f"username: {request.user.username}, role: {request.user.role}")
     if request.user.role == 'admin':
-        users = CustomUser.objects.filter(role='user')
+        users = CustomUser.objects.all()
         return render(request, 'accounts/dashboard_admin.html', {'users': users})
     return render(request, 'accounts/dashboard_user.html')
 

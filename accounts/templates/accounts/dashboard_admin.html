@@ -10,6 +10,7 @@
     <tr class="bg-slate-200 text-left">
       <th class="py-2 px-4">Username</th>
       <th class="py-2 px-4">Email</th>
+      <th class="py-2 px-4">Role</th>
       <th class="py-2 px-4">Aksi</th>
     </tr>
   </thead>
@@ -18,6 +19,7 @@
     <tr id="user-{{ user.id }}" class="border-t hover:bg-slate-50">
       <td class="py-2 px-4">{{ user.username }}</td>
       <td class="py-2 px-4">{{ user.email }}</td>
+      <td class="py-2 px-4">{{ user.role }}</td>
       <td class="py-2 px-4">
         <button
           onclick="deleteUser({{ user.id }})"
