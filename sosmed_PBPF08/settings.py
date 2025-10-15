@@ -48,6 +48,7 @@ INSTALLED_APPS = [
     'liveChat',
     'accounts',
     'matches',
+    'threads',
 ]
 
 MIDDLEWARE = [
