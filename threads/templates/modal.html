@@ -79,8 +79,8 @@
             modal.classList.add('hidden');
         }, 150);
     }
-    async function addNewsEntry() {
-        await fetch("{% url 'main:add_thread_entry_ajax' %}", {
+    async function addThreadsEntry() {
+        await fetch("{% url 'threads:add_thread_entry_ajax' %}", {
             method: "POST",
             body: new FormData(document.querySelector('#threadForm')),
         })
@@ -89,15 +89,15 @@
         hideModal();
 
         // Show toast notification
-        showToast('News added successfully!', '', 'success');
+        showToast('Threads added successfully!', '', 'success');
 
         // Dispatch custom event to notify main.html about new data
-        document.dispatchEvent(new CustomEvent('newsAdded'));
+        document.dispatchEvent(new CustomEvent('ThreadsAdded'));
 
         return false;
     }
     document.getElementById("threadForm").addEventListener("submit", function (e) {
         e.preventDefault();
-        addNewsEntry();
+        addThreadsEntry();
     })
 </script>

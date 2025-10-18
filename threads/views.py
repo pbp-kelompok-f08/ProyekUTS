@@ -9,7 +9,7 @@ from django.views.decorators.http import require_POST
 
 
 
-@login_required
+# @login_required
 def show_main(request):
     return render(request,"main.html")
 
@@ -17,7 +17,7 @@ def show_json(request):
     thread_list = Thread.objects.all()
     data = [
         {
-            'id': str(Thread.id),
+            # 'id': str(thread.id),
             'content' :thread.content,
             'tags' : thread.tags,
             'image' : thread.image,
@@ -33,13 +33,13 @@ def show_json(request):
 @csrf_exempt
 @require_POST
 def add_thread_entry_ajax(request):
-    user = request.user
+    # user = request.user
     content = request.POST.get("content")
     tags = request.POST.get("tags")
     image = request.POST.get("image")
 
     new_thread = Thread(
-        user=user,
+        # user=user,
         content = content,
         tags =  tags,
         image = image,
