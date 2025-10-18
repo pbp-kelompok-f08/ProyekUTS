@@ -1,0 +1,27 @@
+{% extends 'base.html' %}
+{%load static%}
+{% block title %}Register{% endblock %}
+
+{% block content %}
+<div class="max-w-md mx-auto bg-white shadow-lg rounded-lg p-8">
+  <h2 class="text-2xl font-bold mb-4 text-center">Register</h2>
+
+  <input id="username" class="w-full border p-2 mb-3 rounded" placeholder="Username" />
+  <input id="email" class="w-full border p-2 mb-3 rounded" placeholder="Email" />
+  <input id="password1" type="password" class="w-full border p-2 mb-3 rounded" placeholder="Password" />
+  <input id="password2" type="password" class="w-full border p-2 mb-3 rounded" placeholder="Konfirmasi Password" />
+
+  <button onclick="registerUser()" class="w-full bg-green-600 text-white py-2 rounded hover:bg-green-700 transition">
+    Register
+  </button>
+
+  <p class="text-center text-sm mt-4">
+    Sudah punya akun?
+    <a href="{% url 'accounts:login' %}" class="text-blue-600 hover:underline">Login di sini</a>
+  </p>
+</div>
+{% endblock %}
+
+{% block extra_scripts %}
+<script src="{% static 'accounts/js/auth.js' %}"></script>
+{% endblock %}
