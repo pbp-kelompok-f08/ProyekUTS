@@ -1,0 +1,19 @@
+<h2>{{ thread.content }}</h2>
+<p>By {{ thread.user.username }} | Likes: {{ thread.likeCount }}</p>
+
+<h3>Replies:</h3>
+<ul>
+  {% for reply in replies %}
+    <li>{{ reply.content }} — {{ reply.user.username }}</li>
+  {% empty %}
+    <p>No replies yet.</p>
+  {% endfor %}
+</ul>
+
+<form method="post" action="{% url 'create_reply' thread.id %}">
+  {% csrf_token %}
+  <textarea name="content" placeholder="Reply..."></textarea>
+  <button type="submit">Reply</button>
+</form>
+
+<a href="{% url 'like_thread' thread.id %}">Like</a>

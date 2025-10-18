@@ -1,0 +1,20 @@
+{% extends 'base.html' %}
+
+{% block meta %}
+<title>Edit News - Football News</title>
+{% endblock meta %}
+
+{% block content %}
+<h1>All Threads</h1>
+<ul>
+    {% for thread in threads %}
+    <li>
+        <a href="{% url 'thread_detail' thread.id %}">{{ thread.content|truncatewords:10 }}</a>
+        — by {{ thread.user.username }}
+    </li>
+    {% empty %}
+    <p>No threads yet.</p>
+    {% endfor %}
+</ul>
+<a href="{% url 'create_thread' %}">Create new thread</a>
+{% endblock %}

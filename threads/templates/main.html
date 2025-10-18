@@ -1,0 +1,124 @@
+{% extends 'base.html' %}
+{% load static %}
+
+
+{% block meta %}
+<title>Threads</title>
+{% endblock meta %}
+
+{% block content %}
+{% include 'modal.html' %}
+{% include 'toast.html' %}
+<div>
+    <button onclick="showModal()">
+        Create new Threads
+    </button>
+
+    <!-- Loading State -->
+    <div id="loading" class="bg-white rounded-lg border border-gray-200 p-12 text-center hidden">
+        <svg class="animate-spin h-8 w-8 text-green-600 inline-block" xmlns="http://www.w3.org/2000/svg" fill="none"
+            viewBox="0 0 24 24">
+            <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
+            <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8v4a4 4 0 00-4 4H4z"></path>
+        </svg>
+        <p class="text-gray-600 mt-3">Loading news...</p>
+    </div>
+
+    <!-- tempat di render -->
+    <div id="threadList" class="hidden">
+    </div>
+
+    <!-- Empty State -->
+    <div id="empty" class="bg-white rounded-lg border border-gray-200 p-12 text-center hidden">
+        <div class="w-32 h-32 mx-auto mb-4">
+            <img src="{% static 'image/no-news.png' %}" alt="No news available" class="w-full h-full object-contain">
+        </div>
+        <h3 class="text-lg font-medium text-gray-900 mb-2">No news found</h3>
+        <p class="text-gray-500 mb-6">Be the first to share football news with the community.</p>
+        <button onclick="showModal()"
+            class="inline-flex items-center px-4 py-2 bg-green-600 text-white rounded-md hover:bg-green-700 transition-colors">
+            Create new Threads
+        </button>
+    </div>
+</div>
+
+
+<script>
+    const THREADS_API_ENDPOINT = "{% url 'threads:show_json' %}"
+    const CURRENT_USER_ID = "{{ user.id|default_if_none:'' }}";
+
+    const loadingSpinner = document.getElementById('loading');
+    const newsGridContainer = document.getElementById('grid');
+
+    let allThreadsData = [];
+
+    function displayPageSection({ showLoading = false, showError = false, showEmpty = false, showGrid = false }) {
+        loadingSpinner.classList.toggle('hidden', !showLoading);
+        errorMessage.classList.toggle('hidden', !showError);
+        emptyStateDisplay.classList.toggle('hidden', !showEmpty);
+        newsGridContainer.classList.toggle('hidden', !showGrid);
+
+        // Add grid classes when showing grid
+        if (showGrid) {
+            newsGridContainer.className = 'grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6';
+        }
+    }
+
+    function buildThreadsCardElement() {
+        const content = DOMPurify.sanitize(item.content);
+        const tags = DOMPurify.sanitize(item.tags);
+        const image = DOMPurify.sanitize(item.image);
+
+        const imageElem = image && `<img src="${image}"></img>`
+        return `
+        <div>
+            <div>${imageElem}</div>
+            <p>${content}</P>
+            <p>${tags}</P>
+        </div>
+        `
+    }
+
+    function renderAllNewsCards(threadsItems) {
+        newsGridContainer.innerHTML = '';
+        threadsItems.forEach(item => {
+            const cardElement = buildThreadsCardElement(item);
+            newsGridContainer.appendChild(cardElement);
+        });
+    }
+
+    function displayNews() {
+        if (allThreadsData.length === 0) {
+            displayPageSection({ showEmpty: true });
+        } else {
+            renderAllNewsCards(filteredNews);
+            displayPageSection({ showGrid: true });
+        }
+    }
+
+    async function fetchNewsFromServer() {
+        try {
+            displayPageSection({ showLoading: true });
+            const response = await fetch(THREADS_API_ENDPOINT, {
+                headers: { 'Accept': 'application/json' },
+            });
+
+            if (!response.ok) {
+                throw new Error('Failed to fetch news data from server');
+            }
+
+            const threadsData = await response.json();
+            allThreadsData = threadsData || [];
+
+            DisplayNews();
+        } catch (error) {
+            console.error('Error loading news:', error);
+            displayPageSection({ showError: true });
+        }
+    }
+    //fetch dan load page
+    fetchNewsFromServer();
+
+</script>
+
+{% endblock content %}

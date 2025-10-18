@@ -1,18 +1,17 @@
 import uuid
 from django.db import models
-from django.contrib.auth.models import User
+from django.conf import settings
 
-class Tag(models.Model):
-    name = models.CharField(max_length=50, unique=True)
+
 
 
 class Thread(models.Model):
-    user = models.ForeignKey(User, on_delete=models.CASCADE, null=True)    
+    user = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.CASCADE, null=True)
 
 
     id = models.UUIDField(primary_key=True, default=uuid.uuid4, editable=False)
     content = models.TextField()
-    tags = models.ManyToManyField(Tag,blank=True)
+    tags = models.TextField()
     image = models.URLField(blank=True, null=True)
     likeCount = models.PositiveIntegerField(default=0)
     shareCount = models.PositiveIntegerField(default=0)
@@ -31,7 +30,8 @@ class Thread(models.Model):
         self.save()
 
 class Reply(models.Model):
-    user = models.ForeignKey(User, on_delete=models.CASCADE, null=True)
+    user = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.CASCADE, null=True)
+
     thread = models.ForeignKey(Thread, on_delete=models.CASCADE, related_name="replies")
 
     id = models.UUIDField(primary_key=True, default=uuid.uuid4, editable=False)
@@ -40,12 +40,13 @@ class Reply(models.Model):
     created_at = models.DateTimeField(auto_now_add=True)
     likeCount = models.PositiveIntegerField(default=0)
 
-    def incrementLike(self):
-        self.likeCount += 1
+    def changeLike(self,isInc):
+        self.likeCount += 1 if isInc else -1
         self.save()
 
 class ReplyChild(models.Model):
-    user = models.ForeignKey(User, on_delete=models.CASCADE, null=True)
+    user = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.CASCADE, null=True)
+
     reply = models.ForeignKey(Reply, on_delete=models.CASCADE, related_name="child_replies")
 
     id = models.UUIDField(primary_key=True, default=uuid.uuid4, editable=False)
@@ -53,8 +54,8 @@ class ReplyChild(models.Model):
     created_at = models.DateTimeField(auto_now_add=True)
     likeCount = models.PositiveIntegerField(default=0)
 
-    def incrementLike(self):
-        self.likeCount += 1
+    def changeLike(self,isInc):
+        self.likeCount += 1 if isInc else -1
         self.save()
 
 
