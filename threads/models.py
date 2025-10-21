@@ -1,13 +1,10 @@
 import uuid
 from django.db import models
 from django.conf import settings
-
-
-
+from accounts.models import CustomUser
 
 class Thread(models.Model):
-    # user = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.CASCADE, null=True)
-
+    user = models.ForeignKey(CustomUser, on_delete=models.CASCADE, null=True)
 
     id = models.UUIDField(primary_key=True, default=uuid.uuid4, editable=False)
     content = models.TextField()
@@ -30,8 +27,7 @@ class Thread(models.Model):
         self.save()
 
 class Reply(models.Model):
-    # user = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.CASCADE, null=True)
-
+    user = models.ForeignKey(CustomUser, on_delete=models.CASCADE, null=True)
     thread = models.ForeignKey(Thread, on_delete=models.CASCADE, related_name="replies")
 
     id = models.UUIDField(primary_key=True, default=uuid.uuid4, editable=False)
@@ -45,10 +41,9 @@ class Reply(models.Model):
         self.save()
 
 class ReplyChild(models.Model):
-    # user = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.CASCADE, null=True)
+    user = models.ForeignKey(CustomUser, on_delete=models.CASCADE, null=True)
 
     reply = models.ForeignKey(Reply, on_delete=models.CASCADE, related_name="child_replies")
-
     id = models.UUIDField(primary_key=True, default=uuid.uuid4, editable=False)
     content = models.TextField()
     created_at = models.DateTimeField(auto_now_add=True)
