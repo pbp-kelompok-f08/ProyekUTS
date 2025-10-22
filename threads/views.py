@@ -1,7 +1,10 @@
 # threads/views.py
 from django.shortcuts import render, get_object_or_404, redirect
 from django.http import HttpResponse
-from .models import Thread, Reply
+
+from accounts.models import CustomUser
+from .models import Thread,ReplyChild
+
 from django.contrib.auth.decorators import login_required
 from django.http import HttpResponseRedirect, JsonResponse
 from django.views.decorators.csrf import csrf_exempt
@@ -17,7 +20,7 @@ def show_json(request):
     thread_list = Thread.objects.all()
     data = [
         {
-            # 'id': str(thread.id),
+            'id': str(thread.id),
             'content' :thread.content,
             'tags' : thread.tags,
             'image' : thread.image,
@@ -47,37 +50,25 @@ def add_thread_entry_ajax(request):
     new_thread.save()
     return HttpResponse(b"CREATED", status=201)
 
-# def thread_list(request):
-#     threads = Thread.objects.all().order_by('-created_at')
-#     return render(request, 'threads/thread_list.html', {'threads': threads})
 
-# def thread_detail(request, thread_id):
-#     thread = get_object_or_404(Thread, id=thread_id)
-#     replies = thread.replies.all()  # because of related_name="replies"
-#     return render(request, 'threads/thread_detail.html', {'thread': thread, 'replies': replies})
+def get_replies_by_username(request, username):
+    # get user or return 404
+    user = get_object_or_404(CustomUser, username=username)
 
-# @login_required
-# def create_thread(request):
-#     if request.method == 'POST':
-#         content = request.POST.get('content')
-#         image = request.POST.get('image', '')
-#         thread = Thread.objects.create(user=request.user, content=content, image=image)
-#         return redirect('thread_detail', thread_id=thread.id)
-#     return render(request, 'threads/create_thread.html')
+    # get all replies made by this user
+    replies = ReplyChild.objects.filter(user=user).order_by('-likeCount')
 
-# @login_required
-# def create_reply(request, thread_id):
-#     thread = get_object_or_404(Thread, id=thread_id)
-#     if request.method == 'POST':
-#         content = request.POST.get('content')
-#         image = request.POST.get('image', '')
-#         Reply.objects.create(user=request.user, thread=thread, content=content, image=image)
-#         thread.changeReply(True)
-#         return redirect('thread_detail', thread_id=thread.id)
-#     return HttpResponse("Invalid request", status=400)
+    # serialize the data manually (or you can use serializers)
+    data = [
+        {
+            'id': str(reply.id),
+            'thread_id': str(reply.thread.id),
+            'content': reply.content,
+            'created_at': reply.created_at.isoformat(),
+            'likeCount': reply.likeCount,
+        }
+        for reply in replies
+    ]
 
-# @login_required
-# def like_thread(request, thread_id):
-#     thread = get_object_or_404(Thread, id=thread_id)
-#     thread.changeLike(True)
-#     return redirect('thread_detail', thread_id=thread.id)
+    # return as JSON
+    return JsonResponse(data, safe=False)
