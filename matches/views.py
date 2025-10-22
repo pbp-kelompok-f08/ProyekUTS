@@ -1,9 +1,13 @@
 from django.db import connection
 from django.db.models import Count, F, Q
 from django.db.utils import OperationalError, ProgrammingError
-from django.http import JsonResponse
+from django.http import JsonResponse, HttpRequest, HttpResponse
 from django.shortcuts import get_object_or_404, render
 from django.views.decorators.http import require_http_methods
+from django.views.decorators.csrf import csrf_exempt
+from django.core import serializers
+from liveChat.models import Group
+import json, uuid
 
 from .forms import MatchForm, MatchSearchForm, ParticipationForm
 from .models import Match, Participation, SportCategory
@@ -116,7 +120,7 @@ def match_dashboard(request):
     match_list = list(matches)
     categories = SportCategory.objects.all()
     grouped_matches = [
-        (category, [m for m in match_list if m.category_id == category.id])
+        (category, [m for m in match_list if m.category == category.name])
         for category in categories
     ]
     has_any_match = any(matches for _, matches in grouped_matches)
@@ -147,7 +151,9 @@ def match_dashboard(request):
 
 
 @require_http_methods(["POST"])
-def create_match(request):
+@csrf_exempt
+def create_match(request: HttpRequest):
+    _ensure_default_categories()
     if not _is_schema_ready():
         return JsonResponse(
             {
@@ -161,9 +167,12 @@ def create_match(request):
             status=503,
         )
 
-    form = MatchForm(request.POST)
+    data = json.loads(request.body)
+    form = MatchForm(data)
     if form.is_valid():
         match = form.save()
+        Participation.objects.create(match=match, user=request.user, message="")
+        Group.objects.create(match=match, name=f"Group {data["title"]}")
         return JsonResponse(
             {
                 "success": True,
@@ -177,7 +186,8 @@ def create_match(request):
 
 
 @require_http_methods(["POST"])
-def book_match(request, pk: int):
+@csrf_exempt
+def book_match(request: HttpRequest, match_id: uuid):
     if not _is_schema_ready():
         return JsonResponse(
             {
@@ -191,7 +201,7 @@ def book_match(request, pk: int):
             status=503,
         )
 
-    match = get_object_or_404(Match.objects.select_related("category"), pk=pk)
+    match = get_object_or_404(Match.objects.select_related("category"), pk=match_id)
 
     if match.available_slots <= 0:
         return JsonResponse(
@@ -204,13 +214,13 @@ def book_match(request, pk: int):
             status=400,
         )
 
-    form = ParticipationForm(request.POST)
+    form = ParticipationForm({"user": request.user, "message": request.POST})
     if form.is_valid():
         participation: Participation = form.save(commit=False)
         participation.match = match
         participation.save()
 
-        updated_match = Match.objects.select_related("category").get(pk=pk)
+        updated_match = Match.objects.select_related("category").get(id=match_id)
 
         return JsonResponse(
             {
@@ -221,3 +231,19 @@ def book_match(request, pk: int):
         )
 
     return JsonResponse({"success": False, "errors": form.errors}, status=400)
+
+@csrf_exempt
+def delete_match(request: HttpRequest, match_id: uuid = ''):
+    if request.user.role != 'admin':
+        return HttpResponse(status=401)
+    elif match_id:
+        get_object_or_404(Match, id=match_id).delete()
+    else:
+        Match.objects.all().delete()
+    return HttpResponse(status=204)
+
+def get_match(requets: HttpRequest, match_id: uuid = ''):
+    matches = get_object_or_404(Match, match_id) if match_id else Match.objects.all()
+    data = serializers.serialize("json", matches)
+    return JsonResponse({"data": json.loads(data)})
+    

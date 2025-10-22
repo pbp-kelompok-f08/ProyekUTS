@@ -1,17 +1,27 @@
 from django.db import models
+from accounts.models import CustomUser
+from matches.models import Match
 import uuid
 
 # Create your models here.
-class User(models.Model):
-    pass
 
 class Group(models.Model):
     id = models.UUIDField(default=uuid.uuid4, primary_key=True)
+    match = models.OneToOneField(to=Match, on_delete=models.CASCADE, related_name="group")
     name = models.CharField(blank=False)
-    users = models.ManyToManyField(to=User)
+
+    def __str__(self):
+        return f"name: {self.name}, users: {self.users}"
+    
+    @property
+    def users(self):
+        return list(users["user"] for users in self.match.participations.all().values("user"))
 
 class Chat(models.Model):
     group_id = models.ForeignKey(to=Group, on_delete=models.CASCADE, related_name='chat')
-    user_id = models.ForeignKey(to=User, on_delete=models.CASCADE, related_name='chat')
+    username = models.ForeignKey(to=CustomUser, on_delete=models.CASCADE, related_name='chat')
     message = models.TextField(blank=False)
     createdAt = models.DateTimeField(auto_now_add=True)
+
+    def __str__(self):
+        return f"group_id: {self.group_id}, username: {self.username}, message: \"{self.message}\""

@@ -12,5 +12,6 @@ urlpatterns = [
     path('ajax/register/', register_ajax, name='register_ajax'),
     path('ajax/logout/', logout_ajax, name='logout_ajax'),
     path('ajax/delete-user/<int:user_id>/', admin_delete_user, name='admin_delete_user'),
-    path('ajax/users/', ajax_all_users, name='ajax_all_users')
+    path('ajax/users/', ajax_all_users, name='ajax_all_users'),
+    path('ajax/profile/', profile, name='profile'),
 ]
