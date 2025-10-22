@@ -1,10 +1,11 @@
 import json
 from django.http import JsonResponse, HttpRequest, HttpResponse
 from django.contrib.auth import authenticate, login, logout
-from django.views.decorators.http import require_POST
+from django.views.decorators.http import require_POST, require_GET
 from django.views.decorators.csrf import csrf_exempt
 from django.contrib.auth.decorators import login_required
 from django.shortcuts import render, get_object_or_404
+from django.forms.models import model_to_dict
 from django.core import serializers
 from .models import CustomUser
 from .forms import RegisterForm
@@ -29,7 +30,7 @@ def login_ajax(request):
 
 @require_POST
 @csrf_exempt
-def register_ajax(request):
+def register_ajax(request: HttpRequest):
     data = json.loads(request.body)
     form = RegisterForm(data)
     if form.is_valid():
@@ -52,9 +53,19 @@ def ajax_all_users(request: HttpRequest):
     users = serializers.serialize("json", CustomUser.objects.filter(role='user'))
     admins = serializers.serialize("json", CustomUser.objects.filter(role='admin'))
     return JsonResponse({
-        "users": users,
-        "admins": admins
+        "users": json.loads(users),
+        "admins": json.loads(admins)
     }, status=200)
+
+@require_GET
+def profile(request: HttpRequest):
+    user = request.user
+    if not user:
+        return HttpRequest(status=401)
+    data = model_to_dict(user)
+    data["participation"] = user.participation
+    print(data)
+    return JsonResponse({"data": data}, status=200)
 
 @login_required
 def admin_delete_user(request, user_id):
