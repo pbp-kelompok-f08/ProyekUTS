@@ -22,4 +22,5 @@ urlpatterns = [
     path('liveChat/', include('liveChat.urls', namespace='livechat')),
     path('accounts/', include('accounts.urls', namespace='accounts')),
     path('matches/', include('matches.urls', namespace='matches')),
+    path('threads/', include('threads.urls', namespace='threads')),
 ]

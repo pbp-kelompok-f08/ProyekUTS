@@ -40,6 +40,7 @@ LOGOUT_REDIRECT_URL = 'login'
 # Application definition
 
 INSTALLED_APPS = [
+    'django.contrib.admin',
     'django.contrib.auth',
     'django.contrib.admin',
     'django.contrib.contenttypes',
@@ -49,6 +50,7 @@ INSTALLED_APPS = [
     'liveChat',
     'accounts',
     'matches',
+    'threads',
 ]
 
 MIDDLEWARE = [
