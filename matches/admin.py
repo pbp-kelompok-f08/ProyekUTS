@@ -18,6 +18,6 @@ class MatchAdmin(admin.ModelAdmin):
 
 @admin.register(Participation)
 class ParticipationAdmin(admin.ModelAdmin):
-    list_display = ("name", "contact", "match", "created_at")
-    search_fields = ("name", "contact", "match__title")
+    list_display = ("match", "created_at")
+    search_fields = ("match__title",)
     list_filter = ("match",)

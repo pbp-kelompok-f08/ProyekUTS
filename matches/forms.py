@@ -51,9 +51,8 @@ class MatchForm(forms.ModelForm):
 class ParticipationForm(forms.ModelForm):
     class Meta:
         model = Participation
-        fields = ["name", "contact", "message"]
+        fields = ["user", "message"]
         widgets = {"message": forms.Textarea(attrs={"rows": 3})}
-
 
 class MatchSearchForm(forms.Form):
     category = forms.ModelChoiceField(
