@@ -10,4 +10,6 @@ urlpatterns = [
     path('create-thread-ajax/', views.add_thread_entry_ajax, name='add_thread_entry_ajax'),
     path('create-reply-ajax/<uuid:threadId>/', views.add_reply_entry_ajax, name='add_reply_entry_ajax'),
     path('replies/<str:threadId>/', views.get_replies_by_threadId, name='get_replies_by_threadId'),
+    path('like-thread/<uuid:thread_id>/', views.like_thread_ajax, name='like_thread_ajax'),
+
 ]

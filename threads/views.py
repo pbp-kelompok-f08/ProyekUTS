@@ -17,7 +17,7 @@ def show_main(request):
     return render(request,"main.html")
 
 def show_json(request):
-    thread_list = Thread.objects.all()
+    thread_list = Thread.objects.all().order_by('-created_at')
     data = [
         {
             'id': str(thread.id),
@@ -77,6 +77,7 @@ def get_replies_by_threadId(request, threadId):
 def add_reply_entry_ajax(request, threadId):
     content = request.POST.get("content", "").strip()
     parent_thread = Thread.objects.get(pk=threadId)
+    parent_thread.changeReply(True)
 
     reply = ReplyChild.objects.create(
         thread=parent_thread,
@@ -90,10 +91,21 @@ def add_reply_entry_ajax(request, threadId):
         "content": reply.content,
         "created_at": reply.created_at.strftime("%Y-%m-%d %H:%M:%S"),
         "likeCount": reply.likeCount,
+        "count":parent_thread.replyCount
         # "user": reply.user.username if reply.user else "Anonymous"
     }
 
     return JsonResponse(data, status=201)
+
+@csrf_exempt
+@require_POST
+def like_thread_ajax(request, thread_id):
+    try:
+        thread = Thread.objects.get(pk=thread_id)
+        thread.changeLike(True)
+        return JsonResponse({"success": True, "likeCount":thread.likeCount})
+    except Thread.DoesNotExist:
+        return JsonResponse({"success": False, "error": "Thread not found"}, status=404)
 
 # @csrf_exempt
 # @require_POST
