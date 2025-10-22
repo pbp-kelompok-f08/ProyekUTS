@@ -1,0 +1,54 @@
+{% extends 'base.html' %}
+
+{% block title %}My Bookings{% endblock %}
+
+{% block content %}
+<div class="row">
+    <div class="col-12">
+        <h1 class="mb-4">My Bookings</h1>
+        {% if bookings|length > 0 %}
+            <div class="table-responsive">
+                <table class="table table-striped">
+                    <thead>
+                        <tr>
+                            <th>Venue</th>
+                            <th>Date</th>
+                            <th>Time</th>
+                            <th>Status</th>
+                            <th>Actions</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for booking in bookings %}
+                        <tr>
+                            <td>{{ booking.venue.name }}</td>
+                            <td>{{ booking.date }}</td>
+                            <td>{{ booking.time }}</td>
+                            <td>
+                                <span class="badge bg-{% if booking.status == 'confirmed' %}success{% elif booking.status == 'pending' %}warning{% else %}danger{% endif %}">
+                                    {{ booking.status|title }}
+                                </span>
+                            </td>
+                            <td>
+                                {% if booking.status != 'cancelled' %}
+                                    <form method="post" action="{% url 'booking_venue:cancel_booking' booking.id %}" style="display: inline;">
+                                        {% csrf_token %}
+                                        <button type="submit" class="btn btn-sm btn-danger"
+                                                onclick="return confirm('Are you sure you want to cancel this booking?')">Cancel</button>
+                                    </form>
+                                {% endif %}
+                            </td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+        {% else %}
+            <div class="alert alert-info">
+                <p>You haven't made any bookings yet.</p>
+                <a href="{% url 'booking_venue:main_page' %}" class="btn btn-primary">Browse Venues</a>
+            </div>
+        {% endif %}
+    </div>
+</div>
+{% endblock %}

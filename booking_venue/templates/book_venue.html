@@ -1,0 +1,53 @@
+{% extends 'base.html' %}
+
+{% block title %}Book Venue{% endblock %}
+
+{% block content %}
+<div class="row justify-content-center">
+    <div class="col-md-6">
+        <div class="card">
+            <div class="card-header">
+                <h3>Book {{ venue.name }}</h3>
+            </div>
+            <div class="card-body">
+                <div class="mb-3">
+                    <strong>Location:</strong> {{ venue.location }}<br>
+                    <strong>Capacity:</strong> {{ venue.capacity }}<br>
+                    <strong>Price:</strong> ${{ venue.price }}
+                </div>
+                <form method="post" action="{% url 'booking_venue:book_venue' venue.id %}">
+                    {% csrf_token %}
+                    {% if form.non_field_errors %}
+                        <div class="alert alert-danger">
+                            {% for error in form.non_field_errors %}
+                                {{ error }}
+                            {% endfor %}
+                        </div>
+                    {% endif %}
+                    <div class="mb-3">
+                        <label for="id_date" class="form-label">Date</label>
+                        <input type="date" name="date" id="id_date" class="form-control" required>
+                        {% if form.date.errors %}
+                            <div class="text-danger">
+                                {% for error in form.date.errors %}{{ error }}{% endfor %}
+                            </div>
+                        {% endif %}
+                    </div>
+                    <div class="mb-3">
+                        <label for="id_time" class="form-label">Time</label>
+                        <input type="time" name="time" id="id_time" class="form-control" required>
+                        {% if form.time.errors %}
+                            <div class="text-danger">
+                                {% for error in form.time.errors %}{{ error }}{% endfor %}
+                            </div>
+                        {% endif %}
+                    </div>
+                    <button type="submit" class="btn btn-primary" name="book_venue" value="1">Book Venue</button>
+                    <a href="{% url 'booking_venue:main_page' %}" class="btn btn-secondary">Cancel</a>
+                </form>
+
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
