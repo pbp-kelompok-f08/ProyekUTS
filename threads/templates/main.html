@@ -10,6 +10,7 @@
 {% include 'navbar.html' %}
 
 
+<main class="pt-20 bg-[#1C1C1C] text-[#EAEAEA] min-h-screen">
 <!-- Main Container -->
 <div class="w-full min-h-screen bg-neutral-800 flex flex-row justify-center gap-20 text-white">
     <!-- Loading Spinner -->
@@ -73,6 +74,7 @@
         </button>
     </div>
 </div>
+</main>
 
 <script>
     const THREADS_API_ENDPOINT = "{% url 'threads:show_json' %}";
