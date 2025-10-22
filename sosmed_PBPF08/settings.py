@@ -34,6 +34,7 @@ ALLOWED_HOSTS = ["localhost", "127.0.0.1", 'm-naufal41-sosmed.pbp.cs.ui.ac.id']
 
 
 AUTH_USER_MODEL = 'accounts.CustomUser' 
+LOGIN_URL = '/login/'
 LOGIN_REDIRECT_URL = 'dashboard' 
 LOGOUT_REDIRECT_URL = 'login'
 
@@ -42,7 +43,6 @@ LOGOUT_REDIRECT_URL = 'login'
 INSTALLED_APPS = [
     'django.contrib.admin',
     'django.contrib.auth',
-    'django.contrib.admin',
     'django.contrib.contenttypes',
     'django.contrib.sessions',
     'django.contrib.messages',

@@ -2,7 +2,7 @@ async function loginUser() {
   const username = document.getElementById("username").value;
   const password = document.getElementById("password").value;
 
-  const res = await fetch("/accounts/ajax/login/", {
+  const res = await fetch("/ajax/login/", {
     method: "POST",
     headers: { "Content-Type": "application/json" },
     body: JSON.stringify({ username, password }),
@@ -12,7 +12,7 @@ async function loginUser() {
   const msg = document.getElementById("login-msg");
 
   if (data.success) {
-    window.location.href = "/accounts/dashboard/";
+    window.location.href = "/dashboard";
   } else {
     msg.textContent = data.message;
   }
@@ -24,7 +24,7 @@ async function registerUser() {
   const password1 = document.getElementById("password1").value;
   const password2 = document.getElementById("password2").value;
 
-  const res = await fetch("/accounts/ajax/register/", {
+  const res = await fetch("/ajax/register/", {
     method: "POST",
     headers: { "Content-Type": "application/json" },
     body: JSON.stringify({ username, email, password1, password2 }),
@@ -34,13 +34,14 @@ async function registerUser() {
   const msg = document.getElementById("register-msg");
 
   if (data.success) {
-    window.location.href = "/accounts/login/";
+    window.location.href = "/login/";
   } else {
     msg.textContent = Object.values(data.errors).join(", ");
   }
 }
 
 async function logoutUser() {
-  await fetch("/accounts/ajax/logout/");
-  window.location.href = "/accounts/login/";
+  await fetch("/ajax/logout/");
+  window.location.href = "/login/";
 }
+
