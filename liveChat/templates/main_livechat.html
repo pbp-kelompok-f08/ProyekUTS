@@ -9,8 +9,8 @@
 {% include 'modal.html' %}
 {% include 'navbar.html' %}
 
-<div class="relative w-full overflow-hidden mt-[50px]">
-    <div class="grid grid-cols-1 md:grid-cols-[35%_65%] w-full">
+<div class="relative w-full overflow-hidden mt-[20px] md:mt-[50px]">
+    <div class="grid grid-cols-1 md:grid-cols-[40%_60%] lg:grid-cols-[35%_65%] w-full">
         <!-- Loading Spinner -->
         <div id="loading" class="absolute inset-0 flex flex-col items-center justify-center bg-neutral-900 z-10 hidden text-gray-300">
             <svg class="animate-spin h-8 w-8 text-green-500 mb-3" xmlns="http://www.w3.org/2000/svg" fill="none"
@@ -41,10 +41,10 @@
             </div>
 
             <!-- Chat form -->
-            <div class="absolute flex flex-row w-full md:w-[900px] h-[50px] bottom-3 bg-neutral-800 rounded-full items-center justify-center px-2 md:px-4">
-                <textarea name="" id="chat-textarea" class="flex-1 bg-transparent resize-none focus:outline-none h-full px-2" placeholder="Type your message"></textarea>
-                <button id="send-chat" class="ml-2">
-                    <img src="{% static 'image/paperplane.webp' %}" alt="" class="size-[25px] invert">
+            <div class="absolute flex flex-row w-full w-[370px] md:w-[480px] lg:w-[900px] h-[50px] bottom-3 bg-neutral-800 rounded-full items-center justify-center px-2 md:px-4 ml-[10px] md:ml-[10px]">
+                <textarea name="" id="chat-textarea" class="flex-1 bg-transparent w-[300px] resize-none focus:outline-none h-[25px] px-2" placeholder="Type your message"></textarea>
+                <button id="send-chat" class="ml-2 w-[30px]">
+                    <img src="{% static 'image/paperplane.webp' %}" alt="" class=" size-[20px] md:size-[25px] invert">
                 </button>
             </div>
         </div>
@@ -199,12 +199,12 @@ function buildGroupSectionElement(group) {
     const groupSectionHtml = `
         <div class="flex flex-row gap-4 w-full">
             <div class="w-[60px] h-[50px] rounded-full bg-white"></div>
-            <div class="grid grid-cols-[80%_20%] w-full">
+            <div class="grid grid-cols-[70%_30%] w-full">
                 <div class="flex flex-col gap-[2px]">
                     <p>${group.name}</p>
-                    <p class="text-neutral-400 truncate">${group.last_chat ? group.last_chat.username + ": " + group.last_chat.message : "Belum ada chat"}</p>
+                    <p class="text-[14px] text-neutral-400 truncate">${group.last_chat ? group.last_chat.username + ": " + group.last_chat.message : "Belum ada chat"}</p>
                 </div>
-                <div class="flex flex-col text-right text-neutral-400 gap-[2px]">
+                <div class="flex flex-col text-right text-neutral-400 text-[10px] md:text-[12px] gap-[2px]">
                     <p>${group.last_chat ? group.last_chat.createdAt.substring(0,10) : "-"}</p>
                     <p>${group.last_chat ? group.last_chat.createdAt.substring(11,16) : "-"}</p>
                 </div>
