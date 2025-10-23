@@ -9,7 +9,7 @@
 {% include 'modal.html' %}
 {% include 'navbar.html' %}
 
-<div class="relative w-full overflow-hidden">
+<div class="relative w-full overflow-hidden mt-[50px]">
     <div class="grid grid-cols-[35%_65%] w-full">
         <!-- Loading Spinner -->
         <div id="loading" class="absolute inset-0 flex flex-col items-center justify-center bg-neutral-900 z-10 hidden text-gray-300">
@@ -28,7 +28,7 @@
         </div>
 
         <!-- Chat -->
-        <div id="chat-container" class="relative flex flex-col h-[calc(100dvh-58px)] border-l border-neutral-800 overflow-y-auto items-center">
+        <div id="chat-container" class="relative flex flex-col h-[calc(100dvh-75px)] border-l border-neutral-800 overflow-y-auto items-center">
             <div class="absolute flex flex-row w-full h-[70px] gap-4 top-0 bg-neutral-700 items-center px-10">
                 <div class="w-[50px] h-[50px] rounded-full bg-white"></div>
                 <div class="flex flex-col gap-[2px]">
@@ -133,7 +133,7 @@
                         <div class="flex flex-col gap-3 text-right">
                             <p class="max-w-[500px]">${chat.message}</p>
                         </div>
-                        <div class="flex flex-col text-left text-[13px] pt-1">
+                        <div class="flex flex-col text-right text-[13px] pt-1">
                             <p>${chat.createdAt.substring(0, 10)}</p>
                             <p>${chat.createdAt.substring(11, 16)}</p>
                         </div>
