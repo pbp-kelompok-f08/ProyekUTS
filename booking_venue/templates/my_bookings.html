@@ -1,54 +1,115 @@
 {% extends 'base.html' %}
-
-{% block title %}My Bookings{% endblock %}
-
+{% block title %}My Bookings - Hoppin Sports Community{% endblock %}
 {% block content %}
-<div class="row">
-    <div class="col-12">
-        <h1 class="mb-4">My Bookings</h1>
-        {% if bookings|length > 0 %}
-            <div class="table-responsive">
-                <table class="table table-striped">
-                    <thead>
-                        <tr>
-                            <th>Venue</th>
-                            <th>Date</th>
-                            <th>Time</th>
-                            <th>Status</th>
-                            <th>Actions</th>
-                        </tr>
-                    </thead>
-                    <tbody>
-                        {% for booking in bookings %}
-                        <tr>
-                            <td>{{ booking.venue.name }}</td>
-                            <td>{{ booking.date }}</td>
-                            <td>{{ booking.time }}</td>
-                            <td>
-                                <span class="badge bg-{% if booking.status == 'confirmed' %}success{% elif booking.status == 'pending' %}warning{% else %}danger{% endif %}">
-                                    {{ booking.status|title }}
-                                </span>
-                            </td>
-                            <td>
-                                {% if booking.status != 'cancelled' %}
-                                    <form method="post" action="{% url 'booking_venue:cancel_booking' booking.id %}" style="display: inline;">
-                                        {% csrf_token %}
-                                        <button type="submit" class="btn btn-sm btn-danger"
-                                                onclick="return confirm('Are you sure you want to cancel this booking?')">Cancel</button>
-                                    </form>
-                                {% endif %}
-                            </td>
-                        </tr>
-                        {% endfor %}
-                    </tbody>
-                </table>
+{% include 'navbar.html' %}
+<body class="min-h-screen bg-gradient-to-br from-gray-900 via-gray-800 to-black text-white">
+    <!-- Header Section -->
+    <div class="bg-gray-800/50 backdrop-blur-sm border-b border-gray-700 pt-20">
+        <div class="container mx-auto px-6 py-8">
+            <div class="flex flex-col md:flex-row items-center justify-between">
+                <div>
+                    <h1 class="text-4xl font-bold mb-2 bg-gradient-to-r from-green-400 to-blue-500 bg-clip-text text-transparent">
+                        My Bookings
+                    </h1>
+                    <p class="text-xl text-gray-300">Manage your venue reservations</p>
+                </div>
+                <div class="mt-6 md:mt-0">
+                    <a href="{% url 'booking_venue:main_page' %}" class="bg-gradient-to-r from-blue-500 to-purple-600 hover:from-blue-600 hover:to-purple-700 text-white px-6 py-3 rounded-xl font-semibold transition-all duration-300 transform hover:scale-105 shadow-lg">
+                        Book New Venue
+                    </a>
+                </div>
             </div>
+        </div>
+    </div>
+
+    <!-- Main Content -->
+    <div class="container mx-auto px-6 py-12">
+        {% if bookings %}
+        <div class="space-y-6">
+            {% for booking in bookings %}
+            <div class="bg-gray-800/50 backdrop-blur-sm rounded-xl p-6 border border-gray-700 hover:border-green-500 transition-all duration-300">
+                <div class="flex flex-col lg:flex-row lg:items-center justify-between">
+                    <div class="flex-1 mb-4 lg:mb-0">
+                        <div class="flex items-start space-x-4">
+                            <div class="w-16 h-16 bg-gradient-to-r from-green-500 to-blue-600 rounded-xl flex items-center justify-center flex-shrink-0">
+                                <span class="text-2xl">🏟️</span>
+                            </div>
+                            <div class="flex-1">
+                                <h3 class="text-xl font-semibold text-white mb-2">{{ booking.venue.name }}</h3>
+                                <div class="grid grid-cols-1 md:grid-cols-2 gap-4 text-sm">
+                                    <div class="flex items-center space-x-2">
+                                        <span class="text-lg">📍</span>
+                                        <span class="text-gray-300">{{ booking.venue.location }}</span>
+                                    </div>
+                                    <div class="flex items-center space-x-2">
+                                        <span class="text-lg">📅</span>
+                                        <span class="text-gray-300">{{ booking.date }} at {{ booking.time }}</span>
+                                    </div>
+                                </div>
+                                <div class="mt-3">
+                                    <span class="inline-flex items-center px-3 py-1 rounded-full text-xs font-medium
+                                        {% if booking.status == 'confirmed' %}
+                                            bg-green-500/20 text-green-400 border border-green-500/30
+                                        {% elif booking.status == 'pending' %}
+                                            bg-yellow-500/20 text-yellow-400 border border-yellow-500/30
+                                        {% else %}
+                                            bg-red-500/20 text-red-400 border border-red-500/30
+                                        {% endif %}">
+                                        {{ booking.get_status_display }}
+                                    </span>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="flex flex-col sm:flex-row gap-3">
+                        {% if booking.status == 'pending' %}
+                        <form method="post" action="{% url 'booking_venue:cancel_booking' booking.id %}" class="inline">
+                            {% csrf_token %}
+                            <button type="submit" class="w-full sm:w-auto bg-red-500 hover:bg-red-600 text-white px-4 py-2 rounded-lg font-medium transition-colors flex items-center justify-center space-x-2">
+                                <span class="text-lg">❌</span>
+                                <span>Cancel</span>
+                            </button>
+                        </form>
+                        {% endif %}
+                        <a href="{% url 'booking_venue:book_venue' booking.venue.id %}" class="w-full sm:w-auto bg-gray-600 hover:bg-gray-700 text-white px-4 py-2 rounded-lg font-medium transition-colors text-center">
+                            Book Again
+                        </a>
+                    </div>
+                </div>
+            </div>
+            {% endfor %}
+        </div>
         {% else %}
-            <div class="alert alert-info">
-                <p>You haven't made any bookings yet.</p>
-                <a href="{% url 'booking_venue:main_page' %}" class="btn btn-primary">Browse Venues</a>
+        <!-- Empty State -->
+        <div class="text-center py-16">
+            <div class="w-24 h-24 mx-auto mb-6 bg-gradient-to-r from-green-500 to-blue-600 rounded-full flex items-center justify-center">
+                <span class="text-3xl">📋</span>
             </div>
+            <h3 class="text-2xl font-bold mb-4">No bookings yet</h3>
+            <p class="text-gray-400 mb-8 max-w-md mx-auto">You haven't made any venue bookings yet. Start exploring available venues and book your first one!</p>
+            <a href="{% url 'booking_venue:main_page' %}" class="inline-flex items-center px-6 py-3 bg-gradient-to-r from-green-500 to-blue-600 hover:from-green-600 hover:to-blue-700 text-white rounded-xl font-semibold transition-all duration-300 transform hover:scale-105 shadow-lg">
+                <span class="text-lg mr-2">🔍</span>
+                Browse Venues
+            </a>
+        </div>
         {% endif %}
     </div>
 </div>
+
+    <style>
+    .line-clamp-2 {
+        display: -webkit-box;
+        -webkit-line-clamp: 2;
+        -webkit-box-orient: vertical;
+        overflow: hidden;
+    }
+
+    .line-clamp-3 {
+        display: -webkit-box;
+        -webkit-line-clamp: 3;
+        -webkit-box-orient: vertical;
+        overflow: hidden;
+    }
+    </style>
+</body>
 {% endblock %}

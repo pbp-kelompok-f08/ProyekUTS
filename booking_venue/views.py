@@ -3,6 +3,8 @@ from django.contrib.auth.decorators import login_required
 from django.contrib import messages
 from django.contrib.auth.forms import UserCreationForm
 from django.utils import timezone
+from django.http import JsonResponse
+from django.core import serializers
 from .models import Venue, Booking
 from .forms import BookingForm
 
@@ -12,7 +14,34 @@ def main_page(request):
     Halaman utama menampilkan daftar venue (stadion) yang bisa dipesan.
     """
     venues = Venue.objects.all()
-    return render(request, 'main_page.html', {'venues': venues})
+
+    region_filter = request.GET.get('region', '')
+    alphabet_filter = request.GET.get('alphabet', '')
+
+    if region_filter:
+        venues = venues.filter(location__icontains=region_filter)
+
+    if alphabet_filter:
+        if alphabet_filter == 'other':
+            venues = venues.exclude(name__regex=r'^[A-Za-z]')
+        else:
+            venues = venues.filter(name__istartswith=alphabet_filter)
+
+
+    all_venues = Venue.objects.all()
+    regions = set()
+    for venue in all_venues:
+        if ', ' in venue.location:
+            country = venue.location.split(', ')[-1]
+            regions.add(country)
+    regions = sorted(list(regions))
+
+    return render(request, 'main_page.html', {
+        'venues': venues,
+        'regions': regions,
+        'current_region': region_filter,
+        'current_alphabet': alphabet_filter
+    })
 
 
 @login_required
@@ -30,7 +59,6 @@ def book_venue(request, venue_id):
             date = form.cleaned_data['date']
             time = form.cleaned_data['time']
 
-            # Create booking manually
             booking = Booking(
                 user=request.user,
                 venue=venue,
@@ -45,20 +73,10 @@ def book_venue(request, venue_id):
                 return redirect('booking_success')
             except Exception as e:
                 messages.error(request, f'Error saving booking: {e}')
-                return render(request, 'book_venue.html', {'form': form, 'venue': venue})
     else:
         form = BookingForm()
 
     return render(request, 'book_venue.html', {'form': form, 'venue': venue})
-
-
-@login_required
-def booking_success(request):
-    """
-    Halaman konfirmasi setelah booking berhasil.
-    """
-    return render(request, 'booking_success.html')
-
 
 @login_required
 def my_bookings(request):
@@ -80,18 +98,21 @@ def cancel_booking(request, booking_id):
         messages.success(request, 'Booking telah dibatalkan.')
     return redirect('booking_venue:my_bookings')
 
-
-def register(request):
+def api_venues(request):
     """
-    View untuk registrasi user baru.
+    API endpoint to get venues data for frontend.
     """
-    if request.method == 'POST':
-        form = UserCreationForm(request.POST)
-        if form.is_valid():
-            form.save()
-            messages.success(request, 'Account created successfully! You can now log in.')
-            return redirect('login')
-    else:
-        form = UserCreationForm()
-    return render(request, 'registration/register.html', {'form': form})
+    venues = Venue.objects.all()
 
+    venues_data = []
+    for venue in venues:
+        venues_data.append({
+            'id': str(venue.id),
+            'name': venue.name,
+            'location': venue.location,
+            'capacity': venue.capacity,
+            'description': venue.description,
+            'price_per_hour': 100.00,
+        })
+
+    return JsonResponse({'venues': venues_data})
