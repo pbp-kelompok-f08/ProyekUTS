@@ -16,6 +16,8 @@ Including another URLconf
 """
 from django.contrib import admin
 from django.urls import path, include
+from django.contrib.auth import views as auth_views
+from booking_venue import views
 from . import views
 
 urlpatterns = [
@@ -24,5 +26,6 @@ urlpatterns = [
     path('', include('accounts.urls', namespace='accounts')),
     path('matches/', include('matches.urls', namespace='matches')),
     path('threads/', include('threads.urls', namespace='threads')),
-    path('', views.home, name="home")
+    path('', views.home, name="home"),
+    path('booking-success/', views.booking_success, name='booking_success'),
 ]
