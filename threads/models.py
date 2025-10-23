@@ -15,13 +15,28 @@ class Thread(models.Model):
     replyCount = models.PositiveIntegerField(default=0)
     created_at = models.DateTimeField(auto_now_add=True)
 
-    def changeLike(self,isInc):
-        self.likeCount += 1 if isInc else -1
-        self.save()
+    liked_by = models.ManyToManyField(
+        CustomUser,
+        related_name='liked_threads',
+        blank=True
+    )
+
+    def changeLike(self,user):
+        if(user in self.liked_by.all()):
+            self.likeCount -=1
+            self.liked_by.remove(user)
+            self.save()
+            return False
+        else:
+            self.likeCount +=1
+            self.liked_by.add(user)
+            self.save()
+            return True
 
     def changeShare(self,isInc):
         self.shareCount += 1 if isInc else -1
         self.save()
+
     def changeReply(self,isInc):
         self.replyCount += 1 if isInc else -1
         self.save()
@@ -49,8 +64,22 @@ class ReplyChild(models.Model):
     created_at = models.DateTimeField(auto_now_add=True)
     likeCount = models.PositiveIntegerField(default=0)
 
-    def changeLike(self,isInc):
-        self.likeCount += 1 if isInc else -1
-        self.save()
+    liked_by = models.ManyToManyField(
+        CustomUser,
+        related_name='liked_replies',
+        blank=True
+    )
+
+    def changeLike(self,user):
+        if(user in self.liked_by.all()):
+            self.likeCount -=1
+            self.liked_by.remove(user)
+            self.save()
+            return False
+        else:
+            self.likeCount +=1
+            self.liked_by.add(user)
+            self.save()
+            return True
 
 
