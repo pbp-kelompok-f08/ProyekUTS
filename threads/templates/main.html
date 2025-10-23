@@ -43,28 +43,72 @@
                 <p id="replyToWho" class="text-sm text-gray-400"></p>
             </div>
 
-            <!-- Scrollable reply list -->
-            <div id="replyList" class="flex-1 overflow-y-auto p-4 space-y-4">
+            <div id="searchBar" class=" w-1/4 bg-neutral-900 border border-neutral-800 rounded-xl p-4 h-fit self-start mt-16">
+                <h2 class="text-lg font-semibold mb-4">Search by Tag</h2>
+                <input id="tagSearchInput" type="text" placeholder="Enter tag... e.g. football,ai,tech"
+                    class="w-full bg-neutral-800 text-gray-200 rounded-md px-3 py-2 focus:outline-none focus:ring-1 focus:ring-green-500 mb-3">
+
+                <button id="tagSearchBtn"
+                    class="w-full bg-green-600 hover:bg-green-700 text-white py-2 rounded-md transition">
+                    Search
+                </button>
+
+                <div id="searchResults" class="mt-4 space-y-2 text-sm text-gray-300"></div>
+            </div>
+            <!-- Threads Feed -->
+            <div class="w-full lg:w-2/5 border-x border-solid border-stone-700">
+                <!-- Create Thread Button -->
+                <button onclick="showModal()"
+                    class="w-full border border-gray-600 bg-neutral-900 text-left text-gray-400 px-4 py-6 rounded-lg hover:border-gray-400 hover:text-gray-200 transition">
+                    + Create new Thread...
+                </button>
+                <div id="threadList" class="hidden"></div>
             </div>
 
-            <!-- Reply input box -->
-            <div class="border-t border-gray-700 p-3 flex items-center space-x-3">
-                <div class="w-8 h-8 rounded-full bg-gray-600 flex-shrink-0"></div>
-                <input type="text" placeholder="Write a reply..."
-                    class="flex-1 bg-neutral-800 text-white text-sm rounded-lg px-3 py-2 focus:outline-none focus:ring-1 focus:ring-green-500" />
-                <button class="bg-green-600 hover:bg-green-700 text-white px-3 py-2 rounded-lg text-sm transition">
-                    Reply
+            <!-- thread Reply -->
+            <div id="threadReply" class="hidden lg:w-1/3">
+                <div
+                    class="fixed w-1/3 bg-neutral-900 mt-10 top-10 bottom-10 rounded-xl border border-gray-700 flex flex-col">
+
+                    <!-- Header -->
+                    <div class="p-4 border-b border-gray-700">
+                        <h2 class="text-lg font-semibold text-white">Replies</h2>
+                        <p id="replyToWho" class="text-sm text-gray-400"></p>
+                    </div>
+
+                    <!-- Scrollable reply list -->
+                    <div id="replyList" class="flex-1 overflow-y-auto px-4">
+                    </div>
+
+                    <div class="flex items-center border-t border-gray-700 px-3">
+                        <form id="replyForm" class="p-3 flex items-center w-full">
+                            <input type="text" name="content" id="replyContent" placeholder="Write a reply..."
+                                class="flex-1 bg-neutral-800 text-white text-sm rounded-lg px-3 py-2 focus:outline-none focus:ring-1 focus:ring-green-500"
+                                required>
+                        </form>
+                        <button type="submit" form="replyForm"
+                            class="bg-blue-600 hover:bg-blue-500 shadow-md shadow-blue-600/20 text-white px-3 py-2 rounded-lg text-sm">
+                            Reply
+                        </button>
+                    </div>
+                </div>
+            </div>
+
+
+            <!-- Empty State -->
+            <div id="empty"
+                class="bg-neutral-900 rounded-lg border border-neutral-800 p-12 text-center hidden text-gray-300">
+                <div class="w-32 h-32 mx-auto mb-4">
+                    <img src="{% static 'image/no-news.png' %}" alt="No threads available"
+                        class="w-full h-full object-contain opacity-80">
+                </div>
+                <h3 class="text-lg font-medium mb-2 text-white">No Thread found</h3>
+                <p class="text-gray-400 mb-6">Be the first to share a football thread with the community.</p>
+                <button onclick="showModal()"
+                    class="inline-flex items-center px-4 py-2 bg-green-600 text-white rounded-md hover:bg-green-700 transition-colors">
+                    Create new Threads
                 </button>
             </div>
-        </div>
-    </div>
-
-
-    <!-- Empty State -->
-    <div id="empty" class="bg-neutral-900 rounded-lg border border-neutral-800 p-12 text-center hidden text-gray-300">
-        <div class="w-32 h-32 mx-auto mb-4">
-            <img src="{% static 'image/no-news.png' %}" alt="No threads available"
-                class="w-full h-full object-contain opacity-80">
         </div>
         <h3 class="text-lg font-medium mb-2 text-white">No Thread found</h3>
         <p class="text-gray-400 mb-6">Be the first to share a football thread with the community.</p>
@@ -78,12 +122,36 @@
 
 <script>
     const THREADS_API_ENDPOINT = "{% url 'threads:show_json' %}";
-    const CURRENT_USER_ID = "{{ user.id|default_if_none:'' }}";
+    const CURRENT_USERNAME = "{{ request.user.username|default_if_none:'' }}";
+
+
+    document.getElementById('tagSearchBtn').addEventListener('click', () => {
+        const searchTerm = document.getElementById('tagSearchInput').value.trim().toLowerCase();
+        if (!searchTerm) {
+            // if input empty, show all
+            renderAllThreadsCards(allThreadsData);
+            return;
+        }
+
+        const filtered = allThreadsData.filter(thread => {
+            const tags = thread.tags ? thread.tags.toLowerCase() : '';
+            return tags.includes(searchTerm);
+        });
+
+        const searchResults = document.getElementById('searchResults');
+        searchResults.innerHTML = filtered.length
+            ? `<p>Found ${filtered.length} thread(s) with #${searchTerm}</p>`
+            : `<p class="text-gray-500">No threads found for "${searchTerm}"</p>`;
+
+        renderAllThreadsCards(filtered);
+    });
+
     let activeReplyThread = null;
 
     const loadingSpinner = document.getElementById('loading');
     const threadsGridContainer = document.getElementById('threadList');
     const threadsReplyContainer = document.getElementById('threadReply');
+    const serachBar = document.getElementById('searchBar');
     const threadsReplyList = document.getElementById('replyList');
     let allThreadsData = [];
 
@@ -93,31 +161,38 @@
     }
 
     function buildThreadsCardElement(item) {
+        const id = DOMPurify.sanitize(item.id);
+
         const content = DOMPurify.sanitize(item.content);
         const tags = DOMPurify.sanitize(item.tags);
         const image = DOMPurify.sanitize(item.image);
         const createdAt = DOMPurify.sanitize(item.created_at);
+
         const likeCount = DOMPurify.sanitize(String(item.likeCount || 0));
         const shareCount = DOMPurify.sanitize(String(item.shareCount || 0));
         const replyCount = DOMPurify.sanitize(String(item.replyCount || 0));
+
         const username = DOMPurify.sanitize(item.username || "Unknown");
 
         const threadCard = document.createElement("div");
+        threadCard.id = id;
         threadCard.className =
-            "w-full border-b border-gray-700 py-4 flex justify-between text-white bg-neutral-800 px-4";
+            "w-full border-b border-gray-700 py-4 flex justify-between text-white bg-neutral-900 hover:bg-neutral-800 transition-colors duration-300 px-5";
 
         threadCard.innerHTML = `
         <!-- Left section: profile + username -->
-        <div class="flex flex-col items-start">
-            <div class="w-10 h-10 rounded-full bg-gray-600"></div>
+        <div class="flex flex-col items-center">
+            <div class="w-10 h-10 rounded-full bg-gradient-to-br from-purple-500 to-pink-500 flex items-center justify-center text-white font-bold shadow-md">
+                ${username[0].toUpperCase()}
+            </div>
         </div>
 
         <!-- Middle section: post content -->
-        <div class="flex-1 px-6">
-            <span class="font-semibold text-lg">${username}</span>
-            <p class="text-xs text-gray-600 mt-2">${new Date(
-            createdAt
-        ).toLocaleString()}</p>
+        <div class="flex flex-col flex-1 px-6">
+            <div class="flex h-10 items-start justify-between">
+                <span class="font-semibold text-base">${username}</span>
+                <p class="text-xs text-gray-500">${new Date(createdAt).toLocaleString()}</p>
+            </div>
 
             ${image
                 ? `<img src="${image}" alt="Thread Image" class="w-full rounded-lg mb-3" />`
@@ -125,33 +200,83 @@
             }
             <p class="text-gray-300 mb-2">${content}</p>
             ${tags
-                ? `<p class="text-sm text-gray-500">#${tags.replace(/,/g, " #")}</p>`
+                ? `<p class="text-sm text-gray-500 mt-auto">#${tags.replace(/, /g, " #")}</p>`
                 : ""
             }
         </div>
 
         <!-- Right section: icons -->
-        <div class="flex flex-col items-center justify-center space-y-4 w-16">
-        <!-- Like -->
-            <div class="flex flex-col items-center">
-                <button class="text-2xl hover:scale-110 transition">❤️</button>
-                <span class="text-sm text-white">${likeCount}</span>
+        <div class="relative flex flex-col items-center justify-center space-y-4 w-16">
+            ${(CURRENT_USERNAME && CURRENT_USERNAME === username) &&
+            `<!-- Dropdown button -->
+            <div class="absolute -top-2 right-0">
+                <button onclick="toggleMenu('${id}')" 
+                class="text-gray-400 hover:text-gray-200 text-xl font-bold px-2">
+                ⋮
+                </button>
+                
+                <!-- Dropdown Menu -->
+                <div id="menu-${id}" 
+                    class="hidden absolute right-0 mt-2 w-24 bg-neutral-800 border border-gray-700 rounded-md shadow-lg z-10">
+                    <a href="thread/${id}/delete" 
+                        class="block w-full text-left px-3 py-2 text-sm text-red-400 hover:bg-red-500 hover:text-white transition">
+                        Delete
+                    </a>
+                </div>
+            </div>`
+            }
+
+            <!-- Like -->
+            <div class="flex flex-col items-center mt-8">
+                <button class="text-2xl hover:scale-110 transition" id="likeEmoji-${id}" onclick="handleLikes('${id}')">
+                    ${item.isLiked ? "❤️" : "🤍"}
+                </button>
+                <span class="text-sm text-white" id="likeCount-${id}">${likeCount}</span>
             </div>
+
             <!-- Comment -->
             <div class="flex flex-col items-center">
-                <button class="text-2xl hover:scale-110 transition" onclick="showReply('${username}')">💬</button>
-                <span class="text-sm text-white">${replyCount}</span>
-            </div>
-            <!-- Repost -->
-            <div class="flex flex-col items-center">
-                <button class="text-2xl hover:scale-110 transition">🔁</button>
-                <span class="text-sm text-white">${shareCount}</span>
+                <button class="text-2xl hover:scale-110 transition" onclick="showReply('${id}', '${username}')">💬</button>
+                <span class="text-sm text-white" id="replyCount-${id}">${replyCount}</span>
             </div>
         </div>
-    `;
+`;
+        // <!-- Repost -->
+        // <div class="flex flex-col items-center">
+        //     <button class="text-2xl hover:scale-110 transition">📩</button>
+        //     <span class="text-sm text-white" id="shareCount-${id}">${shareCount}</span>
+        // </div>
 
         return threadCard;
     }
+    function toggleMenu(threadId) {
+        const menu = document.getElementById(`menu-${threadId}`);
+        menu.classList.toggle("hidden");
+
+        // Hide if clicked outside
+        document.addEventListener("click", function hideMenu(e) {
+            if (!menu.contains(e.target) && !e.target.closest(`[onclick="toggleMenu('${threadId}')"]`)) {
+                menu.classList.add("hidden");
+                document.removeEventListener("click", hideMenu);
+            }
+        });
+    }
+
+    async function handleLikes(threadId) {
+        const response = await fetch(`/threads/like-thread/${threadId}/`, { method: "POST" })
+        // if (!response.ok) {
+        //     console.error("Failed to like/unlike thread");
+        //     return;
+        // }
+        const likeCount = await response.json()
+
+        const count = document.getElementById(`likeCount-${threadId}`);
+        const emoji = document.getElementById(`likeEmoji-${threadId}`);
+
+        count.innerHTML = likeCount.likeCount
+        emoji.textContent = likeCount.isLiked ? "❤️" : "🤍";
+    }
+
 
     function renderAllThreadsCards(threadsItems) {
         threadsGridContainer.innerHTML = '';
@@ -169,54 +294,113 @@
         }
     }
 
-    async function showReply(userId) {
+    async function showReply(threadId, username) {
         // If the same thread is clicked again → hide the reply panel
-        if (activeReplyThread === userId && !threadsReplyContainer.classList.contains('hidden')) {
+        if (activeReplyThread === threadId && !threadsReplyContainer.classList.contains('hidden')) {
             threadsReplyContainer.classList.add('hidden');
+            serachBar.classList.remove('hidden')
             activeReplyThread = null;
             return;
         }
-
+        
+        
         // Otherwise, open the panel for the new thread
-        activeReplyThread = userId;
+        activeReplyThread = threadId;
         threadsReplyContainer.classList.remove('hidden');
+        serachBar.classList.add('hidden')
 
         // Show username at the top
-        document.getElementById('replyToWho').textContent = `Replying to ${userId}`;
+        document.getElementById('replyToWho').textContent = `Replying to ${username}`;
 
         // Fetch and render replies
-        const replyItems = await fetchReplyFromServer(userId);
+        const replyItems = await fetchReplyFromServer();
         threadsReplyList.innerHTML = '';
 
         replyItems.forEach(item => {
-            threadsReplyList.appendChild(buildReplyCardElement(item));
+            threadsReplyList.append(buildReplyCardElement(item));
         });
     }
+
+    async function fetchThreadsFromServer(userId) {
+        try {
+            displayPageSection({ showLoading: true });
+            const response = await fetch(THREADS_API_ENDPOINT, { headers: { 'Accept': 'application/json' } });
+            if (!response.ok) throw new Error('Failed to fetch thread data');
+            allThreadsData = await response.json() || [];
+            displayThreads();
+        } catch (error) {
+            console.error('Error loading thread:', error);
+            displayPageSection({ showError: true });
+        }
+    }
+
+    fetchThreadsFromServer();
+    document.addEventListener('ThreadsAdded', fetchThreadsFromServer);
+
+    //reply part
     function buildReplyCardElement(item) {
-        const username = DOMPurify.sanitize(item.username || "Unknown");
-        const content = DOMPurify.sanitize(item.content || "");
+        const id = DOMPurify.sanitize(item.id);
+
+        const username = DOMPurify.sanitize(item.username);
+        const content = DOMPurify.sanitize(item.content);
         const likeCount = DOMPurify.sanitize(String(item.likeCount || 0));
         const createdAt = new Date(item.created_at);
         const timeAgo = timeSince(createdAt);
 
         const replyCard = document.createElement("div");
-        replyCard.className = "flex space-x-3 border-b border-gray-700 py-3";
+        replyCard.className = "relative flex space-x-3 border-b border-gray-700 py-3";
 
         replyCard.innerHTML = `
-        <div class="w-8 h-8 rounded-full bg-gray-600"></div>
-        <div class="flex-1">
-            <p class="font-semibold text-white">${username}</p>
-            <p class="text-gray-300 text-sm">${content}</p>
-            <div class="flex items-center space-x-2 mt-1 text-gray-500 text-xs">
-                <button class="hover:text-red-400">❤️</button>
-                <span>${likeCount}</span>
-                <span>·</span>
-                <span>${timeAgo}</span>
+        ${(CURRENT_USERNAME && CURRENT_USERNAME === username) &&
+            `<!-- Dropdown button -->
+            <div class="absolute top-3 -right-3">
+                <button onclick="toggleMenu('${id}')" 
+                class="text-gray-400 hover:text-gray-200 text-xl font-bold px-2">
+                ⋮
+                </button>
+                
+                <!-- Dropdown Menu -->
+                <div id="menu-${id}" 
+                    class="hidden absolute right-0 mt-2 w-24 bg-neutral-800 border border-gray-700 rounded-md shadow-lg z-10">
+                    <a href="reply/${id}/delete" 
+                        class="block w-full text-left px-3 py-2 text-sm text-red-400 hover:bg-red-500 hover:text-white transition">
+                        Delete
+                    </a>
+                </div>
+            </div>`
+            }
+            <div class="flex flex-col items-center">
+                <div class="w-8 h-8 rounded-full bg-gradient-to-br from-purple-500 to-pink-500 flex items-center text-md  justify-center text-white font-bold shadow-md">
+                    ${username[0].toUpperCase()}
+                </div>
             </div>
-        </div>
+            <div class="flex-1">
+                <p class="font-semibold text-white">${username}</p>
+                <p class="text-gray-300 text-sm">${content}</p>
+                <div class="flex items-center space-x-2 mt-1 text-gray-500 text-xs">
+                    <button class="hover:text-red-400" id="likeEmoji-${id}" onclick="handleReplyLikes('${id}')">${item.isLiked ? "❤️" : "🤍"}</button>
+                    <span id="likeCount-${id}">${likeCount}</span>
+                    <span>·</span>
+                    <span>${timeAgo}</span>
+                </div>
+            </div>
     `;
 
         return replyCard;
+    }
+    async function handleReplyLikes(replyId) {
+        const response = await fetch(`/threads/like-reply/${replyId}/`, { method: "POST" })
+        // if (!response.ok) {
+        //     console.error("Failed to like/unlike thread");
+        //     return;
+        // }
+        const likeCount = await response.json()
+
+        const count = document.getElementById(`likeCount-${replyId}`);
+        const emoji = document.getElementById(`likeEmoji-${replyId}`);
+
+        count.innerHTML = likeCount.likeCount
+        emoji.textContent = likeCount.isLiked ? "❤️" : "🤍";
     }
 
     // Helper function to show "time ago" style text
@@ -236,11 +420,9 @@
         }
         return "Just now";
     }
-
-
-    async function fetchReplyFromServer(userId) {
+    async function fetchReplyFromServer() {
         try {
-            const response = await fetch(`/threads/replies/${userId}/`, { headers: { 'Accept': 'application/json' }, });
+            const response = await fetch(`/threads/replies/${activeReplyThread}/`, { headers: { 'Accept': 'application/json' }, });
 
             if (!response.ok) throw new Error('Failed to fetch Reply data');
             replyItems = await response.json() || [];
@@ -251,21 +433,32 @@
         }
     }
 
-    async function fetchThreadsFromServer(userId) {
-        try {
-            displayPageSection({ showLoading: true });
-            const response = await fetch(THREADS_API_ENDPOINT, { headers: { 'Accept': 'application/json' } });
-            if (!response.ok) throw new Error('Failed to fetch thread data');
-            allThreadsData = await response.json() || [];
-            displayThreads();
-        } catch (error) {
-            console.error('Error loading thread:', error);
-            displayPageSection({ showError: true });
-        }
-    }
+    async function addReplyEntry() {
+        const response = await fetch(`/threads/create-reply-ajax/${activeReplyThread}/`, {
+            method: "POST",
+            body: new FormData(document.querySelector('#replyForm')),
+        })
 
-    fetchThreadsFromServer();
-    document.addEventListener('ThreadsAdded', fetchThreadsFromServer);
+        document.getElementById("replyForm").reset();
+
+        const newReply = await response.json()
+        threadsReplyList.prepend(buildReplyCardElement(newReply))
+
+        const count = document.getElementById(`replyCount-${activeReplyThread}`)
+        count.innerHTML = newReply.count
+        // Show toast notification
+        showToast('reply added successfully!', '', 'success');
+
+        // Dispatch custom event to notify main.html about new data
+        // document.dispatchEvent(new CustomEvent('ReplyAdded'));
+        return false;
+    }
+    document.getElementById("replyForm").addEventListener("submit", function (e) {
+        e.preventDefault();
+        addReplyEntry();
+    })
+
+
 </script>
 
 {% endblock content %}
