@@ -18,6 +18,10 @@ def login_page(request):
 def register_page(request):
     return render(request, 'accounts/register.html')
 
+@login_required
+def profile_page(request):
+    return render(request, "accounts/profile.html")
+
 @require_POST
 @csrf_exempt
 def login_ajax(request):
@@ -79,3 +83,69 @@ def admin_delete_user(request, user_id):
 def logout_ajax(request):
     logout(request)
     return JsonResponse({'success': True})
+
+@require_GET
+@login_required
+def profile_detail(request: HttpRequest):
+    user = request.user
+    data = model_to_dict(user, fields=[
+        'username', 'email', 'bio', 'role',
+        'favorite_sport', 'skill_level'
+    ])
+    data["profile_picture"] = user.profile_picture.url if user.profile_picture else None
+    return JsonResponse({"data": data}, status=200)
+
+@login_required
+@require_POST
+def update_profile(request):
+    user = request.user
+
+    username = request.POST.get("username", "").strip()
+    email = request.POST.get("email", "").strip()
+    bio = request.POST.get("bio", "").strip()
+    favorite_sport = request.POST.get("favorite_sport", "").strip()
+    skill_level = request.POST.get("skill_level", "").strip()
+    profile_picture = request.FILES.get("profile_picture")
+    remove_picture = request.POST.get("remove_picture")
+
+    # --- Basic validation ---
+    if not username:
+        return JsonResponse({"status": "error", "message": "Username cannot be empty."}, status=400)
+
+    # --- Update user fields ---
+    user.username = username
+    if email:
+        user.email = email
+    user.bio = bio
+    user.favorite_sport = favorite_sport or None
+    user.skill_level = skill_level or None
+    if profile_picture:
+        if user.profile_picture and user.profile_picture.name != profile_picture.name:
+            user.profile_picture.delete(save=False)
+        user.profile_picture = profile_picture
+
+    if remove_picture == "true": 
+        if user.profile_picture:
+            user.profile_picture.delete(save=False)
+        user.profile_picture = None
+    elif profile_picture:
+        if user.profile_picture and user.profile_picture.name != profile_picture.name:
+            user.profile_picture.delete(save=False)
+        user.profile_picture = profile_picture
+
+    user.save()
+
+    login(request, user)
+
+    # --- Return updated data ---
+    return JsonResponse({
+        "status": "success",
+        "data": {
+            "username": user.username,
+            "email": user.email,
+            "bio": user.bio,
+            "favorite_sport": user.favorite_sport,
+            "skill_level": user.skill_level,
+            "profile_picture": user.profile_picture.url if user.profile_picture else None,
+        }
+    })

@@ -1,0 +1,299 @@
+{% extends 'base.html' %}
+{% load static %}
+{% block title %}Profile - {{ request.user.username }}{% endblock %}
+
+{% block content %}
+{% include 'navbar.html' %}
+
+<!-- Font -->
+<link href="https://fonts.googleapis.com/css2?family=Roboto+Mono:wght@400;500;700&display=swap" rel="stylesheet">
+
+<!-- Toast Container -->
+<div id="toast-container" class="fixed top-5 right-5 space-y-3 z-50"></div>
+
+<div class="min-h-screen bg-[#262626] text-[#E6E8E6] flex flex-col pt-24" style="font-family: 'Roboto Mono', monospace;">
+  <div class="container mx-auto px-6 space-y-8">
+
+    <!-- PROFILE HEADER BOX -->
+    <div class="bg-[#212842] backdrop-blur-sm rounded-xl p-10 border border-[#9DB4C0]/30 shadow-lg flex flex-col sm:flex-row sm:items-center sm:space-x-8 space-y-6 sm:space-y-0 transition-all">
+      <div class="flex justify-center sm:justify-start">
+        <img id="user-pic" 
+             class="w-32 h-32 sm:w-40 sm:h-40 rounded-full object-cover border-4 border-[#9DB4C0]/40 shadow-md" 
+             src="{% static 'accounts/img/default.png' %}" 
+             alt="Profile Picture">
+      </div>
+
+      <div class="flex flex-col justify-center text-center sm:text-left space-y-2">
+        <h2 id="username" class="text-3xl sm:text-4xl font-semibold text-[#E6E8E6]"> {{ request.user.username }}</h2>
+        <p class="text-[#CED0CE] text-sm">Member since {{ request.user.date_joined|date:"M Y" }}</p>
+        <button onclick="toggleEditForm()" 
+                class="mt-4 bg-[#9DB4C0] hover:bg-[#E6E8E6] hover:text-[#253237] 
+                       px-4 py-2 rounded text-[#262626] font-medium 
+                       transition-all duration-300 transform hover:scale-105 shadow-sm">
+          Edit Profile
+        </button>
+      </div>
+    </div>
+
+    <!-- DETAIL BOX -->
+    <div class="bg-[#212842] backdrop-blur-sm rounded-xl p-8 border border-[#9DB4C0]/30 shadow-lg">
+      <div class="mb-6">
+        <h4 class="text-sm text-[#9DB4C0] uppercase tracking-wide mb-1">Bio</h4>
+        <p id="bio" class="text-[#E6E8E6] italic">{{ request.user.bio|default:"Belum ada bio." }}</p>
+      </div>
+
+      <div class="grid sm:grid-cols-2 gap-6">
+        <div>
+          <h4 class="text-sm text-[#9DB4C0] uppercase tracking-wide mb-1">Email</h4>
+          <p id="email" class="text-[#E6E8E6]">{{ request.user.email }}</p>
+        </div>
+        <div>
+          <h4 class="text-sm text-[#9DB4C0] uppercase tracking-wide mb-1">Favorite Sport</h4>
+          <p id="favorite-sport" class="text-[#E6E8E6]">{{ request.user.favorite_sport|default:"-" }}</p>
+        </div>
+        <div>
+          <h4 class="text-sm text-[#9DB4C0] uppercase tracking-wide mb-1">Skill Level</h4>
+          <p id="skill-level" class="text-[#E6E8E6] capitalize">{{ request.user.skill_level|default:"-" }}</p>
+        </div>
+      </div>
+    </div>
+
+    <!-- EDIT FORM (HIDDEN) -->
+    <div id="edit-form" 
+        class="hidden bg-[#212842]/80 backdrop-blur-sm p-8 mt-10 rounded-xl border border-[#9DB4C0]/30 
+                shadow-lg max-w-3xl w-full mx-auto transition-all duration-300">
+      <form id="profileForm" enctype="multipart/form-data">
+        {% csrf_token %}
+
+        <h2 class="text-2xl font-semibold mb-6 text-[#E6E8E6]">Edit Profile</h2>
+
+        <div class="grid md:grid-cols-2 gap-6">
+          <div>
+            <label class="block text-sm text-[#CED0CE] mb-1">Username</label>
+            <input type="text" name="username" id="edit-username" 
+                   class="w-full bg-[#253237] text-[#E6E8E6] p-2 rounded focus:outline-none focus:ring-2 focus:ring-[#9DB4C0]">
+          </div>
+          <div>
+            <label class="block text-sm text-[#CED0CE] mb-1">Email</label>
+            <input type="email" name="email" id="edit-email" 
+                   class="w-full bg-[#253237] text-[#E6E8E6] p-2 rounded focus:outline-none focus:ring-2 focus:ring-[#9DB4C0]">
+          </div>
+        </div>
+
+        <div class="mt-4">
+          <label class="block text-sm text-[#CED0CE] mb-1">Bio</label>
+          <textarea name="bio" id="edit-bio" rows="3" 
+                    class="w-full bg-[#253237] text-[#E6E8E6] p-2 rounded focus:outline-none focus:ring-2 focus:ring-[#9DB4C0]"></textarea>
+        </div>
+
+        <div class="grid md:grid-cols-2 gap-6 mt-4">
+          <div>
+            <label class="block text-sm text-[#CED0CE] mb-1">Favorite Sport</label>
+            <select name="favorite_sport" id="edit-fav-sport" 
+                    class="w-full bg-[#253237] text-[#E6E8E6] p-2 rounded focus:outline-none focus:ring-2 focus:ring-[#9DB4C0]">
+              <option value="">Select a sport</option>
+              <option value="Football">Football</option>
+              <option value="Basketball">Basketball</option>
+              <option value="Badminton">Badminton</option>
+              <option value="Tennis">Tennis</option>
+              <option value="Padel">Padel</option>
+              <option value="Swimming">Swimming</option>
+              <option value="F1">F1</option>
+              <option value="Other">Other</option>
+            </select>
+          </div>
+          <div>
+            <label class="block text-sm text-[#CED0CE] mb-1">Skill Level</label>
+            <select name="skill_level" id="edit-skill" 
+                    class="w-full bg-[#253237] text-[#E6E8E6] p-2 rounded focus:outline-none focus:ring-2 focus:ring-[#9DB4C0]">
+              <option value="">Select skill level</option>
+              <option value="beginner">Beginner</option>
+              <option value="intermediate">Intermediate</option>
+              <option value="advanced">Advanced</option>
+              <option value="expert">Expert</option>
+            </select>
+          </div>
+        </div>
+
+        <div class="mt-4">
+          <label class="block text-sm text-[#CED0CE] mb-1">Profile Picture</label>
+          <input type="file" name="profile_picture" id="edit-pic" class="text-[#CED0CE] block mb-2">
+          <label class="flex items-center space-x-2 text-sm text-[#CED0CE] cursor-pointer">
+            <input type="checkbox" id="remove-picture" name="remove_picture" value="true" class="accent-[#9DB4C0]">
+            <span>Remove current profile picture</span>
+          </label>
+        </div>
+
+        <div class="flex justify-end mt-8 space-x-4">
+          <button type="button" onclick="toggleEditForm()" 
+                  class="bg-[#5C6B73] hover:bg-[#9DB4C0] hover:text-[#253237] px-4 py-2 rounded transition-all duration-300">
+            Cancel
+          </button>
+          <button type="submit" 
+                  class="bg-[#9DB4C0] hover:bg-[#E6E8E6] hover:text-[#253237] px-4 py-2 rounded font-medium transition-all duration-300">
+            Save Changes
+          </button>
+        </div>
+      </form>
+    </div>
+
+    <!-- USER THREADS BOX -->
+    <div id="user-threads-box"
+            class="bg-[#262626] rounded-xl border border-[#9DB4C0]/30 shadow-lg mt-8 p-6 max-h-[500px] overflow-y-auto">
+        <h3 class="text-xl font-semibold mb-4 text-[#E6E8E6]">Your Threads</h3>
+        <div id="userThreads" class="space-y-6"></div>
+        <p id="emptyThreads" class="text-[#9DB4C0] hidden text-sm text-center italic">No threads yet.</p>
+    </div>
+
+  </div>
+</div>
+
+{% endblock %}
+
+{% block extra_scripts %}
+<script src="{% static 'accounts/js/toast.js' %}"></script>
+<script src="{% static 'accounts/js/auth.js' %}"></script>
+<script>
+
+document.addEventListener("DOMContentLoaded", () => {
+  const savedProfile = localStorage.getItem('userProfile');
+  const currentUsername = "{{ request.user.username }}";
+
+  if (savedProfile) {
+    const parsed = JSON.parse(savedProfile);
+
+    if (parsed.username !== currentUsername) {
+      localStorage.removeItem('userProfile');
+      fetchProfile();
+    } else {
+      renderProfile(parsed);
+    }
+  } else {
+    fetchProfile();
+  }
+
+  fetchUserThreads();
+});
+
+function renderProfile(user) {
+  document.getElementById('username').textContent = user.username;
+  document.getElementById('bio').textContent = user.bio || "Belum ada bio.";
+  document.getElementById('email').textContent = user.email || "-";
+  document.getElementById('favorite-sport').textContent = user.favorite_sport || "-";
+  document.getElementById('skill-level').textContent = user.skill_level || "-";
+  document.getElementById('edit-username').value = user.username;
+  document.getElementById('edit-email').value = user.email || "";
+  document.getElementById('edit-bio').value = user.bio || "";
+  document.getElementById('edit-fav-sport').value = user.favorite_sport || "";
+  document.getElementById('edit-skill').value = user.skill_level || "";
+  document.getElementById('user-pic').src = user.profile_picture || "{% static 'accounts/img/default.png' %}";
+}
+
+function fetchProfile() {
+  fetch("{% url 'accounts:profile_detail' %}, { cache: 'no-store' }")
+    .then(response => response.json())
+    .then(data => {
+      const user = data.data;
+      renderProfile(user);
+      localStorage.setItem('userProfile', JSON.stringify(user));
+    });
+}
+
+function toggleEditForm() {
+  document.getElementById('edit-form').classList.toggle('hidden');
+}
+
+async function fetchUserThreads() {
+  const threadsList = document.getElementById('threads-list');
+  const loading = document.getElementById('threads-loading');
+  const empty = document.getElementById('threads-empty');
+
+  threadsList.innerHTML = '';
+  loading.classList.remove('hidden');
+  empty.classList.add('hidden');
+
+  try {
+    const res = await fetch("{% url 'threads:show_json' %}");
+    if (!res.ok) throw new Error("Failed to fetch threads");
+    const allThreads = await res.json();
+
+    const username = "{{ request.user.username }}";
+    const userThreads = allThreads.filter(t => t.username === username);
+
+    loading.classList.add('hidden');
+
+    if (userThreads.length === 0) {
+      empty.classList.remove('hidden');
+      return;
+    }
+
+    const userPic = `{% if request.user.profile_picture %}{{ request.user.profile_picture.url }}{% else %}{% static 'accounts/img/default.png' %}{% endif %}`;
+
+    userThreads.forEach(thread => {
+      const div = document.createElement('div');
+      div.className = "bg-[#262626] border border-[#9DB4C0]/20 rounded-xl p-6 shadow transition-all hover:bg-[#30363D]/50";
+
+      const created = new Date(thread.created_at).toLocaleString();
+
+      div.innerHTML = `
+        <div class="flex items-center mb-4 space-x-3">
+          <img src="${userPic}" 
+               class="w-10 h-10 rounded-full object-cover border border-[#9DB4C0]/30" 
+               alt="user profile picture">
+          <div>
+            <p class="font-semibold text-[#E6E8E6]">${DOMPurify.sanitize(thread.username || "{{ request.user.username }}")}</p>
+            <p class="text-xs text-[#9DB4C0]">${created}</p>
+          </div>
+        </div>
+
+        ${thread.image ? `
+          <div class="mb-3 rounded-lg overflow-hidden border border-[#9DB4C0]/30">
+            <img src="${DOMPurify.sanitize(thread.image)}" alt="Thread image" class="w-full object-cover max-h-72">
+          </div>` : ""
+        }
+
+        <p class="text-[#E6E8E6] mb-2 whitespace-pre-line">${DOMPurify.sanitize(thread.content || "")}</p>
+        ${thread.tags ? `<p class="text-sm text-[#9DB4C0]">#${DOMPurify.sanitize(thread.tags.replace(/,/g, " #"))}</p>` : ""}
+      `;
+
+      threadsList.appendChild(div);
+    });
+
+  } catch (error) {
+    console.error(error);
+    loading.classList.add('hidden');
+    empty.textContent = "Failed to load threads.";
+    empty.classList.remove('hidden');
+  }
+}
+
+document.getElementById('profileForm').addEventListener('submit', function(e) {
+  e.preventDefault();
+  const formData = new FormData(this);
+  const removePicture = document.getElementById('remove-picture').checked;
+  formData.append('remove_picture', removePicture);
+
+  fetch("{% url 'accounts:update_profile' %}", {
+    method: 'POST',
+    headers: { 'X-CSRFToken': '{{ csrf_token }}' },
+    body: formData
+  })
+  .then(res => res.json())
+  .then(data => {
+    if (data.status === 'success') {
+      const user = data.data;
+      renderProfile(user);
+      localStorage.setItem('userProfile', JSON.stringify(user));
+      toggleEditForm();
+      showToast("Profile updated successfully!", "success");
+    } else {
+      showToast(data.message || "Failed to update profile.", "error");
+    }
+  })
+  .catch(err => {
+    console.error(err);
+    showToast("An unexpected error occurred.", "error");
+  });
+});
+</script>
+{% endblock %}
