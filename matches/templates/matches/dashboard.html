@@ -1,383 +1,607 @@
 {% extends "base.html" %}
 {% load static %}
 
-{% block title %}Match Olahraga{% endblock %}
+{% block title %}Find Matches - Hoppin Sports Community{% endblock %}
 
 {% block content %}
 {% include "navbar.html" %}
 
-<main class="pt-24 min-h-screen bg-black text-white font-[Roboto_Mono]">
+<!-- ============== PAGE WRAPPER ============== -->
+<div class="min-h-screen bg-[#0E0E0E] text-[#EAEAEA] pt-20">
 
-  <!-- ================= SEARCH FORM ================= -->
-  <section class="px-10 py-8">
-      <h2 class="text-3xl mb-4 font-semibold">Cari Match</h2>
-      <form id="match-search-form" method="get" action=""
-          class="bg-[#1F1F1F] border border-[#2A2A2A] rounded-2xl p-6 shadow-md">
-          {{ search_form.as_p }}
-          <button type="submit" {% if not schema_ready %}disabled{% endif %}
-              class="mt-3 bg-[#2B2B2B] border border-[#3A3A3A] px-6 py-2 rounded-lg hover:bg-[#3C3C3C] transition">
-              Cari
+  <!-- ============== HEADER ============== -->
+  <header class="bg-[#141414] border-b border-[#2A2A2A]">
+    <div class="container mx-auto px-6 py-10">
+      <div class="flex flex-col md:flex-row items-center justify-between gap-6">
+        <div>
+          <h1 class="text-4xl md:text-5xl font-extrabold mb-2 tracking-tight bg-gradient-to-r from-[#00FF94] to-[#0099FF] bg-clip-text text-transparent">
+            Find Your Match
+          </h1>
+          <p class="text-lg md:text-xl text-[#A1A1A1]">Discover and join sports events near you</p>
+        </div>
+
+        <button type="button" id="open-create-modal" {% if not schema_ready %}disabled{% endif %}
+          class="group mt-2 md:mt-0 rounded-xl px-7 py-3 font-semibold text-black transition-all duration-300
+                 bg-gradient-to-r from-[#00FF94] to-[#0099FF] hover:opacity-90
+                 shadow-[0_0_15px_rgba(0,255,148,0.35)] hover:shadow-[0_0_24px_rgba(0,255,148,0.55)]
+                 disabled:opacity-50 disabled:cursor-not-allowed flex items-center gap-2">
+          <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"></path>
+          </svg>
+          <span>Create Match</span>
+        </button>
+      </div>
+
+      <!-- ============== SEARCH & FILTER BAR ============== -->
+      <div class="mt-8 flex flex-col lg:flex-row gap-4">
+        <div class="flex-1">
+          <form id="match-search-form" method="get" action="">
+            <div class="relative">
+              <input
+                type="text"
+                name="q"
+                placeholder="Search matches..."
+                class="w-full bg-transparent border-b border-[#3A3A3A] text-[#EAEAEA]
+                       placeholder-[#6B6B6B] focus:outline-none focus:border-[#00FF94]
+                       py-3 pr-4 pl-11 text-lg transition-all duration-300" />
+              <svg class="w-5 h-5 absolute left-1.5 top-3.5 text-[#6B6B6B]" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                      d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"></path>
+              </svg>
+            </div>
+          </form>
+        </div>
+
+        <select id="sport-filter"
+          class="bg-transparent border-b border-[#3A3A3A] text-[#EAEAEA] focus:outline-none focus:border-[#00FF94]
+                 px-2 py-2 rounded-none transition-colors">
+          <option value="">All Sports</option>
+          <option value="football">Football</option>
+          <option value="basketball">Basketball</option>
+          <option value="tennis">Tennis</option>
+          <option value="badminton">Badminton</option>
+          <option value="volleyball">Volleyball</option>
+        </select>
+
+        <select id="date-filter"
+          class="bg-transparent border-b border-[#3A3A3A] text-[#EAEAEA] focus:outline-none focus:border-[#00FF94]
+                 px-2 py-2 rounded-none transition-colors">
+          <option value="">Any Date</option>
+          <option value="today">Today</option>
+          <option value="week">This Week</option>
+          <option value="month">This Month</option>
+        </select>
+      </div>
+    </div>
+  </header>
+
+  <!-- ============== MAIN CONTENT ============== -->
+  <main class="container mx-auto px-6 py-8">
+    <div class="flex flex-col lg:flex-row gap-8">
+
+      <!-- ===== Matches Grid ===== -->
+      <section class="flex-1">
+
+        <!-- Loading State -->
+        <div id="loading" class="hidden flex flex-col items-center justify-center py-16">
+          <div class="animate-spin rounded-full h-12 w-12 border-b-2 border-[#00FF94] mb-4"></div>
+          <p class="text-[#A1A1A1]">Loading matches...</p>
+        </div>
+
+        <!-- Matches Container -->
+        <div id="match-list" class="grid md:grid-cols-2 xl:grid-cols-3 gap-6">
+          <!-- Cards rendered via JS -->
+        </div>
+
+        <!-- Empty State -->
+        <div id="empty" class="hidden text-center py-16">
+          <div class="w-24 h-24 mx-auto mb-6 rounded-full flex items-center justify-center
+                      bg-gradient-to-r from-[#00FF94] to-[#0099FF] shadow-[0_0_25px_rgba(0,255,148,0.35)]">
+            <svg class="w-12 h-12 text-black" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                    d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z"></path>
+            </svg>
+          </div>
+          <h3 class="text-2xl font-bold mb-3">No matches found</h3>
+          <p class="text-[#A1A1A1] mb-8 max-w-md mx-auto">Be the first to create a sports match and invite others to join!</p>
+          <button id="empty-create-btn"
+                  class="rounded-xl px-7 py-3 font-semibold text-black transition-all duration-300
+                         bg-gradient-to-r from-[#00FF94] to-[#0099FF] hover:opacity-90
+                         shadow-[0_0_15px_rgba(0,255,148,0.35)] hover:shadow-[0_0_24px_rgba(0,255,148,0.55)]">
+            Create First Match
           </button>
-      </form>
-  </section>
+        </div>
+      </section>
 
-  <!-- ================= CREATE MATCH ================= -->
-  <section class="px-10 pb-10">
-      <h2 class="text-3xl mb-4 font-semibold">Buat Match Baru</h2>
-      <button type="button" id="open-create-modal" {% if not schema_ready %}disabled{% endif %}
-          class="bg-[#2B2B2B] border border-[#3A3A3A] px-6 py-2 rounded-lg hover:bg-[#3C3C3C] transition">
-          Buat Match
-      </button>
-  </section>
+      <!-- ===== Sidebar ===== -->
+      <aside class="lg:w-80">
 
-  <!-- ================= MATCH CARDS ================= -->
-  <section class="px-10 pb-16">
-    <h2 class="text-3xl mb-6 font-semibold">Daftar Match</h2>
-
-    <div id="match-list" class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-8">
-      {% if schema_ready %}
-        {% if has_any_match %}
-          {% for category, matches in grouped_matches %}
-            {% for match in matches %}
-            <div class="bg-[#1F1F1F] border border-[#2A2A2A] rounded-2xl p-6 shadow-lg hover:border-gray-400 transition transform hover:-translate-y-1">
-              <div class="flex justify-between items-center mb-3">
-                <h3 class="text-2xl font-semibold">{{ match.title }}</h3>
-                <span class="text-sm text-gray-400 border border-[#3A3A3A] rounded-md px-2 py-0.5">{{ category.name }}</span>
-              </div>
-
-              <p class="text-gray-300 mb-1">📍 {{ match.location }}</p>
-              <p class="text-gray-300 mb-1">🕒 {{ match.event_date|date:"d M Y, H:i" }}</p>
-              {% if match.description %}
-              <p class="text-gray-400 text-sm italic mb-2">"{{ match.description }}"</p>
-              {% endif %}
-
-              <div class="flex justify-between items-center mt-3">
-                <p class="text-sm text-gray-400">Slot: {{ match.current_members }} / {{ match.max_members }}</p>
-                {% if match.available_slots > 0 %}
-                <span class="text-green-400 text-sm">{{ match.available_slots }} tersisa</span>
-                {% else %}
-                <span class="text-red-400 text-sm">Penuh</span>
-                {% endif %}
-              </div>
-
-              <form class="booking-form mt-5" method="post" action="{% url 'matches:book_match' match.id %}">
-                {% csrf_token %}
-                <button type="submit"
-                  class="w-full py-2 bg-[#2B2B2B] hover:bg-[#3C3C3C] border border-[#3A3A3A] rounded-xl text-gray-100 transition">
-                  Gabung Match
-                </button>
-              </form>
+        <!-- Quick Stats -->
+        <div class="bg-[#1A1A1A]/70 backdrop-blur-xl rounded-2xl p-6 border border-[#2A2A2A] mb-6
+                    shadow-[0_0_10px_rgba(0,0,0,0.35)]">
+          <h3 class="text-xl font-semibold mb-4 flex items-center text-white">
+            <svg class="w-5 h-5 mr-2 text-[#00FF94]" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                    d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z"></path>
+            </svg>
+            Match Stats
+          </h3>
+          <div class="space-y-4">
+            <div class="flex justify-between items-center">
+              <span class="text-[#A1A1A1]">Total Matches</span>
+              <span class="font-semibold text-[#00FF94]">247</span>
             </div>
-            {% endfor %}
-          {% empty %}
-            <p class="col-span-full text-center text-gray-400 text-xl mt-10">Belum ada match tersedia.</p>
-          {% endfor %}
-        {% else %}
-          <p class="col-span-full text-center text-gray-400 text-xl mt-10">Belum ada match tersedia.</p>
-        {% endif %}
-      {% else %}
-        <p class="col-span-full text-center text-gray-400 text-xl mt-10">
-          Data match belum tersedia karena basis data belum dimigrasikan.
-        </p>
-      {% endif %}
-    </div>
-  </section>
-
-</main>
-
-<!-- ================= MODAL ================= -->
-<div id="create-match-modal" class="modal" data-open="false" aria-hidden="true">
-    <div class="modal-overlay" role="presentation"></div>
-    <div class="modal-content" role="dialog" aria-modal="true" aria-labelledby="create-match-modal-title">
-        <button type="button" class="modal-close" aria-label="Tutup">&times;</button>
-        <h3 id="create-match-modal-title">Buat Match Baru</h3>
-        <form id="match-create-form" method="post" action="{% url 'matches:create_match' %}">
-            {% csrf_token %}
-            {{ match_form.as_p }}
-            <div id="create-form-errors" class="form-errors" role="alert" aria-live="assertive" hidden></div>
-            <div class="modal-actions">
-                <button type="button" class="modal-cancel">Batal</button>
-                <button type="submit">Simpan</button>
+            <div class="flex justify-between items-center">
+              <span class="text-[#A1A1A1]">Active Today</span>
+              <span class="font-semibold text-[#33B3FF]">23</span>
             </div>
-        </form>
+            <div class="flex justify-between items-center">
+              <span class="text-[#A1A1A1]">Players Online</span>
+              <span class="font-semibold text-[#A78BFA]">156</span>
+            </div>
+            <div class="flex justify-between items-center">
+              <span class="text-[#A1A1A1]">Sports Types</span>
+              <span class="font-semibold text-[#F472B6]">8</span>
+            </div>
+          </div>
+        </div>
+
+        <!-- Popular Sports -->
+        <div class="bg-[#1A1A1A]/70 backdrop-blur-xl rounded-2xl p-6 border border-[#2A2A2A] mb-6
+                    shadow-[0_0_10px_rgba(0,0,0,0.35)]">
+          <h3 class="text-xl font-semibold mb-4 flex items-center text-white">
+            <svg class="w-5 h-5 mr-2 text-[#FFB020]" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                    d="M13 7h8m0 0v8m0-8l-8 8-4-4-6 6"></path>
+            </svg>
+            Popular Sports
+          </h3>
+          <div class="space-y-3">
+            <div class="flex items-center justify-between p-3 bg-[#202020] rounded-lg border border-[#2A2A2A]">
+              <span class="flex items-center">
+                <span class="w-3 h-3 rounded-full mr-3" style="background:#00FF94"></span>
+                Football
+              </span>
+              <span class="text-sm text-[#A1A1A1]">89 matches</span>
+            </div>
+            <div class="flex items-center justify-between p-3 bg-[#202020] rounded-lg border border-[#2A2A2A]">
+              <span class="flex items-center">
+                <span class="w-3 h-3 rounded-full mr-3" style="background:#33B3FF"></span>
+                Basketball
+              </span>
+              <span class="text-sm text-[#A1A1A1]">67 matches</span>
+            </div>
+            <div class="flex items-center justify-between p-3 bg-[#202020] rounded-lg border border-[#2A2A2A]">
+              <span class="flex items-center">
+                <span class="w-3 h-3 rounded-full mr-3" style="background:#A78BFA"></span>
+                Tennis
+              </span>
+              <span class="text-sm text-[#A1A1A1]">45 matches</span>
+            </div>
+          </div>
+        </div>
+
+        <!-- Recent Activity -->
+        <div class="bg-[#1A1A1A]/70 backdrop-blur-xl rounded-2xl p-6 border border-[#2A2A2A]
+                    shadow-[0_0_10px_rgba(0,0,0,0.35)]">
+          <h3 class="text-xl font-semibold mb-4 flex items-center text-white">
+            <svg class="w-5 h-5 mr-2 text-[#FFD54A]" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                    d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"></path>
+            </svg>
+            Recent Activity
+          </h3>
+          <div class="space-y-4">
+            <div class="flex items-start space-x-3 p-3 bg-[#202020] rounded-lg border border-[#2A2A2A]">
+              <div class="w-8 h-8 rounded-full flex items-center justify-center flex-shrink-0" style="background:#00FF94">
+                <svg class="w-4 h-4 text-black" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                        d="M12 4v16m8-8H4"></path>
+                </svg>
+              </div>
+              <div class="flex-1">
+                <p class="text-sm text-white">New basketball match created</p>
+                <p class="text-xs text-[#A1A1A1]">2 hours ago</p>
+              </div>
+            </div>
+            <div class="flex items-start space-x-3 p-3 bg-[#202020] rounded-lg border border-[#2A2A2A]">
+              <div class="w-8 h-8 rounded-full flex items-center justify-center flex-shrink-0" style="background:#33B3FF">
+                <svg class="w-4 h-4 text-black" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                        d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z"></path>
+                </svg>
+              </div>
+              <div class="flex-1">
+                <p class="text-sm text-white">5 players joined football match</p>
+                <p class="text-xs text-[#A1A1A1]">4 hours ago</p>
+              </div>
+            </div>
+          </div>
+        </div>
+
+      </aside>
     </div>
+  </main>
 </div>
 
+<!-- ============== CREATE MATCH MODAL (single source of truth) ============== -->
+<div id="create-match-modal" class="fixed inset-0 z-[1000] hidden" aria-hidden="true" data-open="false">
+  <div class="absolute inset-0 bg-black/60"></div>
+  <div class="relative max-w-2xl w-[92%] mx-auto my-10 bg-[#1A1A1A] text-[#EAEAEA]
+              border border-[#2A2A2A] rounded-2xl shadow-[0_10px_30px_rgba(0,0,0,0.55)] overflow-hidden">
+    <div class="flex items-center justify-between px-6 py-4 border-b border-[#2A2A2A]">
+      <h3 class="text-xl font-semibold">Create New Match</h3>
+      <button type="button" class="modal-close text-[#A1A1A1] hover:text-white transition" aria-label="Close">
+        <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                d="M6 18L18 6M6 6l12 12"></path>
+        </svg>
+      </button>
+    </div>
+
+    <form id="match-create-form" method="post" action="{% url 'matches:create_match' %}">
+      {% csrf_token %}
+      <div class="px-6 py-5 max-h-[65vh] overflow-y-auto">
+        <div class="grid md:grid-cols-2 gap-6">
+          <div>
+            <label class="block text-sm font-medium text-[#CFCFCF] mb-2">Match Title</label>
+            <input type="text" name="title" required
+                   class="w-full bg-[#161616] border border-[#2A2A2A] rounded-lg px-4 py-3 text-[#EAEAEA]
+                          placeholder-[#6B6B6B] focus:outline-none focus:ring-2 focus:ring-[#00FF94] focus:border-transparent" />
+          </div>
+
+          <div>
+            <label class="block text-sm font-medium text-[#CFCFCF] mb-2">Sport Category</label>
+            <select name="category" required
+                    class="w-full bg-[#161616] border border-[#2A2A2A] rounded-lg px-4 py-3 text-[#EAEAEA]
+                           focus:outline-none focus:ring-2 focus:ring-[#00FF94] focus:border-transparent">
+              <option value="">Select Sport</option>
+              {% if schema_ready %}
+                <!-- Categories can be loaded dynamically from API -->
+              {% endif %}
+            </select>
+          </div>
+
+          <div>
+            <label class="block text-sm font-medium text-[#CFCFCF] mb-2">Location</label>
+            <input type="text" name="location" required
+                   class="w-full bg-[#161616] border border-[#2A2A2A] rounded-lg px-4 py-3 text-[#EAEAEA]
+                          placeholder-[#6B6B6B] focus:outline-none focus:ring-2 focus:ring-[#00FF94] focus:border-transparent" />
+          </div>
+
+          <div>
+            <label class="block text-sm font-medium text-[#CFCFCF] mb-2">Max Members</label>
+            <input type="number" name="max_members" min="2" max="50" required
+                   class="w-full bg-[#161616] border border-[#2A2A2A] rounded-lg px-4 py-3 text-[#EAEAEA]
+                          placeholder-[#6B6B6B] focus:outline-none focus:ring-2 focus:ring-[#00FF94] focus:border-transparent" />
+          </div>
+
+          <div class="md:col-span-2">
+            <label class="block text-sm font-medium text-[#CFCFCF] mb-2">Event Date & Time</label>
+            <input type="datetime-local" name="event_date" required
+                   class="w-full bg-[#161616] border border-[#2A2A2A] rounded-lg px-4 py-3 text-[#EAEAEA]
+                          focus:outline-none focus:ring-2 focus:ring-[#00FF94] focus:border-transparent" />
+          </div>
+
+          <div class="md:col-span-2">
+            <label class="block text-sm font-medium text-[#CFCFCF] mb-2">Description</label>
+            <textarea name="description" rows="4" placeholder="Describe your match..."
+                      class="w-full bg-[#161616] border border-[#2A2A2A] rounded-lg px-4 py-3 text-[#EAEAEA]
+                             placeholder-[#6B6B6B] focus:outline-none focus:ring-2 focus:ring-[#00FF94] focus:border-transparent resize-none"></textarea>
+          </div>
+        </div>
+
+        <div id="create-form-errors" class="mt-4 hidden rounded-lg border border-[#f56565] bg-[#2a1414] text-[#ffd1d1] px-4 py-3 text-sm" role="alert" aria-live="assertive"></div>
+      </div>
+
+      <div class="px-6 py-4 border-t border-[#2A2A2A] flex justify-end gap-3">
+        <button type="button" class="modal-cancel px-5 py-2.5 rounded-lg bg-[#2A2A2A] text-[#EAEAEA] hover:bg-[#343434] transition">
+          Cancel
+        </button>
+        <button type="submit"
+                class="px-6 py-2.5 rounded-lg font-semibold text-black transition
+                       bg-gradient-to-r from-[#00FF94] to-[#0099FF] hover:opacity-90
+                       shadow-[0_0_15px_rgba(0,255,148,0.35)]">
+          Create Match
+        </button>
+      </div>
+    </form>
+  </div>
+</div>
+
+<!-- ============== INLINE STYLE for fallback (optional) ============== -->
 <style>
-  body {
-    background-color: #000;
-  }
-  .modal {
-      position: fixed;
-      inset: 0;
-      display: none;
-      align-items: center;
-      justify-content: center;
-      z-index: 1000;
-  }
-  .modal[data-open="true"] {
-      display: flex;
-  }
-  .modal-overlay {
-      position: absolute;
-      inset: 0;
-      background: rgba(0, 0, 0, 0.5);
-  }
-  .modal-content {
-      position: relative;
-      background: #f7f7f7;
-      padding: 1.5rem;
-      border-radius: 0.5rem;
-      box-shadow: 0 10px 25px rgba(0, 0, 0, 0.3);
-      max-width: 480px;
-      width: 90%;
-      max-height: 90vh;
-      overflow-y: auto;
-  }
-  .modal-close {
-      position: absolute;
-      top: 0.75rem;
-      right: 0.75rem;
-      background: transparent;
-      border: none;
-      font-size: 1.5rem;
-      cursor: pointer;
-  }
-  .modal-actions {
-      display: flex;
-      justify-content: flex-end;
-      gap: 0.75rem;
-      margin-top: 1.5rem;
-  }
-  .modal-actions button {
-      padding: 0.5rem 1rem;
-      cursor: pointer;
-  }
-  .form-errors {
-      margin-top: 0.75rem;
-      padding: 0.75rem;
-      border-radius: 0.375rem;
-      background-color: #fed7d7;
-      border: 1px solid #f56565;
-      color: #742a2a;
-  }
+  body { background-color: #0E0E0E; color: #EAEAEA; font-family: 'Roboto Mono', monospace; letter-spacing: .3px; }
 </style>
+<link href="https://fonts.googleapis.com/css2?family=Roboto+Mono:wght@500;600&display=swap" rel="stylesheet">
 {% endblock %}
 
 {% block extra_scripts %}
 {% if schema_ready %}
 <script>
 (function() {
-    const body = document.body;
-    const searchForm = document.getElementById('match-search-form');
-    const createForm = document.getElementById('match-create-form');
-    const matchList = document.getElementById('match-list');
-    const csrfToken = getCookie('csrftoken');
-    const modal = document.getElementById('create-match-modal');
-    const openModalButton = document.getElementById('open-create-modal');
-    const modalOverlay = modal ? modal.querySelector('.modal-overlay') : null;
-    const modalClose = modal ? modal.querySelector('.modal-close') : null;
-    const modalCancel = modal ? modal.querySelector('.modal-cancel') : null;
-    const createErrors = document.getElementById('create-form-errors');
-    const createSubmit = createForm ? createForm.querySelector('button[type="submit"]') : null;
-    const originalSubmitLabel = createSubmit ? createSubmit.textContent : '';
+  // ========= Helpers =========
+  const body        = document.body;
+  const searchForm  = document.getElementById('match-search-form');
+  const createForm  = document.getElementById('match-create-form');
+  const matchList   = document.getElementById('match-list');
+  const loadingEl   = document.getElementById('loading');
+  const emptyEl     = document.getElementById('empty');
+  const emptyBtn    = document.getElementById('empty-create-btn');
+  const modal       = document.getElementById('create-match-modal');
+  const openModalBtn= document.getElementById('open-create-modal');
+  const createErrors= document.getElementById('create-form-errors');
+  const csrfToken   = getCookie('csrftoken');
 
-    function escapeHtml(value) {
-        if (value == null) return '';
-        return String(value)
-            .replace(/&/g, '&amp;')
-            .replace(/</g, '&lt;')
-            .replace(/>/g, '&gt;')
-            .replace(/"/g, '&quot;')
-            .replace(/'/g, '&#x27;');
+  function getCookie(name) {
+    const v = document.cookie.match('(^|;)\\s*' + name + '\\s*=\\s*([^;]+)');
+    return v ? v.pop() : '';
+  }
+  function escapeHtml(value) {
+    if (value == null) return '';
+    return String(value)
+      .replace(/&/g, '&amp;')
+      .replace(/</g, '&lt;')
+      .replace(/>/g, '&gt;')
+      .replace(/"/g, '&quot;')
+      .replace(/'/g, '&#x27;');
+  }
+  function showToast(msg, type) {
+    // Minimal toast without external libs (dark + glow)
+    const t = document.createElement('div');
+    t.textContent = msg || '';
+    t.style.position = 'fixed';
+    t.style.zIndex = '1100';
+    t.style.bottom = '24px';
+    t.style.left = '50%';
+    t.style.transform = 'translateX(-50%)';
+    t.style.padding = '10px 14px';
+    t.style.borderRadius = '10px';
+    t.style.fontSize = '14px';
+    t.style.border = '1px solid #2A2A2A';
+    t.style.color = '#0B0B0B';
+    t.style.background = type === 'error'
+      ? 'linear-gradient(90deg,#FF6B6B,#FFB199)'
+      : 'linear-gradient(90deg,#00FF94,#0099FF)';
+    t.style.boxShadow = type === 'error'
+      ? '0 0 18px rgba(255,107,107,0.4)'
+      : '0 0 18px rgba(0,255,148,0.4)';
+    document.body.appendChild(t);
+    setTimeout(() => { t.style.opacity = '0'; t.style.transition = 'opacity .3s'; }, 2000);
+    setTimeout(() => t.remove(), 2600);
+  }
+
+  // ========= Modal Controls =========
+  function openModal() {
+    if (!modal) return;
+    modal.classList.remove('hidden');
+    modal.setAttribute('data-open', 'true');
+    modal.setAttribute('aria-hidden', 'false');
+    body.style.overflow = 'hidden';
+    setCreateErrors([]);
+    const first = modal.querySelector('input, textarea, select, button:not(.modal-close):not(.modal-cancel)');
+    if (first) first.focus();
+  }
+  function closeModal() {
+    if (!modal) return;
+    modal.classList.add('hidden');
+    modal.setAttribute('data-open', 'false');
+    modal.setAttribute('aria-hidden', 'true');
+    body.style.overflow = '';
+    setCreateErrors([]);
+  }
+  function setCreateErrors(messages) {
+    if (!createErrors) return;
+    const list = (messages || []).filter(Boolean);
+    if (!list.length) {
+      createErrors.innerHTML = '';
+      createErrors.classList.add('hidden');
+      createErrors.setAttribute('hidden','');
+      return;
     }
-
-    function setCreateErrors(messages) {
-        if (!createErrors) return;
-        const list = (messages || []).filter(Boolean);
-        if (!list.length) {
-            createErrors.innerHTML = '';
-            createErrors.setAttribute('hidden', '');
-            return;
-        }
-        createErrors.innerHTML = list.map(m => `<p>${escapeHtml(m)}</p>`).join('');
-        createErrors.removeAttribute('hidden');
-    }
-
-    function openModal() {
-        if (!modal) return;
-        modal.setAttribute('data-open', 'true');
-        modal.setAttribute('aria-hidden', 'false');
-        body.style.overflow = 'hidden';
-        setCreateErrors([]);
-        const firstInput = modal.querySelector('.modal-content form input, .modal-content form textarea, .modal-content form select');
-        if (firstInput) firstInput.focus();
-    }
-
-    function closeModal() {
-        if (!modal) return;
-        modal.setAttribute('data-open', 'false');
-        modal.setAttribute('aria-hidden', 'true');
-        body.style.overflow = '';
-        setCreateErrors([]);
-    }
-
-    function bindModalEvents() {
-        if (!modal) return;
-        if (openModalButton) openModalButton.addEventListener('click', openModal);
-        [modalOverlay, modalClose, modalCancel].forEach(el => el?.addEventListener('click', closeModal));
-        document.addEventListener('keydown', e => {
-            if (e.key === 'Escape' && modal.getAttribute('data-open') === 'true') closeModal();
-        });
-    }
-
-    function renderGroups(groups) {
-        if (!groups || groups.length === 0) {
-            matchList.innerHTML = '<p>Belum ada match yang sesuai pencarian.</p>';
-            return;
-        }
-
-        const csrfField = csrfToken ? `<input type="hidden" name="csrfmiddlewaretoken" value="${escapeHtml(csrfToken)}">` : '';
-
-        const sectionHtml = groups.map(group => {
-            const matchesHtml = group.matches.map(match => {
-                const id = escapeHtml(match.id);
-                const desc = match.description ? `<p>${escapeHtml(match.description)}</p>` : '';
-                const date = match.event_date ? new Date(match.event_date).toLocaleString('id-ID') : '';
-                return `
-                <div class="bg-[#1F1F1F] border border-[#2A2A2A] rounded-2xl p-6 shadow-lg hover:border-gray-400 transition transform hover:-translate-y-1">
-                    <div class="flex justify-between items-center mb-3">
-                        <h3 class="text-2xl font-semibold tracking-wide">${escapeHtml(match.title)}</h3>
-                        <span class="text-sm text-gray-400 border border-[#3A3A3A] rounded-md px-2 py-0.5">
-                            ${escapeHtml(group.category)}
-                        </span>
-                    </div>
-                    <p class="text-gray-300 mb-1">📍 ${escapeHtml(match.location)}</p>
-                    <p class="text-gray-300 mb-1">🕒 ${escapeHtml(date)}</p>
-                    ${desc}
-                    <div class="flex justify-between items-center mt-3">
-                        <p class="text-sm text-gray-400">Slot: ${escapeHtml(match.current_members)} / ${escapeHtml(match.max_members)}</p>
-                        <span class="text-sm ${match.available_slots > 0 ? 'text-green-400' : 'text-red-400'}">
-                            ${match.available_slots > 0 ? `${escapeHtml(match.available_slots)} tersisa` : 'Penuh'}
-                        </span>
-                    </div>
-                    <form class="booking-form mt-5" data-match-id="${id}" method="post" action="/matches/${id}/book/">
-                        ${csrfField}
-                        <button type="submit"
-                            class="w-full py-2 bg-[#2B2B2B] hover:bg-[#3C3C3C] border border-[#3A3A3A] rounded-xl text-gray-100 transition">
-                            Gabung Match
-                        </button>
-                    </form>
-                </div>`;
-            }).join('');
-
-            return `<section data-category="${escapeHtml(group.category_slug)}"><h3>${escapeHtml(group.category)}</h3>${matchesHtml}</section>`;
-        }).join('');
-
-        matchList.innerHTML = sectionHtml;
-        attachBookingHandlers();
-    }
-
-    async function loadMatches(formData) {
-        const endpoint = searchForm.getAttribute('action') || window.location.pathname;
-        const params = new URLSearchParams(formData || new FormData(searchForm));
-        const url = params.toString() ? `${endpoint}?${params}` : endpoint;
-
-        try {
-            const res = await fetch(url, { headers: { 'X-Requested-With': 'XMLHttpRequest' } });
-            if (!res.ok) return showToast('Gagal memuat data match.', 'error');
-            const data = await res.json();
-            renderGroups(data.groups || []);
-        } catch (err) {
-            console.error(err);
-            showToast('Terjadi kesalahan saat mengambil data match.', 'error');
-        }
-    }
-
-    async function handleCreate(e) {
-        e.preventDefault();
-        const formData = new FormData(createForm);
-        if (createSubmit) {
-            createSubmit.disabled = true;
-            createSubmit.textContent = 'Menyimpan...';
-        }
-        try {
-            const res = await fetch(createForm.action, {
-                method: 'POST',
-                headers: { 'X-CSRFToken': csrfToken, 'X-Requested-With': 'XMLHttpRequest' },
-                body: formData
-            });
-            const payload = await res.json().catch(() => ({ success: false }));
-            if (!res.ok || !payload.success) {
-                const msgs = Object.values(payload.errors || {}).flat().filter(Boolean);
-                setCreateErrors(msgs);
-                showToast(msgs.join(' ') || 'Gagal membuat match baru.', 'error');
-                return;
-            }
-            setCreateErrors([]);
-            createForm.reset();
-            showToast(payload.message || 'Match baru berhasil dibuat.', 'success');
-            closeModal();
-            await loadMatches();
-        } catch (err) {
-            console.error(err);
-            showToast('Terjadi kesalahan jaringan. Coba lagi nanti.', 'error');
-        } finally {
-            if (createSubmit) {
-                createSubmit.disabled = false;
-                createSubmit.textContent = originalSubmitLabel;
-            }
-        }
-    }
-
-    async function handleBooking(e) {
-        e.preventDefault();
-        const form = e.target;
-        const formData = new FormData(form);
-        const btn = form.querySelector('button[type="submit"]');
-        if (btn) {
-            btn.disabled = true;
-            btn.textContent = 'Memproses...';
-        }
-
-        try {
-            const res = await fetch(form.action, {
-                method: 'POST',
-                headers: { 'X-CSRFToken': csrfToken, 'X-Requested-With': 'XMLHttpRequest' },
-                body: formData
-            });
-            const data = await res.json().catch(() => ({ success: false }));
-            if (!res.ok || !data.success) {
-                const msgs = Object.values(data.errors || {}).flat().filter(Boolean).join(' ');
-                showToast(msgs || 'Tidak dapat mendaftar pada match ini.', 'error');
-                return;
-            }
-            form.reset();
-            showToast(data.message || 'Kamu berhasil mendaftar pada match ini.', 'success');
-            await loadMatches();
-        } catch (err) {
-            console.error(err);
-            showToast('Terjadi kesalahan jaringan. Coba lagi nanti.', 'error');
-        } finally {
-            if (btn) {
-                btn.disabled = false;
-                btn.textContent = 'Gabung Match';
-            }
-        }
-    }
-
-    function attachBookingHandlers() {
-        matchList.querySelectorAll('.booking-form').forEach(f => f.addEventListener('submit', handleBooking));
-    }
-
-    searchForm.addEventListener('submit', e => {
-        e.preventDefault();
-        loadMatches(new FormData(searchForm));
+    createErrors.innerHTML = list.map(m => '<p>'+escapeHtml(m)+'</p>').join('');
+    createErrors.classList.remove('hidden');
+    createErrors.removeAttribute('hidden');
+  }
+  // Bind modal events
+  if (openModalBtn) openModalBtn.addEventListener('click', openModal);
+  if (emptyBtn) emptyBtn.addEventListener('click', openModal);
+  if (modal) {
+    modal.addEventListener('click', (e) => {
+      if (e.target === modal) closeModal();
     });
+    const closeBtn = modal.querySelector('.modal-close');
+    const cancelBtn= modal.querySelector('.modal-cancel');
+    if (closeBtn) closeBtn.addEventListener('click', closeModal);
+    if (cancelBtn) cancelBtn.addEventListener('click', closeModal);
+    document.addEventListener('keydown', e => {
+      if (e.key === 'Escape' && modal.getAttribute('data-open') === 'true') closeModal();
+    });
+  }
 
-    if (createForm) createForm.addEventListener('submit', handleCreate);
+  // ========= Render Matches =========
+  function renderGroups(groups) {
+    if (!Array.isArray(groups) || groups.length === 0) {
+      matchList.innerHTML = '';
+      emptyEl?.classList.remove('hidden');
+      return;
+    }
+    emptyEl?.classList.add('hidden');
+
+    const csrfField = csrfToken
+      ? `<input type="hidden" name="csrfmiddlewaretoken" value="${escapeHtml(csrfToken)}">`
+      : '';
+
+    const html = groups.map(group => {
+      const matchesHtml = (group.matches || []).map(match => {
+        const id    = escapeHtml(match.id);
+        const title = escapeHtml(match.title);
+        const loc   = escapeHtml(match.location);
+        const desc  = match.description ? `<p class="text-[#CFCFCF] mt-1">${escapeHtml(match.description)}</p>` : '';
+        const date  = match.event_date ? new Date(match.event_date).toLocaleString('id-ID') : '';
+        const slot  = `${escapeHtml(match.current_members)} / ${escapeHtml(match.max_members)}`;
+        const avail = Number(match.available_slots || 0);
+        const availText = avail > 0 ? `${avail} left` : 'Full';
+        const availClass = avail > 0 ? 'text-[#00FF94]' : 'text-[#FF8080]';
+
+        return `
+          <article class="bg-[#161616] hover:bg-[#1F1F1F] border border-[#2A2A2A] rounded-2xl p-6
+                          shadow-[0_0_10px_rgba(0,0,0,0.4)] transition hover:-translate-y-1
+                          hover:shadow-[0_0_22px_rgba(0,255,148,0.16)]">
+            <div class="flex justify-between items-center mb-3">
+              <h3 class="text-2xl font-semibold tracking-wide text-white">${title}</h3>
+              <span class="text-xs md:text-sm text-[#CFCFCF] border border-[#2A2A2A] rounded-md px-2 py-0.5">
+                ${escapeHtml(group.category || '')}
+              </span>
+            </div>
+            <p class="text-[#A1A1A1]">📍 ${loc}</p>
+            <p class="text-[#A1A1A1]">🕒 ${escapeHtml(date)}</p>
+            ${desc}
+            <div class="flex justify-between items-center mt-4">
+              <p class="text-sm text-[#A1A1A1]">Slot: ${slot}</p>
+              <span class="text-sm ${availClass}">${availText}</span>
+            </div>
+            <form class="booking-form mt-5" data-match-id="${id}" method="post" action="/matches/${id}/book/">
+              ${csrfField}
+              <button type="submit"
+                class="w-full py-2.5 rounded-xl font-semibold text-black transition
+                       bg-gradient-to-r from-[#00FF94] to-[#0099FF] hover:opacity-90
+                       shadow-[0_0_15px_rgba(0,255,148,0.35)]">
+                Join Match
+              </button>
+            </form>
+          </article>
+        `;
+      }).join('');
+
+      const cat = escapeHtml(group.category || '');
+      const slug= escapeHtml(group.category_slug || '');
+      return `
+        <section data-category="${slug}">
+          <h4 class="text-lg font-semibold mb-3 mt-2 text-white">${cat}</h4>
+          <div class="grid gap-6">
+            ${matchesHtml}
+          </div>
+        </section>
+      `;
+    }).join('');
+
+    matchList.innerHTML = html;
     attachBookingHandlers();
-    bindModalEvents();
+  }
+
+  // ========= Data Loading =========
+  async function loadMatches(formData) {
+    const endpoint = searchForm?.getAttribute('action') || window.location.pathname;
+    const params   = new URLSearchParams(formData || new FormData(searchForm));
+    const url      = params.toString() ? `${endpoint}?${params}` : endpoint;
+
+    try {
+      loadingEl?.classList.remove('hidden');
+      const res  = await fetch(url, { headers: { 'X-Requested-With': 'XMLHttpRequest' } });
+      if (!res.ok) {
+        showToast('Gagal memuat data match.', 'error');
+        return;
+      }
+      const data = await res.json();
+      renderGroups(data.groups || []);
+    } catch (err) {
+      console.error(err);
+      showToast('Terjadi kesalahan saat mengambil data match.', 'error');
+    } finally {
+      loadingEl?.classList.add('hidden');
+    }
+  }
+
+  // ========= Create Match =========
+  async function handleCreate(e) {
+    e.preventDefault();
+    if (!createForm) return;
+    const btn = createForm.querySelector('button[type="submit"]');
+    btn && (btn.disabled = true, btn.textContent = 'Saving...');
+
+    try {
+      const res = await fetch(createForm.action, {
+        method: 'POST',
+        headers: { 'X-CSRFToken': csrfToken, 'X-Requested-With': 'XMLHttpRequest' },
+        body: new FormData(createForm)
+      });
+
+      const payload = await res.json().catch(() => ({ success: false }));
+      if (!res.ok || !payload.success) {
+        const msgs = Object.values(payload.errors || {}).flat().filter(Boolean);
+        setCreateErrors(msgs);
+        showToast(msgs.join(' ') || 'Gagal membuat match baru.', 'error');
+        return;
+      }
+
+      setCreateErrors([]);
+      createForm.reset();
+      showToast(payload.message || 'Match baru berhasil dibuat.', 'success');
+      closeModal();
+      await loadMatches();
+    } catch (err) {
+      console.error(err);
+      showToast('Terjadi kesalahan jaringan. Coba lagi nanti.', 'error');
+    } finally {
+      if (btn) { btn.disabled = false; btn.textContent = 'Create Match'; }
+    }
+  }
+
+  // ========= Booking =========
+  async function handleBooking(e) {
+    e.preventDefault();
+    const form = e.target;
+    const btn  = form.querySelector('button[type="submit"]');
+    btn && (btn.disabled = true, btn.textContent = 'Processing...');
+
+    try {
+      const res  = await fetch(form.action, {
+        method: 'POST',
+        headers: { 'X-CSRFToken': csrfToken, 'X-Requested-With': 'XMLHttpRequest' },
+        body: new FormData(form)
+      });
+      const data = await res.json().catch(() => ({ success: false }));
+      if (!res.ok || !data.success) {
+        const msgs = Object.values(data.errors || {}).flat().filter(Boolean).join(' ');
+        showToast(msgs || 'Tidak dapat mendaftar pada match ini.', 'error');
+        return;
+      }
+      form.reset();
+      showToast(data.message || 'Kamu berhasil mendaftar pada match ini.', 'success');
+      await loadMatches();
+    } catch (err) {
+      console.error(err);
+      showToast('Terjadi kesalahan jaringan. Coba lagi nanti.', 'error');
+    } finally {
+      if (btn) { btn.disabled = false; btn.textContent = 'Join Match'; }
+    }
+  }
+
+  function attachBookingHandlers() {
+    matchList.querySelectorAll('.booking-form').forEach(f => {
+      f.addEventListener('submit', handleBooking);
+    });
+  }
+
+  // ========= Filters binding (optional basic hook) =========
+  document.getElementById('sport-filter')?.addEventListener('change', () => {
+    const fd = new FormData(searchForm);
+    fd.set('sport', document.getElementById('sport-filter').value || '');
+    loadMatches(fd);
+  });
+  document.getElementById('date-filter')?.addEventListener('change', () => {
+    const fd = new FormData(searchForm);
+    fd.set('when', document.getElementById('date-filter').value || '');
+    loadMatches(fd);
+  });
+
+  // ========= Init =========
+  if (searchForm) {
+    searchForm.addEventListener('submit', (e) => { e.preventDefault(); loadMatches(new FormData(searchForm)); });
+  }
+  if (createForm) createForm.addEventListener('submit', handleCreate);
+  loadMatches(); // first render
 })();
 </script>
 {% endif %}

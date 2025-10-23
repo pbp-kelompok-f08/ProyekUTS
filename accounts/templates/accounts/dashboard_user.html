@@ -1,18 +1,143 @@
 {% extends 'base.html' %}
 {% load static %}
-{% block title %}User Dashboard{% endblock %}
+{% block title %}Dashboard - {{ request.user.username }}{% endblock %}
 
 {% block content %}
-<div class="text-center mt-16">
-  <h1 class="text-3xl font-bold mb-2">Selamat datang, {{ request.user.username }}!</h1>
-  <p class="text-gray-600 mb-6">Role: {{ request.user.role }}</p>
+{% include 'navbar.html' %}
 
-  <button onclick="logoutUser()" class="bg-gray-700 text-white px-4 py-2 rounded hover:bg-gray-800 transition">
-    Logout
-  </button>
+<!-- Roboto Mono -->
+<link href="https://fonts.googleapis.com/css2?family=Roboto+Mono:wght@400;500;700&display=swap" rel="stylesheet">
+
+<div class="min-h-screen bg-[#262626] text-[#E6E8E6] pt-20" style="font-family: 'Roboto Mono', monospace;">
+  <div class="container mx-auto px-6 py-8">
+
+    <!-- Welcome Section -->
+    <div class="bg-[#212842]/60 backdrop-blur-sm rounded-xl p-8 border border-[#9DB4C0]/30 mb-8 shadow-lg">
+      <div class="flex flex-col md:flex-row items-center justify-between">
+        <div>
+          <h1 class="text-4xl font-bold mb-2 text-[#E6E8E6]">Welcome back, {{ request.user.username }}!</h1>
+        </div>
+        <div class="mt-6 md:mt-0">
+          <!-- Role badge -->
+          <div class="rounded-full px-6 py-3 bg-[#9DB4C0] border border-[#CED0CE] shadow-sm">
+            <span class="text-[#253237] font-semibold">{{ request.user.role|title }}</span>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Quick Actions -->
+    <div class="grid md:grid-cols-2 lg:grid-cols-4 gap-6 mb-12">
+
+      <!-- Threads -->
+      <a href="/threads/" 
+         class="bg-[#5C6B73] hover:bg-[#9DB4C0] hover:text-[#253237] border border-[#CED0CE]/30 rounded-xl p-6 transition-all duration-300 transform hover:scale-105 group shadow-md">
+        <div class="w-12 h-12 bg-[#9DB4C0] group-hover:bg-[#E6E8E6] rounded-lg flex items-center justify-center mb-4 group-hover:scale-110 transition-transform">
+          <svg class="w-6 h-6 text-[#253237]" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" 
+                  d="M8 12h.01M12 12h.01M16 12h.01M21 12c0 4.418-4.03 8-9 
+                     8a9.863 9.863 0 01-4.255-.949L3 20l1.395-3.72C3.512 
+                     15.042 3 13.574 3 12c0-4.418 4.03-8 
+                     9-8s9 3.582 9 8z"></path>
+          </svg>
+        </div>
+        <h3 class="text-xl font-semibold mb-2">Threads</h3>
+        <p class="text-[#CED0CE] text-sm">Share experiences and connect with the community</p>
+      </a>
+
+      <!-- Book Venue -->
+      <a href="/booking-venue/" 
+         class="bg-[#5C6B73] hover:bg-[#9DB4C0] hover:text-[#253237] border border-[#CED0CE]/30 rounded-xl p-6 transition-all duration-300 transform hover:scale-105 group shadow-md">
+        <div class="w-12 h-12 bg-[#CED0CE] group-hover:bg-[#E6E8E6] rounded-lg flex items-center justify-center mb-4 group-hover:scale-110 transition-transform">
+          <svg class="w-6 h-6 text-[#253237]" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" 
+                  d="M17.657 16.657L13.414 20.9a1.998 1.998 0 
+                     01-2.827 0l-4.244-4.243a8 8 0 
+                     1111.314 0z"></path>
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" 
+                  d="M15 11a3 3 0 11-6 0 3 3 
+                     0 016 0z"></path>
+          </svg>
+        </div>
+        <h3 class="text-xl font-semibold mb-2">Book Venue</h3>
+        <p class="text-[#CED0CE] text-sm">Find and reserve sports facilities</p>
+      </a>
+
+      <!-- Find Matches -->
+      <a href="/matches/" 
+         class="bg-[#5C6B73] hover:bg-[#9DB4C0] hover:text-[#253237] border border-[#CED0CE]/30 rounded-xl p-6 transition-all duration-300 transform hover:scale-105 group shadow-md">
+        <div class="w-12 h-12 bg-[#9DB4C0] group-hover:bg-[#E6E8E6] rounded-lg flex items-center justify-center mb-4 group-hover:scale-110 transition-transform">
+          <svg class="w-6 h-6 text-[#253237]" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" 
+                  d="M9 19v-6a2 2 0 00-2-2H5a2 2 
+                     0 00-2 2v6a2 2 0 
+                     002 2h2a2 2 0 
+                     002-2zm0 0V9a2 2 0 
+                     012-2h2a2 2 0 
+                     012 2v10m-6 0a2 2 
+                     0 002 2h2a2 2 0 
+                     002-2m0 0V5a2 2 0 
+                     012-2h2a2 2 0 
+                     012 2v14a2 2 0 
+                     01-2 2h-2a2 2 0 
+                     01-2-2z"></path>
+          </svg>
+        </div>
+        <h3 class="text-xl font-semibold mb-2">Find Matches</h3>
+        <p class="text-[#CED0CE] text-sm">Join or create sports events</p>
+      </a>
+
+      <!-- Live Chat -->
+      <a href="/liveChat/" 
+         class="bg-[#5C6B73] hover:bg-[#9DB4C0] hover:text-[#253237] border border-[#CED0CE]/30 rounded-xl p-6 transition-all duration-300 transform hover:scale-105 group shadow-md">
+        <div class="w-12 h-12 bg-[#9DB4C0] group-hover:bg-[#E6E8E6] rounded-lg flex items-center justify-center mb-4 group-hover:scale-110 transition-transform">
+          <svg class="w-6 h-6 text-[#253237]" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" 
+                  d="M8 12h.01M12 12h.01M16 12h.01M21 12c0 
+                     4.418-4.03 8-9 
+                     8a9.863 9.863 0 
+                     01-4.255-.949L3 
+                     20l1.395-3.72C3.512 
+                     15.042 3 13.574 3 
+                     12c0-4.418 4.03-8 
+                     9-8s9 3.582 9 
+                     8z"></path>
+          </svg>
+        </div>
+        <h3 class="text-xl font-semibold mb-2">Live Chat</h3>
+        <p class="text-[#CED0CE] text-sm">Connect with players in real-time</p>
+      </a>
+    </div>
+
+    <!-- Profile Summary -->
+    <div class="grid lg:grid-cols-2 gap-8 mb-12">
+      <div class="bg-[#212842]/60 backdrop-blur-sm rounded-xl p-6 border border-[#9DB4C0]/30 shadow-md">
+        <h3 class="text-xl font-semibold mb-4 text-[#E6E8E6]">Your Profile</h3>
+        <div class="space-y-3">
+          <div class="flex justify-between"><span class="text-[#CED0CE]">Username:</span><span>{{ request.user.username }}</span></div>
+          <div class="flex justify-between"><span class="text-[#CED0CE]">Email:</span><span>{{ request.user.email }}</span></div>
+          <div class="flex justify-between"><span class="text-[#CED0CE]">Role:</span><span>{{ request.user.role|title }}</span></div>
+          <div class="flex justify-between"><span class="text-[#CED0CE]">Joined:</span><span>{{ request.user.date_joined|date:"M d, Y" }}</span></div>
+        </div>
+        <a href="/profile/" class="inline-block mt-4 text-[#9DB4C0] hover:text-[#E6E8E6] font-medium">Edit Profile →</a>
+      </div>
+
+      <!-- Personal Overview -->
+      <div class="bg-[#212842]/60 backdrop-blur-sm rounded-xl p-6 border border-[#9DB4C0]/30 shadow-md">
+        <h3 class="text-xl font-semibold mb-4 text-[#E6E8E6]">Personal Overview</h3>
+        <div class="space-y-4 text-[#E6E8E6]">
+          <h2 class="text-2xl font-semibold">Hello, {{ request.user.username }}!</h2>
+          <p class="text-[#CED0CE]">
+            You joined in <span class="text-[#9DB4C0]">{{ request.user.date_joined|date:"F Y" }}</span> 
+            and your favorite sport is <span class="text-[#9DB4C0]">{{ request.user.favorite_sport|default:"—" }}</span>.
+          </p>
+          <p class="italic text-[#CED0CE]">
+            “{{ request.user.bio|default:"No bio added yet." }}”
+          </p>
+        </div>
+      </div>
+
+
+  </div>
 </div>
-{% endblock %}
-
-{% block extra_scripts %}
-<script src="{% static 'accounts/js/auth.js' %}"></script>
 {% endblock %}

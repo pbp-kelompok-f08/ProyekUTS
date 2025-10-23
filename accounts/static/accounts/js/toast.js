@@ -3,7 +3,7 @@ function showToast(message, type = "success") {
   if (!container) return;
 
   const colors = {
-    success: "bg-green-600 text-white",
+    success: "bg-[#71798E] text-white",
     error: "bg-red-600 text-white",
     info: "bg-blue-600 text-white",
   };
