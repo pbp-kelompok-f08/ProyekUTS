@@ -12,14 +12,15 @@ import uuid
 import json
 
 # Create your views here.
-def testing(request: HttpRequest):
-    return JsonResponse({
-        "message": "hello"
-    }, status=200)
+@login_required
+def show_main(request: HttpRequest):
+    print("fetched group get")
+    return render(request, 'main_livechat.html', {"username": request.user.username})
 
 @login_required
 @csrf_exempt
 def operate_group(request: HttpRequest, group_id: uuid = ''):
+    print("fetch here!")
     match request.method:
         case "GET":
             return operate_group_get(request.user, group_id)
@@ -31,7 +32,7 @@ def operate_group(request: HttpRequest, group_id: uuid = ''):
             return HttpResponse(status=405)
 
 def operate_group_get(user: CustomUser, group_id: uuid):
-    if user.role != 'admin':
+    if user.role != 'admin' and not group_id:
         user_participations = user.participations.all()
         data = []
         for user_participation in user_participations:
@@ -39,7 +40,15 @@ def operate_group_get(user: CustomUser, group_id: uuid):
             group = match.group
             group_dict = model_to_dict(group)
             group_dict["members"] = group.users
+            group_dict["last_chat"] = group.last_chat
+            print(group_dict)
             data.append(group_dict)
+        print(data)
+        return JsonResponse({"data": data}, status=200)
+    elif user.role != 'admin':
+        group = get_object_or_404(Group, id=group_id)
+        data = model_to_dict(group)
+        data["members"] = group.users
         return JsonResponse({"data": data}, status=200)
     elif group_id:
         group = get_object_or_404(Group, id=group_id)

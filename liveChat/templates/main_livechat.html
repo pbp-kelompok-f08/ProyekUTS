@@ -1,0 +1,245 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block meta %}
+<title>Chats</title>
+{% endblock meta %}
+
+{% block content %}
+{% include 'modal.html' %}
+{% include 'navbar.html' %}
+
+<div class="relative w-full overflow-hidden">
+    <div class="grid grid-cols-[35%_65%] w-full">
+        <!-- Loading Spinner -->
+        <div id="loading" class="absolute inset-0 flex flex-col items-center justify-center bg-neutral-900 z-10 hidden text-gray-300">
+            <svg class="animate-spin h-8 w-8 text-green-500 mb-3" xmlns="http://www.w3.org/2000/svg" fill="none"
+                viewBox="0 0 24 24">
+                <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
+                <path class="opacity-75" fill="currentColor"
+                    d="M4 12a8 8 0 018-8v4a4 4 0 00-4 4H4z"></path>
+            </svg>
+            <p class="text-gray-400">Loading Threads...</p>
+        </div>
+
+        <!-- Groups -->
+        <div id="groups-container" class="flex flex-col border-neutral-800 overflow-y-auto">
+            <div class="hidden" id="dummy-section"></div>
+        </div>
+
+        <!-- Chat -->
+        <div id="chat-container" class="relative flex flex-col h-[calc(100dvh-58px)] border-l border-neutral-800 overflow-y-auto items-center">
+            <div class="absolute flex flex-row w-full h-[70px] gap-4 top-0 bg-neutral-700 items-center px-10">
+                <div class="w-[50px] h-[50px] rounded-full bg-white"></div>
+                <div class="flex flex-col gap-[2px]">
+                    <p id="chat-group-name">Group Name</p>
+                    <p id="chat-group-members" class="text-neutral-400 truncate">Ojan, Aly, Alfino, Dimaz, Dion, Bion, Alvino, Nathan</p>
+                </div>
+            </div>
+            <div class="absolute flex flex-row w-[900px] h-[50px] bottom-3 bg-neutral-800 rounded-full items-center justify-center" id="chat-form">
+                <textarea name="" id="chat-textarea" class="w-[800px] h-[25px] bg-transparent resize-none focus:outline-none" placeholder="Type your message"></textarea>
+                <button class="" onclick="" id="send-chat">
+                    <img src="{% static 'image/paperplane.webp' %}" alt="" class="size-[25px] invert">
+                </button>
+            </div>
+            <div class="flex flex-col-reverse justify-start w-[980px] h-full overflow-y-auto mb-20" id="chats-section">
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock content %}
+
+{% block extra_scripts %}
+<script>
+    const groupsContainer = document.getElementById("groups-container");
+    const chatFormContainer = document.getElementById("chat-container");
+    const chatGroupNameElement = document.getElementById("chat-group-name");
+    const chatGroupMembersElement = document.getElementById("chat-group-members");
+    const chatsSectionContainer = document.getElementById("chats-section");
+    const sendButton = document.getElementById("send-chat"); 
+    const chatTextArea = document.getElementById("chat-textarea");
+    let currentGroupSection = document.getElementById("dummy-section");
+    let lastChat = null;
+    let lastChatTime = null;
+
+    async function changeCurrentGroup(group)
+    {
+        currentGroupSection.className = "flex w-full h-[70px] hover:cursor-pointer hover:bg-neutral-800 items-center px-6";
+        currentGroupSection = document.getElementById(`group-${group.id}-section`);
+        currentGroupSection.className = "flex w-full h-[70px] hover:cursor-pointer hover:bg-neutral-800 items-center px-6 bg-neutral-800";
+        chatGroupNameElement.innerText = group.name;
+        chatGroupMembersElement.innerText = group.members.join(", ");
+        sendButton.onclick = () => sendChat(group.id);
+        startFetchingChats(group.id);
+    }
+
+    async function startFetchingChats(groupId) {
+        // langsung fetch pertama kali
+        await fetchChats(groupId);
+
+        // lalu fetch lagi setiap 10 detik
+        setInterval(() => {
+            fetchChats(groupId);
+        }, 10000);
+    }
+
+    async function fetchChats(groupId) {
+        try {
+            const response = await fetch(`/liveChat/chat/${groupId}/`);
+            if (!response.ok) throw new Error("Gagal fetch chat");
+
+            const json = await response.json();
+            const chats = json.data;
+            addChatToPage(chats);
+        } catch (error) {
+            console.error("Error fetching chats:", error);
+        }
+    }
+
+    async function fetchGroups() 
+    {
+        const response = await fetch("/liveChat/group/");
+        const json = await response.json();
+        const groups = json.data;
+        addGroupsToPage(groups);
+        await changeCurrentGroup(groups[0]);
+    }
+
+    function buildChatBubbleElement(chat) 
+    {
+        const bubbleElement = document.createElement('div');
+        const sameUserAsPrev = lastChat !== null && lastChat.username === chat.username;
+        const sameUserAsCurrent = chat.username === "{{ username|escapejs }}";
+
+        // Kalau user sendiri → bubble di kanan
+        bubbleElement.className = `flex flex-row ${sameUserAsCurrent ? "justify-end" : "justify-start"} mt-${sameUserAsPrev ? 1 : 2}`;
+
+        const bubbleChatHtml = sameUserAsPrev
+            ? `
+                <div class="flex flex-row ${sameUserAsCurrent ? "bg-green-700" : "bg-neutral-800"} rounded-[8px] gap-10 py-1 px-4 ${sameUserAsCurrent ? "mr-[38px]" : "ml-[38px]"}">
+                    <div class="flex flex-col gap-3">
+                        <p class="max-w-[500px]">${chat.message}</p>
+                    </div>
+                    <div class="flex flex-col text-right text-[13px] pt-1">
+                        <p>${chat.createdAt.substring(0, 10)}</p>
+                        <p>${chat.createdAt.substring(11, 16)}</p>
+                    </div>
+                </div>
+            `
+            : sameUserAsCurrent
+            ? `
+                <div class="flex flex-row gap-2 items-end">
+                    <div class="flex flex-row bg-green-700 rounded-[8px] gap-10 py-1 px-4">
+                        <div class="flex flex-col gap-3 text-right">
+                            <p class="max-w-[500px]">${chat.message}</p>
+                        </div>
+                        <div class="flex flex-col text-left text-[13px] pt-1">
+                            <p>${chat.createdAt.substring(0, 10)}</p>
+                            <p>${chat.createdAt.substring(11, 16)}</p>
+                        </div>
+                    </div>
+                    <img src="https://cdn-icons-png.flaticon.com/512/847/847969.png" alt="" class="size-[30px] rounded-full">
+                </div>
+            `
+            : `
+                <div class="flex flex-row gap-2 items-end">
+                    <img src="https://cdn-icons-png.flaticon.com/512/847/847969.png" alt="" class="size-[30px] rounded-full">
+                    <div class="flex flex-row bg-neutral-800 rounded-[8px] gap-10 py-1 px-4">
+                        <div class="flex flex-col gap-3">
+                            <p class="font-semibold">${chat.username}</p>
+                            <p class="max-w-[500px]">${chat.message}</p>
+                        </div>
+                        <div class="flex flex-col text-right text-[13px] pt-1">
+                            <p>${chat.createdAt.substring(0, 10)}</p>
+                            <p>${chat.createdAt.substring(11, 16)}</p>
+                        </div>
+                    </div>
+                </div>
+            `;
+
+        bubbleElement.innerHTML = bubbleChatHtml;
+        return bubbleElement;
+    }
+
+    function addChatToPage(chats) {
+        if (chats.length === 0) return;
+
+        // Jika belum pernah fetch sebelumnya, tampilkan semua
+        if (!lastChatTime) {
+            for (let ii = chats.length-1; ii >= 0; ii-- )
+            {
+                const chat = chats[ii];
+                chatsSectionContainer.prepend(buildChatBubbleElement(chat));
+                lastChat = chat;
+            };
+            lastChatTime = chats[0].createdAt;
+            return;
+        }
+
+        // Filter hanya chat yang dibuat setelah lastChatTime
+        const newChats = chats.filter(chat => chat.createdAt > lastChatTime);
+
+        // Tambahkan chat baru ke tampilan
+        for (let jj = newChats.length-1; jj >= 0; jj--) 
+        {
+            const chat = newChats[jj];
+            chatsSectionContainer.prepend(buildChatBubbleElement(chat));
+            lastChat = chat;
+        };
+
+        // Update lastChatTime
+        if (newChats.length > 0) {
+            lastChatTime = newChats[0].createdAt;
+            lastChat = newChats[0];
+        }
+    }
+
+    function buildGroupSectionElement(group) 
+    {
+        const sectionElement = document.createElement('div');
+        sectionElement.className = `flex w-full h-[70px] hover:cursor-pointer hover:bg-neutral-800 items-center px-6`;
+        sectionElement.onclick = () => changeCurrentGroup(group)
+        sectionElement.id = `group-${group.id}-section`
+        const groupSectionHtml = `
+            <div class="flex flex-row gap-4 w-full">
+                <div class="w-[60px] h-[50px] rounded-full bg-white"></div>
+                <div class="grid grid-cols-[80%_20%] w-full">
+                    <div class="flex flex-col gap-[2px]">
+                        <p>${group.name}</p>
+                        <p class="text-neutral-400 truncate">${group.last_chat === null  ? "Belum ada chat" : group.last_chat.username+": "+group.last_chat.message}</p>
+                    </div>
+                    <div class="flex flex-col text-right text-neutral-400 gap-[2px]">
+                        <p>${group.last_chat === null ? "-" : group.last_chat.createdAt.substring(0, 10)}</p>
+                        <p>${group.last_chat === null ? "-" : group.last_chat.createdAt.substring(11, 16)}</p>
+                    </div>
+                </div>
+            </div>`;
+        sectionElement.innerHTML = groupSectionHtml;
+        return sectionElement;
+    }
+
+    function addGroupsToPage(groups) 
+    {
+        groupsContainer.innerHTML = '';
+        groups.forEach(group => groupsContainer.appendChild(buildGroupSectionElement(group)));
+    }
+
+    async function sendChat(group_id) 
+    {
+        const response = await fetch(`/liveChat/chat/${group_id}/`, {
+            method: "POST",
+            headers: {
+                "Content-Type": "application/json",
+            },
+            body: JSON.stringify({
+                message: chatTextArea.value,
+            }),
+            credentials: "include",
+        });
+        chatTextArea.value = '';
+        await fetchChats();
+    }
+
+    fetchGroups();
+</script>
+{% endblock extra_scripts %}
