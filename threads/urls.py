@@ -12,5 +12,6 @@ urlpatterns = [
     path('replies/<str:threadId>/', views.get_replies_by_threadId, name='get_replies_by_threadId'),
     path('like-thread/<uuid:thread_id>/', views.like_thread_ajax, name='like_thread_ajax'),
     path('like-reply/<uuid:replyId>/', views.like_reply_ajax, name='like_reply_ajax'),
-
+    path('thread/<uuid:thread_id>/delete', views.delete_thread, name='delete_thread'),
+    path('reply/<uuid:reply_id>/delete', views.delete_reply, name='delete_reply'),
 ]

@@ -10,11 +10,10 @@
 {% include 'navbar.html' %}
 
 
-<main class="pt-20 bg-[#1C1C1C] text-[#EAEAEA] min-h-screen">
+<main class="pt-20 bg-neutral-950 text-gray-100 min-h-screen">
     <!-- Main Container -->
-    <div class="w-full min-h-screen bg-neutral-800 flex flex-row justify-center gap-20 text-white">
-        <div
-            class="w-full min-h-screen bg-[radial-gradient(circle_at_top_left,_#1f1f1f,_#0d0d0d_80%)] flex flex-row justify-center gap-20 text-white">
+    <div class="flex justify-center gap-10 px-6 sm:px-12">
+        <div class="w-full min-h-screen flex flex-row justify-center gap-20 text-white">
 
 
             <!-- Loading Spinner -->
@@ -28,6 +27,18 @@
                 <p class="text-gray-400 mt-3">Loading Threads...</p>
             </div>
 
+            <div id="searchBar" class=" w-1/4 bg-neutral-900 border border-neutral-800 rounded-xl p-4 h-fit self-start mt-16">
+                <h2 class="text-lg font-semibold mb-4">Search by Tag</h2>
+                <input id="tagSearchInput" type="text" placeholder="Enter tag... e.g. football,ai,tech"
+                    class="w-full bg-neutral-800 text-gray-200 rounded-md px-3 py-2 focus:outline-none focus:ring-1 focus:ring-green-500 mb-3">
+
+                <button id="tagSearchBtn"
+                    class="w-full bg-green-600 hover:bg-green-700 text-white py-2 rounded-md transition">
+                    Search
+                </button>
+
+                <div id="searchResults" class="mt-4 space-y-2 text-sm text-gray-300"></div>
+            </div>
             <!-- Threads Feed -->
             <div class="w-full lg:w-2/5 border-x border-solid border-stone-700">
                 <!-- Create Thread Button -->
@@ -50,8 +61,9 @@
                     </div>
 
                     <!-- Scrollable reply list -->
-                    <div id="replyList" class="flex-1 overflow-y-auto p-4 space-y-4">
+                    <div id="replyList" class="flex-1 overflow-y-auto px-4">
                     </div>
+
                     <div class="flex items-center border-t border-gray-700 px-3">
                         <form id="replyForm" class="p-3 flex items-center w-full">
                             <input type="text" name="content" id="replyContent" placeholder="Write a reply..."
@@ -59,7 +71,7 @@
                                 required>
                         </form>
                         <button type="submit" form="replyForm"
-                            class="bg-green-600 hover:bg-green-700 text-white px-3 py-2 rounded-lg text-sm">
+                            class="bg-blue-600 hover:bg-blue-500 shadow-md shadow-blue-600/20 text-white px-3 py-2 rounded-lg text-sm">
                             Reply
                         </button>
                     </div>
@@ -86,12 +98,36 @@
 
 <script>
     const THREADS_API_ENDPOINT = "{% url 'threads:show_json' %}";
-    const CURRENT_USER_ID = "{{ user.id|default_if_none:'' }}";
+    const CURRENT_USERNAME = "{{ request.user.username|default_if_none:'' }}";
+
+
+    document.getElementById('tagSearchBtn').addEventListener('click', () => {
+        const searchTerm = document.getElementById('tagSearchInput').value.trim().toLowerCase();
+        if (!searchTerm) {
+            // if input empty, show all
+            renderAllThreadsCards(allThreadsData);
+            return;
+        }
+
+        const filtered = allThreadsData.filter(thread => {
+            const tags = thread.tags ? thread.tags.toLowerCase() : '';
+            return tags.includes(searchTerm);
+        });
+
+        const searchResults = document.getElementById('searchResults');
+        searchResults.innerHTML = filtered.length
+            ? `<p>Found ${filtered.length} thread(s) with #${searchTerm}</p>`
+            : `<p class="text-gray-500">No threads found for "${searchTerm}"</p>`;
+
+        renderAllThreadsCards(filtered);
+    });
+
     let activeReplyThread = null;
 
     const loadingSpinner = document.getElementById('loading');
     const threadsGridContainer = document.getElementById('threadList');
     const threadsReplyContainer = document.getElementById('threadReply');
+    const serachBar = document.getElementById('searchBar');
     const threadsReplyList = document.getElementById('replyList');
     let allThreadsData = [];
 
@@ -117,20 +153,22 @@
         const threadCard = document.createElement("div");
         threadCard.id = id;
         threadCard.className =
-            "w-full border-b border-gray-700 py-4 flex justify-between text-white bg-neutral-800 px-4";
+            "w-full border-b border-gray-700 py-4 flex justify-between text-white bg-neutral-900 hover:bg-neutral-800 transition-colors duration-300 px-5";
 
         threadCard.innerHTML = `
         <!-- Left section: profile + username -->
-        <div class="flex flex-col items-start">
-            <div class="w-10 h-10 rounded-full bg-gray-600"></div>
+        <div class="flex flex-col items-center">
+            <div class="w-10 h-10 rounded-full bg-gradient-to-br from-purple-500 to-pink-500 flex items-center justify-center text-white font-bold shadow-md">
+                ${username[0].toUpperCase()}
+            </div>
         </div>
 
         <!-- Middle section: post content -->
         <div class="flex flex-col flex-1 px-6">
-            <span class="font-semibold text-lg">${username}</span>
-            <p class="text-xs text-gray-600 mt-2">${new Date(
-            createdAt
-        ).toLocaleString()}</p>
+            <div class="flex h-10 items-start justify-between">
+                <span class="font-semibold text-base">${username}</span>
+                <p class="text-xs text-gray-500">${new Date(createdAt).toLocaleString()}</p>
+            </div>
 
             ${image
                 ? `<img src="${image}" alt="Thread Image" class="w-full rounded-lg mb-3" />`
@@ -144,19 +182,41 @@
         </div>
 
         <!-- Right section: icons -->
-        <div class="flex flex-col items-center justify-center space-y-4 w-16">
-        <!-- Like -->
-            <div class="flex flex-col items-center">
-                <button class="text-2xl hover:scale-110 transition" id="likeEmoji-${id}" onclick="handleLikes('${id}')">${item.isLiked ? "❤️" : "🤍"}</button>
+        <div class="relative flex flex-col items-center justify-center space-y-4 w-16">
+            ${(CURRENT_USERNAME && CURRENT_USERNAME === username) &&
+            `<!-- Dropdown button -->
+            <div class="absolute -top-2 right-0">
+                <button onclick="toggleMenu('${id}')" 
+                class="text-gray-400 hover:text-gray-200 text-xl font-bold px-2">
+                ⋮
+                </button>
+                
+                <!-- Dropdown Menu -->
+                <div id="menu-${id}" 
+                    class="hidden absolute right-0 mt-2 w-24 bg-neutral-800 border border-gray-700 rounded-md shadow-lg z-10">
+                    <a href="thread/${id}/delete" 
+                        class="block w-full text-left px-3 py-2 text-sm text-red-400 hover:bg-red-500 hover:text-white transition">
+                        Delete
+                    </a>
+                </div>
+            </div>`
+            }
+
+            <!-- Like -->
+            <div class="flex flex-col items-center mt-8">
+                <button class="text-2xl hover:scale-110 transition" id="likeEmoji-${id}" onclick="handleLikes('${id}')">
+                    ${item.isLiked ? "❤️" : "🤍"}
+                </button>
                 <span class="text-sm text-white" id="likeCount-${id}">${likeCount}</span>
             </div>
+
             <!-- Comment -->
             <div class="flex flex-col items-center">
                 <button class="text-2xl hover:scale-110 transition" onclick="showReply('${id}', '${username}')">💬</button>
                 <span class="text-sm text-white" id="replyCount-${id}">${replyCount}</span>
             </div>
         </div>
-        `;
+`;
         // <!-- Repost -->
         // <div class="flex flex-col items-center">
         //     <button class="text-2xl hover:scale-110 transition">📩</button>
@@ -165,6 +225,19 @@
 
         return threadCard;
     }
+    function toggleMenu(threadId) {
+        const menu = document.getElementById(`menu-${threadId}`);
+        menu.classList.toggle("hidden");
+
+        // Hide if clicked outside
+        document.addEventListener("click", function hideMenu(e) {
+            if (!menu.contains(e.target) && !e.target.closest(`[onclick="toggleMenu('${threadId}')"]`)) {
+                menu.classList.add("hidden");
+                document.removeEventListener("click", hideMenu);
+            }
+        });
+    }
+
     async function handleLikes(threadId) {
         const response = await fetch(`/threads/like-thread/${threadId}/`, { method: "POST" })
         // if (!response.ok) {
@@ -201,13 +274,16 @@
         // If the same thread is clicked again → hide the reply panel
         if (activeReplyThread === threadId && !threadsReplyContainer.classList.contains('hidden')) {
             threadsReplyContainer.classList.add('hidden');
+            serachBar.classList.remove('hidden')
             activeReplyThread = null;
             return;
         }
-
+        
+        
         // Otherwise, open the panel for the new thread
         activeReplyThread = threadId;
         threadsReplyContainer.classList.remove('hidden');
+        serachBar.classList.add('hidden')
 
         // Show username at the top
         document.getElementById('replyToWho').textContent = `Replying to ${username}`;
@@ -248,20 +324,42 @@
         const timeAgo = timeSince(createdAt);
 
         const replyCard = document.createElement("div");
-        replyCard.className = "flex space-x-3 border-b border-gray-700 py-3";
+        replyCard.className = "relative flex space-x-3 border-b border-gray-700 py-3";
 
         replyCard.innerHTML = `
-        <div class="w-8 h-8 rounded-full bg-gray-600"></div>
-        <div class="flex-1">
-            <p class="font-semibold text-white">${username}</p>
-            <p class="text-gray-300 text-sm">${content}</p>
-            <div class="flex items-center space-x-2 mt-1 text-gray-500 text-xs">
-                <button class="hover:text-red-400" id="likeEmoji-${id}" onclick="handleReplyLikes('${id}')">${item.isLiked ? "❤️" : "🤍"}</button>
-                <span id="likeCount-${id}">${likeCount}</span>
-                <span>·</span>
-                <span>${timeAgo}</span>
+        ${(CURRENT_USERNAME && CURRENT_USERNAME === username) &&
+            `<!-- Dropdown button -->
+            <div class="absolute top-3 -right-3">
+                <button onclick="toggleMenu('${id}')" 
+                class="text-gray-400 hover:text-gray-200 text-xl font-bold px-2">
+                ⋮
+                </button>
+                
+                <!-- Dropdown Menu -->
+                <div id="menu-${id}" 
+                    class="hidden absolute right-0 mt-2 w-24 bg-neutral-800 border border-gray-700 rounded-md shadow-lg z-10">
+                    <a href="reply/${id}/delete" 
+                        class="block w-full text-left px-3 py-2 text-sm text-red-400 hover:bg-red-500 hover:text-white transition">
+                        Delete
+                    </a>
+                </div>
+            </div>`
+            }
+            <div class="flex flex-col items-center">
+                <div class="w-8 h-8 rounded-full bg-gradient-to-br from-purple-500 to-pink-500 flex items-center text-md  justify-center text-white font-bold shadow-md">
+                    ${username[0].toUpperCase()}
+                </div>
             </div>
-        </div>
+            <div class="flex-1">
+                <p class="font-semibold text-white">${username}</p>
+                <p class="text-gray-300 text-sm">${content}</p>
+                <div class="flex items-center space-x-2 mt-1 text-gray-500 text-xs">
+                    <button class="hover:text-red-400" id="likeEmoji-${id}" onclick="handleReplyLikes('${id}')">${item.isLiked ? "❤️" : "🤍"}</button>
+                    <span id="likeCount-${id}">${likeCount}</span>
+                    <span>·</span>
+                    <span>${timeAgo}</span>
+                </div>
+            </div>
     `;
 
         return replyCard;

@@ -1,6 +1,6 @@
 # threads/views.py
 from django.shortcuts import render, get_object_or_404, redirect
-from django.http import Http404, HttpResponse
+from django.http import Http404, HttpResponse,HttpResponseRedirect
 
 from accounts.models import CustomUser
 from .models import Thread,ReplyChild
@@ -9,6 +9,8 @@ from django.contrib.auth.decorators import login_required
 from django.http import JsonResponse
 from django.views.decorators.csrf import csrf_exempt
 from django.views.decorators.http import require_POST
+from django.urls import reverse
+
 
 
 
@@ -52,6 +54,11 @@ def add_thread_entry_ajax(request):
     )
     new_thread.save()
     return HttpResponse(b"CREATED", status=201)
+
+def delete_thread(request, thread_id):
+    thread = get_object_or_404(Thread, pk=thread_id)
+    thread.delete()
+    return HttpResponseRedirect(reverse('threads:show_main'))
 
 
 def get_replies_by_threadId(request, threadId):
@@ -139,4 +146,11 @@ def like_reply_ajax(request, replyId):
 
     except Thread.DoesNotExist:
         return JsonResponse({"success": False, "error": "Thread not found"}, status=404)
+    
+
+def delete_reply(request, reply_id):
+    reply = get_object_or_404(ReplyChild, pk=reply_id)
+    reply.thread.changeReply(False)
+    reply.delete()
+    return HttpResponseRedirect(reverse('threads:show_main'))
 
