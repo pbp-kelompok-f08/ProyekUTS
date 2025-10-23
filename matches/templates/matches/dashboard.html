@@ -1,0 +1,384 @@
+{% extends "base.html" %}
+{% load static %}
+
+{% block title %}Match Olahraga{% endblock %}
+
+{% block content %}
+{% include "navbar.html" %}
+
+<main class="pt-24 min-h-screen bg-black text-white font-[Roboto_Mono]">
+
+  <!-- ================= SEARCH FORM ================= -->
+  <section class="px-10 py-8">
+      <h2 class="text-3xl mb-4 font-semibold">Cari Match</h2>
+      <form id="match-search-form" method="get" action=""
+          class="bg-[#1F1F1F] border border-[#2A2A2A] rounded-2xl p-6 shadow-md">
+          {{ search_form.as_p }}
+          <button type="submit" {% if not schema_ready %}disabled{% endif %}
+              class="mt-3 bg-[#2B2B2B] border border-[#3A3A3A] px-6 py-2 rounded-lg hover:bg-[#3C3C3C] transition">
+              Cari
+          </button>
+      </form>
+  </section>
+
+  <!-- ================= CREATE MATCH ================= -->
+  <section class="px-10 pb-10">
+      <h2 class="text-3xl mb-4 font-semibold">Buat Match Baru</h2>
+      <button type="button" id="open-create-modal" {% if not schema_ready %}disabled{% endif %}
+          class="bg-[#2B2B2B] border border-[#3A3A3A] px-6 py-2 rounded-lg hover:bg-[#3C3C3C] transition">
+          Buat Match
+      </button>
+  </section>
+
+  <!-- ================= MATCH CARDS ================= -->
+  <section class="px-10 pb-16">
+    <h2 class="text-3xl mb-6 font-semibold">Daftar Match</h2>
+
+    <div id="match-list" class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-8">
+      {% if schema_ready %}
+        {% if has_any_match %}
+          {% for category, matches in grouped_matches %}
+            {% for match in matches %}
+            <div class="bg-[#1F1F1F] border border-[#2A2A2A] rounded-2xl p-6 shadow-lg hover:border-gray-400 transition transform hover:-translate-y-1">
+              <div class="flex justify-between items-center mb-3">
+                <h3 class="text-2xl font-semibold">{{ match.title }}</h3>
+                <span class="text-sm text-gray-400 border border-[#3A3A3A] rounded-md px-2 py-0.5">{{ category.name }}</span>
+              </div>
+
+              <p class="text-gray-300 mb-1">📍 {{ match.location }}</p>
+              <p class="text-gray-300 mb-1">🕒 {{ match.event_date|date:"d M Y, H:i" }}</p>
+              {% if match.description %}
+              <p class="text-gray-400 text-sm italic mb-2">"{{ match.description }}"</p>
+              {% endif %}
+
+              <div class="flex justify-between items-center mt-3">
+                <p class="text-sm text-gray-400">Slot: {{ match.current_members }} / {{ match.max_members }}</p>
+                {% if match.available_slots > 0 %}
+                <span class="text-green-400 text-sm">{{ match.available_slots }} tersisa</span>
+                {% else %}
+                <span class="text-red-400 text-sm">Penuh</span>
+                {% endif %}
+              </div>
+
+              <form class="booking-form mt-5" method="post" action="{% url 'matches:book_match' match.id %}">
+                {% csrf_token %}
+                <button type="submit"
+                  class="w-full py-2 bg-[#2B2B2B] hover:bg-[#3C3C3C] border border-[#3A3A3A] rounded-xl text-gray-100 transition">
+                  Gabung Match
+                </button>
+              </form>
+            </div>
+            {% endfor %}
+          {% empty %}
+            <p class="col-span-full text-center text-gray-400 text-xl mt-10">Belum ada match tersedia.</p>
+          {% endfor %}
+        {% else %}
+          <p class="col-span-full text-center text-gray-400 text-xl mt-10">Belum ada match tersedia.</p>
+        {% endif %}
+      {% else %}
+        <p class="col-span-full text-center text-gray-400 text-xl mt-10">
+          Data match belum tersedia karena basis data belum dimigrasikan.
+        </p>
+      {% endif %}
+    </div>
+  </section>
+
+</main>
+
+<!-- ================= MODAL ================= -->
+<div id="create-match-modal" class="modal" data-open="false" aria-hidden="true">
+    <div class="modal-overlay" role="presentation"></div>
+    <div class="modal-content" role="dialog" aria-modal="true" aria-labelledby="create-match-modal-title">
+        <button type="button" class="modal-close" aria-label="Tutup">&times;</button>
+        <h3 id="create-match-modal-title">Buat Match Baru</h3>
+        <form id="match-create-form" method="post" action="{% url 'matches:create_match' %}">
+            {% csrf_token %}
+            {{ match_form.as_p }}
+            <div id="create-form-errors" class="form-errors" role="alert" aria-live="assertive" hidden></div>
+            <div class="modal-actions">
+                <button type="button" class="modal-cancel">Batal</button>
+                <button type="submit">Simpan</button>
+            </div>
+        </form>
+    </div>
+</div>
+
+<style>
+  body {
+    background-color: #000;
+  }
+  .modal {
+      position: fixed;
+      inset: 0;
+      display: none;
+      align-items: center;
+      justify-content: center;
+      z-index: 1000;
+  }
+  .modal[data-open="true"] {
+      display: flex;
+  }
+  .modal-overlay {
+      position: absolute;
+      inset: 0;
+      background: rgba(0, 0, 0, 0.5);
+  }
+  .modal-content {
+      position: relative;
+      background: #f7f7f7;
+      padding: 1.5rem;
+      border-radius: 0.5rem;
+      box-shadow: 0 10px 25px rgba(0, 0, 0, 0.3);
+      max-width: 480px;
+      width: 90%;
+      max-height: 90vh;
+      overflow-y: auto;
+  }
+  .modal-close {
+      position: absolute;
+      top: 0.75rem;
+      right: 0.75rem;
+      background: transparent;
+      border: none;
+      font-size: 1.5rem;
+      cursor: pointer;
+  }
+  .modal-actions {
+      display: flex;
+      justify-content: flex-end;
+      gap: 0.75rem;
+      margin-top: 1.5rem;
+  }
+  .modal-actions button {
+      padding: 0.5rem 1rem;
+      cursor: pointer;
+  }
+  .form-errors {
+      margin-top: 0.75rem;
+      padding: 0.75rem;
+      border-radius: 0.375rem;
+      background-color: #fed7d7;
+      border: 1px solid #f56565;
+      color: #742a2a;
+  }
+</style>
+{% endblock %}
+
+{% block extra_scripts %}
+{% if schema_ready %}
+<script>
+(function() {
+    const body = document.body;
+    const searchForm = document.getElementById('match-search-form');
+    const createForm = document.getElementById('match-create-form');
+    const matchList = document.getElementById('match-list');
+    const csrfToken = getCookie('csrftoken');
+    const modal = document.getElementById('create-match-modal');
+    const openModalButton = document.getElementById('open-create-modal');
+    const modalOverlay = modal ? modal.querySelector('.modal-overlay') : null;
+    const modalClose = modal ? modal.querySelector('.modal-close') : null;
+    const modalCancel = modal ? modal.querySelector('.modal-cancel') : null;
+    const createErrors = document.getElementById('create-form-errors');
+    const createSubmit = createForm ? createForm.querySelector('button[type="submit"]') : null;
+    const originalSubmitLabel = createSubmit ? createSubmit.textContent : '';
+
+    function escapeHtml(value) {
+        if (value == null) return '';
+        return String(value)
+            .replace(/&/g, '&amp;')
+            .replace(/</g, '&lt;')
+            .replace(/>/g, '&gt;')
+            .replace(/"/g, '&quot;')
+            .replace(/'/g, '&#x27;');
+    }
+
+    function setCreateErrors(messages) {
+        if (!createErrors) return;
+        const list = (messages || []).filter(Boolean);
+        if (!list.length) {
+            createErrors.innerHTML = '';
+            createErrors.setAttribute('hidden', '');
+            return;
+        }
+        createErrors.innerHTML = list.map(m => `<p>${escapeHtml(m)}</p>`).join('');
+        createErrors.removeAttribute('hidden');
+    }
+
+    function openModal() {
+        if (!modal) return;
+        modal.setAttribute('data-open', 'true');
+        modal.setAttribute('aria-hidden', 'false');
+        body.style.overflow = 'hidden';
+        setCreateErrors([]);
+        const firstInput = modal.querySelector('.modal-content form input, .modal-content form textarea, .modal-content form select');
+        if (firstInput) firstInput.focus();
+    }
+
+    function closeModal() {
+        if (!modal) return;
+        modal.setAttribute('data-open', 'false');
+        modal.setAttribute('aria-hidden', 'true');
+        body.style.overflow = '';
+        setCreateErrors([]);
+    }
+
+    function bindModalEvents() {
+        if (!modal) return;
+        if (openModalButton) openModalButton.addEventListener('click', openModal);
+        [modalOverlay, modalClose, modalCancel].forEach(el => el?.addEventListener('click', closeModal));
+        document.addEventListener('keydown', e => {
+            if (e.key === 'Escape' && modal.getAttribute('data-open') === 'true') closeModal();
+        });
+    }
+
+    function renderGroups(groups) {
+        if (!groups || groups.length === 0) {
+            matchList.innerHTML = '<p>Belum ada match yang sesuai pencarian.</p>';
+            return;
+        }
+
+        const csrfField = csrfToken ? `<input type="hidden" name="csrfmiddlewaretoken" value="${escapeHtml(csrfToken)}">` : '';
+
+        const sectionHtml = groups.map(group => {
+            const matchesHtml = group.matches.map(match => {
+                const id = escapeHtml(match.id);
+                const desc = match.description ? `<p>${escapeHtml(match.description)}</p>` : '';
+                const date = match.event_date ? new Date(match.event_date).toLocaleString('id-ID') : '';
+                return `
+                <div class="bg-[#1F1F1F] border border-[#2A2A2A] rounded-2xl p-6 shadow-lg hover:border-gray-400 transition transform hover:-translate-y-1">
+                    <div class="flex justify-between items-center mb-3">
+                        <h3 class="text-2xl font-semibold tracking-wide">${escapeHtml(match.title)}</h3>
+                        <span class="text-sm text-gray-400 border border-[#3A3A3A] rounded-md px-2 py-0.5">
+                            ${escapeHtml(group.category)}
+                        </span>
+                    </div>
+                    <p class="text-gray-300 mb-1">📍 ${escapeHtml(match.location)}</p>
+                    <p class="text-gray-300 mb-1">🕒 ${escapeHtml(date)}</p>
+                    ${desc}
+                    <div class="flex justify-between items-center mt-3">
+                        <p class="text-sm text-gray-400">Slot: ${escapeHtml(match.current_members)} / ${escapeHtml(match.max_members)}</p>
+                        <span class="text-sm ${match.available_slots > 0 ? 'text-green-400' : 'text-red-400'}">
+                            ${match.available_slots > 0 ? `${escapeHtml(match.available_slots)} tersisa` : 'Penuh'}
+                        </span>
+                    </div>
+                    <form class="booking-form mt-5" data-match-id="${id}" method="post" action="/matches/${id}/book/">
+                        ${csrfField}
+                        <button type="submit"
+                            class="w-full py-2 bg-[#2B2B2B] hover:bg-[#3C3C3C] border border-[#3A3A3A] rounded-xl text-gray-100 transition">
+                            Gabung Match
+                        </button>
+                    </form>
+                </div>`;
+            }).join('');
+
+            return `<section data-category="${escapeHtml(group.category_slug)}"><h3>${escapeHtml(group.category)}</h3>${matchesHtml}</section>`;
+        }).join('');
+
+        matchList.innerHTML = sectionHtml;
+        attachBookingHandlers();
+    }
+
+    async function loadMatches(formData) {
+        const endpoint = searchForm.getAttribute('action') || window.location.pathname;
+        const params = new URLSearchParams(formData || new FormData(searchForm));
+        const url = params.toString() ? `${endpoint}?${params}` : endpoint;
+
+        try {
+            const res = await fetch(url, { headers: { 'X-Requested-With': 'XMLHttpRequest' } });
+            if (!res.ok) return showToast('Gagal memuat data match.', 'error');
+            const data = await res.json();
+            renderGroups(data.groups || []);
+        } catch (err) {
+            console.error(err);
+            showToast('Terjadi kesalahan saat mengambil data match.', 'error');
+        }
+    }
+
+    async function handleCreate(e) {
+        e.preventDefault();
+        const formData = new FormData(createForm);
+        if (createSubmit) {
+            createSubmit.disabled = true;
+            createSubmit.textContent = 'Menyimpan...';
+        }
+        try {
+            const res = await fetch(createForm.action, {
+                method: 'POST',
+                headers: { 'X-CSRFToken': csrfToken, 'X-Requested-With': 'XMLHttpRequest' },
+                body: formData
+            });
+            const payload = await res.json().catch(() => ({ success: false }));
+            if (!res.ok || !payload.success) {
+                const msgs = Object.values(payload.errors || {}).flat().filter(Boolean);
+                setCreateErrors(msgs);
+                showToast(msgs.join(' ') || 'Gagal membuat match baru.', 'error');
+                return;
+            }
+            setCreateErrors([]);
+            createForm.reset();
+            showToast(payload.message || 'Match baru berhasil dibuat.', 'success');
+            closeModal();
+            await loadMatches();
+        } catch (err) {
+            console.error(err);
+            showToast('Terjadi kesalahan jaringan. Coba lagi nanti.', 'error');
+        } finally {
+            if (createSubmit) {
+                createSubmit.disabled = false;
+                createSubmit.textContent = originalSubmitLabel;
+            }
+        }
+    }
+
+    async function handleBooking(e) {
+        e.preventDefault();
+        const form = e.target;
+        const formData = new FormData(form);
+        const btn = form.querySelector('button[type="submit"]');
+        if (btn) {
+            btn.disabled = true;
+            btn.textContent = 'Memproses...';
+        }
+
+        try {
+            const res = await fetch(form.action, {
+                method: 'POST',
+                headers: { 'X-CSRFToken': csrfToken, 'X-Requested-With': 'XMLHttpRequest' },
+                body: formData
+            });
+            const data = await res.json().catch(() => ({ success: false }));
+            if (!res.ok || !data.success) {
+                const msgs = Object.values(data.errors || {}).flat().filter(Boolean).join(' ');
+                showToast(msgs || 'Tidak dapat mendaftar pada match ini.', 'error');
+                return;
+            }
+            form.reset();
+            showToast(data.message || 'Kamu berhasil mendaftar pada match ini.', 'success');
+            await loadMatches();
+        } catch (err) {
+            console.error(err);
+            showToast('Terjadi kesalahan jaringan. Coba lagi nanti.', 'error');
+        } finally {
+            if (btn) {
+                btn.disabled = false;
+                btn.textContent = 'Gabung Match';
+            }
+        }
+    }
+
+    function attachBookingHandlers() {
+        matchList.querySelectorAll('.booking-form').forEach(f => f.addEventListener('submit', handleBooking));
+    }
+
+    searchForm.addEventListener('submit', e => {
+        e.preventDefault();
+        loadMatches(new FormData(searchForm));
+    });
+
+    if (createForm) createForm.addEventListener('submit', handleCreate);
+    attachBookingHandlers();
+    bindModalEvents();
+})();
+</script>
+{% endif %}
+{% endblock %}

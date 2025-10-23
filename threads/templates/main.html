@@ -1,0 +1,271 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block meta %}
+<title>Threads</title>
+{% endblock meta %}
+
+{% block content %}
+{% include 'modal.html' %}
+{% include 'navbar.html' %}
+
+
+<main class="pt-20 bg-[#1C1C1C] text-[#EAEAEA] min-h-screen">
+<!-- Main Container -->
+<div class="w-full min-h-screen bg-neutral-800 flex flex-row justify-center gap-20 text-white">
+    <!-- Loading Spinner -->
+    <div id="loading" class="bg-neutral-900 rounded-lg border border-neutral-800 p-12 text-center hidden text-gray-300">
+        <svg class="animate-spin h-8 w-8 text-green-500 inline-block" xmlns="http://www.w3.org/2000/svg" fill="none"
+            viewBox="0 0 24 24">
+            <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
+            <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8v4a4 4 0 00-4 4H4z"></path>
+        </svg>
+        <p class="text-gray-400 mt-3">Loading Threads...</p>
+    </div>
+
+    <!-- Threads Feed -->
+    <div class="w-full lg:w-2/5 border-x border-solid border-white">
+        <!-- Create Thread Button -->
+        <button onclick="showModal()"
+            class="w-full border border-gray-600 bg-neutral-900 text-left text-gray-400 px-4 py-6 rounded-lg hover:border-gray-400 hover:text-gray-200 transition">
+            + Create new Thread...
+        </button>
+        <div id="threadList" class="hidden"></div>
+    </div>
+
+    <!-- thread Reply -->
+    <div id="threadReply" class="hidden lg:w-1/3">
+        <div class="fixed w-1/3 bg-neutral-900 mt-10 top-10 bottom-10 rounded-xl border border-gray-700 flex flex-col">
+
+            <!-- Header -->
+            <div class="p-4 border-b border-gray-700">
+                <h2 class="text-lg font-semibold text-white">Replies</h2>
+                <p id="replyToWho" class="text-sm text-gray-400"></p>
+            </div>
+
+            <!-- Scrollable reply list -->
+            <div id="replyList" class="flex-1 overflow-y-auto p-4 space-y-4">
+            </div>
+
+            <!-- Reply input box -->
+            <div class="border-t border-gray-700 p-3 flex items-center space-x-3">
+                <div class="w-8 h-8 rounded-full bg-gray-600 flex-shrink-0"></div>
+                <input type="text" placeholder="Write a reply..."
+                    class="flex-1 bg-neutral-800 text-white text-sm rounded-lg px-3 py-2 focus:outline-none focus:ring-1 focus:ring-green-500" />
+                <button class="bg-green-600 hover:bg-green-700 text-white px-3 py-2 rounded-lg text-sm transition">
+                    Reply
+                </button>
+            </div>
+        </div>
+    </div>
+
+
+    <!-- Empty State -->
+    <div id="empty" class="bg-neutral-900 rounded-lg border border-neutral-800 p-12 text-center hidden text-gray-300">
+        <div class="w-32 h-32 mx-auto mb-4">
+            <img src="{% static 'image/no-news.png' %}" alt="No threads available"
+                class="w-full h-full object-contain opacity-80">
+        </div>
+        <h3 class="text-lg font-medium mb-2 text-white">No Thread found</h3>
+        <p class="text-gray-400 mb-6">Be the first to share a football thread with the community.</p>
+        <button onclick="showModal()"
+            class="inline-flex items-center px-4 py-2 bg-green-600 text-white rounded-md hover:bg-green-700 transition-colors">
+            Create new Threads
+        </button>
+    </div>
+</div>
+</main>
+
+<script>
+    const THREADS_API_ENDPOINT = "{% url 'threads:show_json' %}";
+    const CURRENT_USER_ID = "{{ user.id|default_if_none:'' }}";
+    let activeReplyThread = null;
+
+    const loadingSpinner = document.getElementById('loading');
+    const threadsGridContainer = document.getElementById('threadList');
+    const threadsReplyContainer = document.getElementById('threadReply');
+    const threadsReplyList = document.getElementById('replyList');
+    let allThreadsData = [];
+
+    function displayPageSection({ showLoading = false, showError = false, showEmpty = false, showGrid = false }) {
+        loadingSpinner.classList.toggle('hidden', !showLoading);
+        threadsGridContainer.classList.toggle('hidden', !showGrid);
+    }
+
+    function buildThreadsCardElement(item) {
+        const content = DOMPurify.sanitize(item.content);
+        const tags = DOMPurify.sanitize(item.tags);
+        const image = DOMPurify.sanitize(item.image);
+        const createdAt = DOMPurify.sanitize(item.created_at);
+        const likeCount = DOMPurify.sanitize(String(item.likeCount || 0));
+        const shareCount = DOMPurify.sanitize(String(item.shareCount || 0));
+        const replyCount = DOMPurify.sanitize(String(item.replyCount || 0));
+        const username = DOMPurify.sanitize(item.username || "Unknown");
+
+        const threadCard = document.createElement("div");
+        threadCard.className =
+            "w-full border-b border-gray-700 py-4 flex justify-between text-white bg-neutral-800 px-4";
+
+        threadCard.innerHTML = `
+        <!-- Left section: profile + username -->
+        <div class="flex flex-col items-start">
+            <div class="w-10 h-10 rounded-full bg-gray-600"></div>
+        </div>
+
+        <!-- Middle section: post content -->
+        <div class="flex-1 px-6">
+            <span class="font-semibold text-lg">${username}</span>
+            <p class="text-xs text-gray-600 mt-2">${new Date(
+            createdAt
+        ).toLocaleString()}</p>
+
+            ${image
+                ? `<img src="${image}" alt="Thread Image" class="w-full rounded-lg mb-3" />`
+                : ""
+            }
+            <p class="text-gray-300 mb-2">${content}</p>
+            ${tags
+                ? `<p class="text-sm text-gray-500">#${tags.replace(/,/g, " #")}</p>`
+                : ""
+            }
+        </div>
+
+        <!-- Right section: icons -->
+        <div class="flex flex-col items-center justify-center space-y-4 w-16">
+        <!-- Like -->
+            <div class="flex flex-col items-center">
+                <button class="text-2xl hover:scale-110 transition">❤️</button>
+                <span class="text-sm text-white">${likeCount}</span>
+            </div>
+            <!-- Comment -->
+            <div class="flex flex-col items-center">
+                <button class="text-2xl hover:scale-110 transition" onclick="showReply('${username}')">💬</button>
+                <span class="text-sm text-white">${replyCount}</span>
+            </div>
+            <!-- Repost -->
+            <div class="flex flex-col items-center">
+                <button class="text-2xl hover:scale-110 transition">🔁</button>
+                <span class="text-sm text-white">${shareCount}</span>
+            </div>
+        </div>
+    `;
+
+        return threadCard;
+    }
+
+    function renderAllThreadsCards(threadsItems) {
+        threadsGridContainer.innerHTML = '';
+        threadsItems.forEach(item => {
+            threadsGridContainer.appendChild(buildThreadsCardElement(item));
+        });
+    }
+
+    function displayThreads() {
+        if (allThreadsData.length === 0) {
+            displayPageSection({ showEmpty: true });
+        } else {
+            renderAllThreadsCards(allThreadsData);
+            displayPageSection({ showGrid: true });
+        }
+    }
+
+    async function showReply(userId) {
+        // If the same thread is clicked again → hide the reply panel
+        if (activeReplyThread === userId && !threadsReplyContainer.classList.contains('hidden')) {
+            threadsReplyContainer.classList.add('hidden');
+            activeReplyThread = null;
+            return;
+        }
+
+        // Otherwise, open the panel for the new thread
+        activeReplyThread = userId;
+        threadsReplyContainer.classList.remove('hidden');
+
+        // Show username at the top
+        document.getElementById('replyToWho').textContent = `Replying to ${userId}`;
+
+        // Fetch and render replies
+        const replyItems = await fetchReplyFromServer(userId);
+        threadsReplyList.innerHTML = '';
+
+        replyItems.forEach(item => {
+            threadsReplyList.appendChild(buildReplyCardElement(item));
+        });
+    }
+    function buildReplyCardElement(item) {
+        const username = DOMPurify.sanitize(item.username || "Unknown");
+        const content = DOMPurify.sanitize(item.content || "");
+        const likeCount = DOMPurify.sanitize(String(item.likeCount || 0));
+        const createdAt = new Date(item.created_at);
+        const timeAgo = timeSince(createdAt);
+
+        const replyCard = document.createElement("div");
+        replyCard.className = "flex space-x-3 border-b border-gray-700 py-3";
+
+        replyCard.innerHTML = `
+        <div class="w-8 h-8 rounded-full bg-gray-600"></div>
+        <div class="flex-1">
+            <p class="font-semibold text-white">${username}</p>
+            <p class="text-gray-300 text-sm">${content}</p>
+            <div class="flex items-center space-x-2 mt-1 text-gray-500 text-xs">
+                <button class="hover:text-red-400">❤️</button>
+                <span>${likeCount}</span>
+                <span>·</span>
+                <span>${timeAgo}</span>
+            </div>
+        </div>
+    `;
+
+        return replyCard;
+    }
+
+    // Helper function to show "time ago" style text
+    function timeSince(date) {
+        const seconds = Math.floor((new Date() - date) / 1000);
+        const intervals = [
+            { label: "y", seconds: 31536000 },
+            { label: "mo", seconds: 2592000 },
+            { label: "d", seconds: 86400 },
+            { label: "h", seconds: 3600 },
+            { label: "m", seconds: 60 },
+        ];
+
+        for (const i of intervals) {
+            const count = Math.floor(seconds / i.seconds);
+            if (count >= 1) return `${count}${i.label} ago`;
+        }
+        return "Just now";
+    }
+
+
+    async function fetchReplyFromServer(userId) {
+        try {
+            const response = await fetch(`/threads/replies/${userId}/`, { headers: { 'Accept': 'application/json' }, });
+
+            if (!response.ok) throw new Error('Failed to fetch Reply data');
+            replyItems = await response.json() || [];
+            return replyItems
+        } catch (error) {
+            console.error('Error loading thread:', error);
+            return []
+        }
+    }
+
+    async function fetchThreadsFromServer(userId) {
+        try {
+            displayPageSection({ showLoading: true });
+            const response = await fetch(THREADS_API_ENDPOINT, { headers: { 'Accept': 'application/json' } });
+            if (!response.ok) throw new Error('Failed to fetch thread data');
+            allThreadsData = await response.json() || [];
+            displayThreads();
+        } catch (error) {
+            console.error('Error loading thread:', error);
+            displayPageSection({ showError: true });
+        }
+    }
+
+    fetchThreadsFromServer();
+    document.addEventListener('ThreadsAdded', fetchThreadsFromServer);
+</script>
+
+{% endblock content %}

@@ -18,13 +18,14 @@ from django.contrib import admin
 from django.urls import path, include
 from django.contrib.auth import views as auth_views
 from booking_venue import views
+from . import views
 
 urlpatterns = [
     path('admin/', admin.site.urls),
-    path('', views.main_page, name='main_page'),
-    path('booking-venue/', include('booking_venue.urls')),
-    path('login/', auth_views.LoginView.as_view(template_name='registration/login.html'), name='login'),
-    path('logout/', auth_views.LogoutView.as_view(next_page='main_page'), name='logout'),
-    path('register/', views.register, name='register'),
+    path('liveChat/', include('liveChat.urls', namespace='livechat')),
+    path('', include('accounts.urls', namespace='accounts')),
+    path('matches/', include('matches.urls', namespace='matches')),
+    path('threads/', include('threads.urls', namespace='threads')),
+    path('', views.home, name="home"),
     path('booking-success/', views.booking_success, name='booking_success'),
 ]

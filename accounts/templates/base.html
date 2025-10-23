@@ -1,0 +1,49 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>{% block title %}My Project{% endblock title %}</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <script src="{% static 'accounts/js/toast.js' %}"></script>
+  {% block extra_head %}{% endblock extra_head %}
+</head>
+<body class="bg-gray-50 min-h-screen flex flex-col">
+  
+  <!-- 🌟 Navbar optional -->
+  {% block navbar %}
+  <nav class="bg-white shadow p-4">
+    <div class="container mx-auto flex justify-between">
+      <a href="/" class="text-lg font-bold text-blue-600">MyProject</a>
+      <div class="space-x-4">
+        {% if user.is_authenticated %}
+          <span class="text-gray-700">Hi, {{ user.username }}</span>
+          <button onclick="logoutUser()" class="text-red-600 hover:underline">Logout</button>
+        {% else %}
+          <a href="{% url 'accounts:login' %}" class="text-blue-600 hover:underline">Login</a>
+          <a href="{% url 'accounts:register' %}" class="text-blue-600 hover:underline">Register</a>
+        {% endif %}
+      </div>
+    </div>
+  </nav>
+  {% endblock navbar %}
+
+  <!-- ✨ Toast Container -->
+  {% include 'partials/toast.html' %}
+
+  <!-- 🧱 Main Content -->
+  <main class="flex-grow container mx-auto p-6">
+    {% block content %}{% endblock content %}
+  </main>
+
+  <!-- 🦶 Footer -->
+  {% block footer %}
+  <footer class="bg-white shadow-inner py-4 text-center text-gray-500 text-sm">
+    © 2025 MyProject — All rights reserved.
+  </footer>
+  {% endblock footer %}
+
+  {% block extra_scripts %}{% endblock extra_scripts %}
+</body>
+</html>

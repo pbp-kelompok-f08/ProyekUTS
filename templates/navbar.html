@@ -1,0 +1,75 @@
+{% load static %}
+<nav class="fixed top-0 left-0 z-50 w-full bg-[#1C1C1C] border-b border-[#2A2A2A] text-[#EAEAEA] flex items-center justify-between px-6 md:px-10 py-4 shadow-[0_2px_6px_rgba(0,0,0,0.6)]">
+  <!-- Left: Logo -->
+  <div class="text-3xl font-bold tracking-wider" style="font-family: 'Roboto Mono', monospace;">
+    hoppin<span class="text-gray-500">.</span>
+  </div>
+
+  <!-- Hamburger Button (Mobile) -->
+  <button id="menu-btn" class="md:hidden flex flex-col justify-center items-center space-y-1 focus:outline-none">
+    <span class="block w-6 h-[2px] bg-[#EAEAEA] rounded"></span>
+    <span class="block w-6 h-[2px] bg-[#EAEAEA] rounded"></span>
+    <span class="block w-6 h-[2px] bg-[#EAEAEA] rounded"></span>
+  </button>
+
+  <!-- Center Navigation Links -->
+  <div id="menu"
+       class="hidden md:flex flex-col md:flex-row absolute md:static top-full left-0 w-full md:w-auto bg-[#1C1C1C] md:bg-transparent border-t md:border-0 border-[#2A2A2A] md:space-x-10 text-gray-400 text-lg font-medium md:items-center"
+       style="font-family: 'Roboto Mono', monospace;">
+       
+    <a href="/threads/"
+       class="block px-6 py-3 md:p-0 transition-all duration-300 relative group {% if request.path == '/threads/' %}text-white{% endif %}">
+      Home
+      <span class="absolute left-0 bottom-1 md:bottom-[-4px] h-[2px] bg-white transition-all duration-300
+        {% if request.path == '/threads/' %}w-full{% else %}w-0 group-hover:w-full{% endif %}">
+      </span>
+    </a>
+
+    <a href="#" class="block px-6 py-3 md:p-0 hover:text-white transition-all duration-300 relative group">
+      Venue
+      <span class="absolute left-0 bottom-1 md:bottom-[-4px] w-0 h-[2px] bg-white group-hover:w-full transition-all duration-300"></span>
+    </a>
+
+    <a href="/matches/"
+       class="block px-6 py-3 md:p-0 transition-all duration-300 relative group {% if request.path == '/matches/' %}text-white{% endif %}">
+      Match
+      <span class="absolute left-0 bottom-1 md:bottom-[-4px] h-[2px] bg-white transition-all duration-300
+        {% if request.path == '/matches/' %}w-full{% else %}w-0 group-hover:w-full{% endif %}">
+      </span>
+    </a>
+
+    <a href="#" class="block px-6 py-3 md:p-0 hover:text-white transition-all duration-300 relative group">
+      Chat
+      <span class="absolute left-0 bottom-1 md:bottom-[-4px] w-0 h-[2px] bg-white group-hover:w-full transition-all duration-300"></span>
+    </a>
+  </div>
+
+  <!-- Right: Avatar + Dropdown -->
+  <div class="hidden md:flex items-center space-x-4">
+    <button class="w-10 h-10 flex items-center justify-center border border-[#3A3A3A] rounded-full overflow-hidden hover:border-[#5A5A5A] transition duration-300 shadow-md hover:shadow-gray-700/40">
+      <img src="https://cdn-icons-png.flaticon.com/512/847/847969.png"
+           alt="User Avatar"
+           class="w-full h-full object-cover">
+    </button>
+
+    <button class="w-10 h-10 flex items-center justify-center border border-[#3A3A3A] rounded-lg hover:border-[#5A5A5A] transition duration-300 shadow-sm hover:shadow-gray-700/40">
+      <svg xmlns="http://www.w3.org/2000/svg" fill="none"
+           viewBox="0 0 24 24" stroke="#EAEAEA" stroke-width="2"
+           class="w-5 h-5">
+        <path stroke-linecap="round" stroke-linejoin="round" d="M6 9l6 6 6-6" />
+      </svg>
+    </button>
+  </div>
+</nav>
+
+<link href="https://fonts.googleapis.com/css2?family=Roboto+Mono:wght@500;600&display=swap" rel="stylesheet">
+
+<script>
+  // Toggle hamburger menu
+  const btn = document.getElementById('menu-btn');
+  const menu = document.getElementById('menu');
+  btn.addEventListener('click', () => {
+    menu.classList.toggle('hidden');
+    menu.classList.toggle('flex');
+  });
+</script>

@@ -1,0 +1,66 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="utf-8">
+    <title>{% block title %}Sosmed Olahraga{% endblock %}</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    
+    {% block meta %}
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    {% endblock meta %}
+
+    <script src="https://cdn.tailwindcss.com"></script>
+    <!-- Add DOMPurify here -->
+    <script src="https://cdn.jsdelivr.net/npm/dompurify@3.0.5/dist/purify.min.js"></script>
+
+</head>
+<body>
+    
+
+
+    <main>
+        {% block content %}{% endblock %}
+    </main>
+
+    <div id="toast-container" style="position:fixed; top: 1rem; right: 1rem; max-width: 320px;"></div>
+
+    <script>
+    function getCookie(name) {
+        let cookieValue = null;
+        if (document.cookie && document.cookie !== '') {
+            const cookies = document.cookie.split(';');
+            for (let i = 0; i < cookies.length; i++) {
+                const cookie = cookies[i].trim();
+                if (cookie.substring(0, name.length + 1) === (name + '=')) {
+                    cookieValue = decodeURIComponent(cookie.substring(name.length + 1));
+                    break;
+                }
+            }
+        }
+        return cookieValue;
+    }
+
+    function showToast(message, type = 'info') {
+        const toastContainer = document.getElementById('toast-container');
+        const toast = document.createElement('div');
+        toast.textContent = message;
+        toast.setAttribute('role', 'status');
+        toast.style.backgroundColor = type === 'success' ? '#c6f6d5' : (type === 'error' ? '#fed7d7' : '#e2e8f0');
+        toast.style.border = '1px solid #4a5568';
+        toast.style.padding = '0.75rem 1rem';
+        toast.style.marginTop = '0.5rem';
+        toast.style.borderRadius = '0.25rem';
+        toast.style.color = '#1a202c';
+        toast.style.boxShadow = '0 2px 6px rgba(0,0,0,0.15)';
+        toastContainer.appendChild(toast);
+        setTimeout(() => {
+            toast.remove();
+        }, 4000);
+    }
+    </script>
+
+    {% block extra_scripts %}{% endblock %}
+</body>
+</html>

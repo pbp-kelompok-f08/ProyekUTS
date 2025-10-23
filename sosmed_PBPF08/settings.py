@@ -33,6 +33,11 @@ DEBUG = True
 ALLOWED_HOSTS = ["localhost", "127.0.0.1", 'm-naufal41-sosmed.pbp.cs.ui.ac.id']
 
 
+AUTH_USER_MODEL = 'accounts.CustomUser' 
+LOGIN_URL = '/login/'
+LOGIN_REDIRECT_URL = 'dashboard' 
+LOGOUT_REDIRECT_URL = 'login'
+
 # Application definition
 
 INSTALLED_APPS = [
@@ -43,6 +48,10 @@ INSTALLED_APPS = [
     'django.contrib.messages',
     'django.contrib.staticfiles',
     'booking_venue',
+    'liveChat',
+    'accounts',
+    'matches',
+    'threads',
 ]
 
 MIDDLEWARE = [
@@ -60,7 +69,7 @@ ROOT_URLCONF = 'sosmed_PBPF08.urls'
 TEMPLATES = [
     {
         'BACKEND': 'django.template.backends.django.DjangoTemplates',
-        'DIRS': [],
+        'DIRS': [BASE_DIR / 'templates'],
         'APP_DIRS': True,
         'OPTIONS': {
             'context_processors': [

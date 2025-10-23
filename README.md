@@ -18,7 +18,7 @@
 <details>
   <summary>Lihat Deskripsi</summary>
 
-Temui platform sosial media baru yang menggabungkan keseruan berbagi cerita dan aktivitas nyata! Di sini, kamu bisa membuat threads seru seperti Twitter, booking lapangan favorit untuk kegiatan, dan ikut **Open Party / Find Party** untuk olahraga sesuai minatmu. Semua konten dan event tersusun rapi berdasarkan kategori, jadi lebih mudah menemukan apa yang kamu suka.
+Hoppin ditujukan bagi seluruh individu yang memiliki minat terhadap aktivitas olahraga, baik pemula maupun mereka yang telah rutin berolahraga. Platform ini menjadi wadah bagi masyarakat yang ingin tetap aktif, membangun relasi sosial, serta berpartisipasi dalam berbagai kegiatan olahraga di sekitar mereka. Melalui fitur seperti threads interaktif, sistem booking venue, dan Open Party / Find Party, Hoppin mempermudah pengguna untuk berbagi pengalaman, menemukan komunitas dengan minat serupa, serta berpartisipasi dalam event olahraga dengan mudah. Selain itu, Hoppin juga memberikan peluang bagi penyedia fasilitas olahraga, pelatih, dan penyelenggara acara untuk memperluas jangkauan audiensnya secara efisien. Dengan menggabungkan interaksi digital dan aktivitas nyata, Hoppin hadir sebagai platform yang mendukung gaya hidup sehat, aktif, dan terhubung bagi semua kalangan.
 
 ### Keunggulan dan Manfaat:
 - **Share & Connect:** Bikin threads, diskusi, dan temukan komunitas dengan minat sama.  
@@ -48,12 +48,12 @@ Temui platform sosial media baru yang menggabungkan keseruan berbagi cerita dan 
 - **Fungsi:** Meningkatkan partisipasi dalam kegiatan olahraga komunitas.
 
 ### 4. Pengguna
-- **Fitur:** Manajemen akun pengguna, termasuk registrasi, login, profil, dan pengaturan privasi.  
+- **Fitur:** Manajemen akun pengguna, termasuk registrasi, login, profil, dan pengaturan privasi. Pengguna juga dapat mengkustomisasi dan mengedit profile mereka
 - **Fungsi:** Personalisasi pengalaman pengguna dan kontrol akses.
 
-### 5. XXXXXX
-- **Fitur:**  isi sini
-- **Fungsi:** isi sini
+### 5. Live Chat
+- **Fitur:**  Pengguna dapat mengirim pesan kepada pengguna lain secara real time. 
+- **Fungsi:** Mempermudah proses booking atau matching dengan komunikasi.
 </details>
 
 ---
@@ -64,39 +64,38 @@ Temui platform sosial media baru yang menggabungkan keseruan berbagi cerita dan 
 
 ### 1. Postingan (Threads)
 - **Dataset:** Dataset apa 
-- **Link:**
+- **Link:** https://www.kaggle.com/datasets/danielgrijalvas/twitter-threads
 
 ### 2. Venue (Booking Venue)
-- **Dataset:** Dataset apa 
-- **Link:**
+- **Dataset:** Football Stadium
+- **Link:** https://www.kaggle.com/datasets/imtkaggleteam/football-stadiums
 
-### 3. Match (Open Party / Find Party)
-- **Dataset:** Dataset apa 
-- **Link:**
-
-### 4. Pengguna
-- **Dataset:** Dataset apa 
-- **Link:**
-
-### 5. XXXXXX
-- **Dataset:** Dataset apa 
-- **Link:**
-  
-  
-
-(Tuliskan sumber dataset kategori utama produk)  
-
+### note:
+untuk fitur" seperti match akan dibuatkan data dummy berdasarkan data venue yang ada.
 </details>
 
 ---
 
-## 👤 Role / Peran Pengguna
+## 👤 Pengguna Website
 <details>
-  <summary>Lihat Role</summary>
+<summary>Role & Hak Akses</summary>
 
-- **User:** Pengguna aplikasi
-- **Admin:** 
+### 1) **User (Pengguna Umum)**
+Pengguna inti aplikasi **Hoppin** untuk berinteraksi dan ikut kegiatan olahraga.
 
+**Hak & Fitur:**
+- **Threads (Postingan):** buat, edit, hapus *post* sendiri; suka & komentar pada *post* orang lain.
+- **Venue Booking:** lihat daftar & detail venue, lakukan *booking*, cek riwayat/status booking di profil.
+- **Match (Open/Find Party):** buat *match* terbuka atau gabung *match* yang tersedia.
+- **Live Chat:** kirim pesan real-time untuk koordinasi booking/match.
+- **Profil:** ubah foto/bio/minat olahraga, lihat statistik aktivitas.
+
+### 2) **Admin**
+Penjaga kualitas platform: moderasi konten, kelola data, dan pantau aktivitas.
+
+**Hak & Fitur:**
+- **Manajemen Pengguna:** lihat semua pengguna, nonaktifkan/hapus akun pelanggar.
+- **Hak User lainnya:** Admin juga memiliki hak yang sama yang dimiliki oleh User.
 </details>
 
 ---
