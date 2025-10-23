@@ -1,0 +1,29 @@
+{% extends 'base.html' %}
+
+{% block title %}Available Venues{% endblock %}
+
+{% block content %}
+<div class="row">
+    <div class="col-12">
+        <h1 class="mb-4">Available Venues</h1>
+        <div class="row">
+            {% for venue in venues %}
+            <div class="col-md-4 mb-4">
+                <div class="card h-100">
+                    <div class="card-body">
+                        <h5 class="card-title">{{ venue.name }}</h5>
+                        <p class="card-text">
+                            <strong>Location:</strong> {{ venue.location }}<br>
+                            <strong>Capacity:</strong> {{ venue.capacity }}<br>
+                            <strong>Price:</strong> ${{ venue.price }}
+                        </p>
+                        <p class="card-text">{{ venue.description|truncatechars:100 }}</p>
+                        <a href="{% url 'booking_venue:book_venue' venue.id %}" class="btn btn-primary">Book Now</a>
+                    </div>
+                </div>
+            </div>
+            {% endfor %}
+        </div>
+    </div>
+</div>
+{% endblock %}
