@@ -120,7 +120,7 @@ def match_dashboard(request):
     match_list = list(matches)
     categories = SportCategory.objects.all()
     grouped_matches = [
-        (category, [m for m in match_list if m.category == category.name])
+        (category, [m for m in match_list if m.category == category])
         for category in categories
     ]
     has_any_match = any(matches for _, matches in grouped_matches)
@@ -167,12 +167,16 @@ def create_match(request: HttpRequest):
             status=503,
         )
 
-    data = json.loads(request.body)
-    form = MatchForm(data)
+    if request.content_type == "application/json":
+        data = json.loads(request.body)
+        form = MatchForm(data)
+    else:
+        form = MatchForm(request.POST)
+
     if form.is_valid():
         match = form.save()
         Participation.objects.create(match=match, user=request.user, message="")
-        Group.objects.create(match=match, name=f"Group {data["title"]}")
+        Group.objects.create(match=match, name=f"Group {match.title}")
         return JsonResponse(
             {
                 "success": True,
@@ -183,6 +187,7 @@ def create_match(request: HttpRequest):
         )
 
     return JsonResponse({"success": False, "errors": form.errors}, status=400)
+
 
 
 @require_http_methods(["POST"])

@@ -10,7 +10,7 @@ class SportCategory(models.Model):
     class Meta:
         ordering = ["name"]
 
-    def __str__(self) -> str:  # pragma: no cover - simple representation
+    def __str__(self) -> str:  
         return self.name
 
     def save(self, *args, **kwargs):
@@ -33,7 +33,7 @@ class Match(models.Model):
     class Meta:
         ordering = ["event_date"]
 
-    def __str__(self) -> str:  # pragma: no cover - simple representation
+    def __str__(self) -> str:  
         return self.title
 
     @property
@@ -55,5 +55,5 @@ class Participation(models.Model):
     class Meta:
         ordering = ["-created_at"]
 
-    def __str__(self) -> str:  # pragma: no cover - simple representation
+    def __str__(self) -> str:  
         return f"{self.user.username} - {self.match.id}"

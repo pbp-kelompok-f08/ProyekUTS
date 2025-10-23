@@ -26,6 +26,6 @@ urlpatterns = [
     path('', include('accounts.urls', namespace='accounts')),
     path('matches/', include('matches.urls', namespace='matches')),
     path('threads/', include('threads.urls', namespace='threads')),
+    path('booking-success/', include('booking_venue.urls', namespace='booking_venue')),
     path('', views.home, name="home"),
-    path('booking-success/', views.booking_success, name='booking_success'),
 ]
