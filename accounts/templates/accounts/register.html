@@ -10,6 +10,11 @@
   <div class="bg-white rounded-2xl shadow-2xl w-full max-w-md p-8">
     <h2 class="text-3xl font-bold text-center text-[#262626] mb-8">Register</h2>
 
+    <!-- Alert Box -->
+    <div id="alert-box"
+         class="hidden mb-4 text-sm font-medium text-red-600 bg-red-100 border border-red-300 rounded-md p-3 text-center">
+    </div>
+
     <input id="username"
            class="w-full border border-gray-300 p-3 mb-4 rounded-md text-[#262626] placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-[#262626]"
            placeholder="Username" />
@@ -23,9 +28,17 @@
            class="w-full border border-gray-300 p-3 mb-6 rounded-md text-[#262626] placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-[#262626]"
            placeholder="Konfirmasi Password" />
 
-    <button onclick="registerUser()"
-            class="w-full bg-[#262626] text-white py-3 rounded-md font-semibold hover:bg-[#1A1A1A] transition">
-      Register
+    <!-- Button -->
+    <button id="register-btn" onclick="registerUser()"
+            class="w-full bg-[#262626] text-white py-3 rounded-md font-semibold hover:bg-[#1A1A1A] transition flex items-center justify-center gap-2">
+      <span id="register-text">Register</span>
+      <!-- Spinner -->
+      <svg id="loading-spinner" class="hidden w-5 h-5 animate-spin text-white" xmlns="http://www.w3.org/2000/svg"
+           fill="none" viewBox="0 0 24 24">
+        <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
+        <path class="opacity-75" fill="currentColor"
+              d="M4 12a8 8 0 018-8v4a4 4 0 00-4 4H4z"></path>
+      </svg>
     </button>
 
     <p class="text-center text-sm mt-5 text-gray-600">
@@ -37,5 +50,76 @@
 {% endblock %}
 
 {% block extra_scripts %}
-<script src="{% static 'accounts/js/auth.js' %}"></script>
+<script>
+async function registerUser() {
+  const username = document.getElementById("username").value.trim();
+  const email = document.getElementById("email").value.trim();
+  const password1 = document.getElementById("password1").value.trim();
+  const password2 = document.getElementById("password2").value.trim();
+  const alertBox = document.getElementById("alert-box");
+  const btn = document.getElementById("register-btn");
+  const spinner = document.getElementById("loading-spinner");
+  const btnText = document.getElementById("register-text");
+
+  // Reset alert
+  alertBox.classList.add("hidden");
+  alertBox.textContent = "";
+
+  if (!username || !email || !password1 || !password2) {
+    alertBox.textContent = "Semua field harus diisi.";
+    alertBox.classList.remove("hidden");
+    return;
+  }
+
+  if (password1 !== password2) {
+    alertBox.textContent = "Password dan konfirmasi password tidak sama.";
+    alertBox.classList.remove("hidden");
+    return;
+  }
+
+  try {
+    // ⏳ Loading State
+    btn.disabled = true;
+    spinner.classList.remove("hidden");
+    btnText.textContent = "Registering...";
+
+    const res = await fetch("/ajax/register/", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ username, email, password1, password2 }),
+    });
+
+    const data = await res.json();
+
+    // Reset loading state
+    btn.disabled = false;
+    spinner.classList.add("hidden");
+    btnText.textContent = "Register";
+
+    if (data.success) {
+      alertBox.textContent = "Registrasi berhasil! Mengalihkan ke halaman login...";
+      alertBox.classList.remove("hidden");
+      alertBox.classList.remove("bg-red-100", "text-red-600");
+      alertBox.classList.add("bg-green-100", "text-green-700");
+
+      setTimeout(() => {
+        window.location.href = "/login/";
+      }, 1000);
+    } else {
+      const errorMsg = data.errors
+        ? Object.values(data.errors).flat().join(", ")
+        : (data.message || "Registrasi gagal. Coba lagi.");
+      alertBox.textContent = errorMsg;
+      alertBox.classList.remove("hidden");
+      alertBox.classList.add("text-red-600", "bg-red-100");
+    }
+  } catch (error) {
+    alertBox.textContent = "Terjadi kesalahan jaringan. Coba lagi nanti.";
+    alertBox.classList.remove("hidden");
+    btn.disabled = false;
+    spinner.classList.add("hidden");
+    btnText.textContent = "Register";
+  }
+}
+</script>
 {% endblock %}
