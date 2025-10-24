@@ -95,7 +95,6 @@ const chatsSectionContainer = document.getElementById("chats-section");
 const sendButton = document.getElementById("send-chat");
 const chatTextArea = document.getElementById("chat-textarea");
 const groupSearchFormInput = document.getElementById("group-search-form-input");
-const username = "{{ username|escapejs }}"
 
 let currentGroupSection = document.getElementById("dummy-section");
 let lastChat = null;
@@ -172,7 +171,7 @@ function buildChatBubbleElement(chat) {
     const bubbleChatHtml = sameUserAsPrev
         ? `<div class="flex flex-row ${sameUserAsCurrent ? "bg-green-700" : "bg-neutral-800"} rounded-[8px] gap-10 py-1 px-4 ${sameUserAsCurrent ? "mr-[38px]" : "ml-[38px]"}">
                 <div class="flex flex-col gap-3">
-                    <a href="/profile/${username}/" class="max-w-[500px]">${chat.message}</a>
+                    <a href="/profile/${chat.username}/" class="max-w-[500px]">${chat.message}</a>
                 </div>
                 <div class="flex flex-col text-right text-[13px] pt-1">
                     <p>${dateString}</p>
@@ -193,10 +192,10 @@ function buildChatBubbleElement(chat) {
                 <img src={{ profile_picture|escapejs }} alt="" class="size-[30px] rounded-full">
            </div>`
         : `<div class="flex flex-row gap-2 items-end">
-                <a href="/profile/${username}/"><img src="${chat.profile_picture}" alt="" class="size-[30px] rounded-full"></a>
+                <a href="/profile/${chat.username}/"><img src="${chat.profile_picture}" alt="" class="size-[30px] rounded-full"></a>
                 <div class="flex flex-row bg-neutral-800 rounded-[8px] gap-10 py-1 px-4">
                     <div class="flex flex-col gap-3">
-                        <a href="/profile/${username}/" class="font-semibold">${chat.username}</a>
+                        <a href="/profile/${chat.username}/" class="font-semibold">${chat.username}</a>
                         <p class="max-w-[500px]">${chat.message}</p>
                     </div>
                     <div class="flex flex-col text-right text-[13px] pt-1">
