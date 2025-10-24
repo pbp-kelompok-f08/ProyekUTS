@@ -12,7 +12,7 @@
     <span class="block w-6 h-[2px] bg-[#EAEAEA] rounded"></span>
   </button>
 
-  <!-- Center Navigation Links -->
+  <!-- Navigation Links (Desktop + Mobile) -->
   <div id="menu"
        class="hidden md:flex flex-col md:flex-row absolute md:static top-full left-0 w-full md:w-auto bg-[#1C1C1C] md:bg-transparent border-t md:border-0 border-[#2A2A2A] md:space-x-10 text-gray-400 text-lg font-medium md:items-center"
        style="font-family: 'Roboto Mono', monospace;">
@@ -48,9 +48,24 @@
         {% if '/liveChat' in request.path %}w-full{% else %}w-0 group-hover:w-full{% endif %}">
       </span>
     </a>
+
+    {% if user.is_authenticated %}
+      <!-- Divider (only mobile) -->
+      <div class="border-t border-[#2A2A2A] my-2 md:hidden"></div>
+      <!-- Mobile user menu -->
+      <a href="{% url 'accounts:dashboard' %}" class="block px-6 py-3 md:hidden hover:bg-[#2A2A2A] text-white transition">
+        Dashboard
+      </a>
+      <a href="/profile/" class="block px-6 py-3 md:hidden hover:bg-[#2A2A2A] text-white transition">
+        Profile
+      </a>
+      <button onclick="logoutUser()" class="block w-full text-left px-6 py-3 md:hidden hover:bg-[#2A2A2A] text-white transition">
+        Logout
+      </button>
+    {% endif %}
   </div>
 
-  <!-- Right: User Menu -->
+  <!-- Right: User Menu (Desktop only) -->
   <div class="hidden md:flex items-center space-x-4">
     {% if user.is_authenticated %}
       <div class="flex items-center space-x-3">
@@ -64,7 +79,7 @@
             {% endif %}
           </button>
 
-          <!-- Dropdown Menu -->
+          <!-- Dropdown Menu (Desktop) -->
           <div id="user-dropdown" class="absolute right-0 mt-2 w-48 bg-[#1C1C1C] border border-[#2A2A2A] rounded-lg shadow-lg py-2 hidden z-50">
             <a href="{% url 'accounts:dashboard' %}" class="block px-4 py-2 text-sm text-[#EAEAEA] hover:bg-[#2A2A2A] transition-colors">
               Dashboard
@@ -134,5 +149,20 @@
       console.error('Logout error:', error);
       window.location.href = '/login/';
     });
+  }
+
+  function getCookie(name) {
+    let cookieValue = null;
+    if (document.cookie && document.cookie !== '') {
+      const cookies = document.cookie.split(';');
+      for (let i = 0; i < cookies.length; i++) {
+        const cookie = cookies[i].trim();
+        if (cookie.substring(0, name.length + 1) === (name + '=')) {
+          cookieValue = decodeURIComponent(cookie.substring(name.length + 1));
+          break;
+        }
+      }
+    }
+    return cookieValue;
   }
 </script>
