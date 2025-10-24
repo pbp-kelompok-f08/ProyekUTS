@@ -245,17 +245,22 @@ function buildGroupSectionElement(group) {
     sectionElement.className = "flex w-full h-[70px] hover:cursor-pointer hover:bg-neutral-800 items-center px-6";
     sectionElement.onclick = () => changeCurrentGroup(group);
     sectionElement.id = `group-${group.id}-section`;
-    const localDate = new Date(group.last_chat.createdAt); // parse ISO UTC
-    const timeString = localDate.toLocaleTimeString('id-ID', {
-        hour: '2-digit',
-        minute: '2-digit',
-    });
-
-    const dateString = localDate.toLocaleDateString('id-ID', {
-        year: 'numeric',
-        month: '2-digit',
-        day: '2-digit'
-    });
+    let localDate;
+    let timeString = '-';
+    let dateString = '-';
+    if (group.last_chat)
+    {
+        localDate = new Date(group.last_chat.createdAt); // parse ISO UTC
+        timeString = localDate.toLocaleTimeString('id-ID', {
+            hour: '2-digit',
+            minute: '2-digit',
+        });
+        dateString = localDate.toLocaleDateString('id-ID', {
+            year: 'numeric',
+            month: '2-digit',
+            day: '2-digit'
+        });
+    }
 
     const groupSectionHtml = `
         <div class="flex flex-row gap-4 w-full">
