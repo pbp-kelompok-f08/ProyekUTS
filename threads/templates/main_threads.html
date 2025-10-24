@@ -170,10 +170,10 @@
         threadCard.innerHTML = `
         <!-- Left section: profile (clickable) -->
         <div class="flex flex-col items-center">
-        <a href="/profile/${username}/" class="group">
-            <img src="${profileImg}" alt="${username}" 
-                class="w-10 h-10 rounded-full object-cover border border-gray-600 group-hover:border-blue-400 transition-all duration-200">
-        </a>
+            <a href="/profile/${username}/" class="group">
+                <img src="${profileImg}" alt="${username}" 
+                    class="w-10 h-10 rounded-full object-cover border border-gray-600 group-hover:border-blue-400 transition-all duration-200">
+            </a>
         </div>
 
         <!-- Middle section: post content -->
@@ -382,8 +382,10 @@
             </div>`
                 : ""}
             <div class="flex flex-col items-center">
-                <img src="${profileImg}" alt="${username}" 
-                    class="w-8 h-8 rounded-full object-cover border border-gray-600">
+                <a href="/profile/${username}/" class="group">
+                    <img src="${profileImg}" alt="${username}" 
+                        class="w-8 h-8 rounded-full object-cover border border-gray-600 group-hover:border-blue-400 transition-all duration-200">
+                </a>
             </div>
             <div class="flex-1">
                 <p class="font-semibold text-white">${username}</p>
