@@ -16,7 +16,7 @@ from django.urls import reverse
 
 @login_required
 def show_main(request):
-    return render(request,"main.html")
+    return render(request, "main_threads.html")
 
 def show_json(request):
     thread_list = Thread.objects.all().order_by('-created_at')

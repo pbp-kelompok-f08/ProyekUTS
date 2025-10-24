@@ -16,12 +16,29 @@ class Group(models.Model):
     @property
     def users(self):
         return list(users["user"] for users in self.match.participations.all().values("user"))
+    
+    @property
+    def last_chat(self):
+        if self.chat.exists():
+            last_chat = self.chat.latest()  
+            data = {
+                "username": last_chat.username.pk,
+                "message": last_chat.message,
+                "createdAt": last_chat.createdAt
+            }
+            return data
+        else:
+            return None
 
 class Chat(models.Model):
     group_id = models.ForeignKey(to=Group, on_delete=models.CASCADE, related_name='chat')
     username = models.ForeignKey(to=CustomUser, on_delete=models.CASCADE, related_name='chat')
     message = models.TextField(blank=False)
     createdAt = models.DateTimeField(auto_now_add=True)
+
+    class Meta:
+        ordering = ["-createdAt"]
+        get_latest_by = "createdAt"
 
     def __str__(self):
         return f"group_id: {self.group_id}, username: {self.username}, message: \"{self.message}\""

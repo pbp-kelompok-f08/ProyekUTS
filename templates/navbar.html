@@ -25,9 +25,12 @@
       </span>
     </a>
 
-    <a href="/booking-venue/" class="block px-6 py-3 md:p-0 hover:text-white transition-all duration-300 relative group">
+    <a href="/booking-venue/"
+       class="block px-6 py-3 md:p-0 transition-all duration-300 relative group {% if '/booking-venue' in request.path %}text-white{% endif %}">
       Venue
-      <span class="absolute left-0 bottom-1 md:bottom-[-4px] w-0 h-[2px] bg-white group-hover:w-full transition-all duration-300"></span>
+      <span class="absolute left-0 bottom-1 md:bottom-[-4px] h-[2px] bg-white transition-all duration-300
+        {% if '/booking-venue' in request.path %}w-full{% else %}w-0 group-hover:w-full{% endif %}">
+      </span>
     </a>
 
     <a href="/matches/"
@@ -38,31 +41,57 @@
       </span>
     </a>
 
-    <a href="/liveChat/" class="block px-6 py-3 md:p-0 hover:text-white transition-all duration-300 relative group">
+    <a href="/liveChat/"
+       class="block px-6 py-3 md:p-0 transition-all duration-300 relative group {% if '/liveChat' in request.path %}text-white{% endif %}">
       Chat
-      <span class="absolute left-0 bottom-1 md:bottom-[-4px] w-0 h-[2px] bg-white group-hover:w-full transition-all duration-300"></span>
+      <span class="absolute left-0 bottom-1 md:bottom-[-4px] h-[2px] bg-white transition-all duration-300
+        {% if '/liveChat' in request.path %}w-full{% else %}w-0 group-hover:w-full{% endif %}">
+      </span>
     </a>
   </div>
 
-  <!-- Right: Avatar + Dropdown -->
+  <!-- Right: User Menu -->
   <div class="hidden md:flex items-center space-x-4">
-    <button class="w-10 h-10 flex items-center justify-center border border-[#3A3A3A] rounded-full overflow-hidden hover:border-[#5A5A5A] transition duration-300 shadow-md hover:shadow-gray-700/40">
-      <img src="https://cdn-icons-png.flaticon.com/512/847/847969.png"
-           alt="User Avatar"
-           class="w-full h-full object-cover">
-    </button>
+    {% if user.is_authenticated %}
+      <div class="flex items-center space-x-3">
+        <span class="text-sm text-gray-300">Welcome, {{ user.username }}</span>
+        <div class="relative">
+          <button id="user-menu-btn" class="w-10 h-10 flex items-center justify-center border border-[#3A3A3A] rounded-full overflow-hidden hover:border-[#5A5A5A] transition duration-300 shadow-md hover:shadow-gray-700/40">
+            {% if user.profile_picture and user.profile_picture.url %}
+              <img src="{{ user.profile_picture.url }}" alt="{{ user.username }}'s avatar" class="w-full h-full object-cover">
+            {% else %}
+              <img src="{% static 'accounts/img/default.png' %}" alt="Default avatar" class="w-full h-full object-cover">
+            {% endif %}
+          </button>
 
-    <button class="w-10 h-10 flex items-center justify-center border border-[#3A3A3A] rounded-lg hover:border-[#5A5A5A] transition duration-300 shadow-sm hover:shadow-gray-700/40"
-      onclick="toggleProfile">
-      <svg xmlns="http://www.w3.org/2000/svg" fill="none"
-           viewBox="0 0 24 24" stroke="#EAEAEA" stroke-width="2"
-           class="w-5 h-5">
-        <path stroke-linecap="round" stroke-linejoin="round" d="M6 9l6 6 6-6" />
-      </svg>
-    </button>
+          <!-- Dropdown Menu -->
+          <div id="user-dropdown" class="absolute right-0 mt-2 w-48 bg-[#1C1C1C] border border-[#2A2A2A] rounded-lg shadow-lg py-2 hidden z-50">
+            <a href="{% url 'accounts:dashboard' %}" class="block px-4 py-2 text-sm text-[#EAEAEA] hover:bg-[#2A2A2A] transition-colors">
+              Dashboard
+            </a>
+            <a href="/profile/" class="block px-4 py-2 text-sm text-[#EAEAEA] hover:bg-[#2A2A2A] transition-colors">
+              Profile
+            </a>
+            <div class="border-t border-[#2A2A2A] my-1"></div>
+            <button onclick="logoutUser()" class="block w-full text-left px-4 py-2 text-sm text-[#EAEAEA] hover:bg-[#2A2A2A] transition-colors">
+              Logout
+            </button>
+          </div>
+        </div>
+      </div>
+    {% else %}
+      <div class="flex items-center space-x-3">
+        <a href="/login/" class="text-[#EAEAEA] hover:text-white transition-colors font-medium">Login</a>
+        <a href="/register/" class="bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded-lg font-medium transition-colors">Sign Up</a>
+      </div>
+    {% endif %}
   </div>
 </nav>
 
+<<<<<<< HEAD
+<!-- Add this to base.html or include font -->
+ <link href="https://fonts.googleapis.com/css2?family=Roboto+Mono:wght@500;600&display=swap" rel="stylesheet">
+=======
 <link href="https://fonts.googleapis.com/css2?family=Roboto+Mono:wght@500;600&display=swap" rel="stylesheet">
 
 <script>
@@ -73,4 +102,42 @@
     menu.classList.toggle('hidden');
     menu.classList.toggle('flex');
   });
+
+  // User dropdown toggle
+  const userMenuBtn = document.getElementById('user-menu-btn');
+  const userDropdown = document.getElementById('user-dropdown');
+
+  if (userMenuBtn && userDropdown) {
+    userMenuBtn.addEventListener('click', (e) => {
+      e.stopPropagation();
+      userDropdown.classList.toggle('hidden');
+    });
+
+    // Close dropdown when clicking outside
+    document.addEventListener('click', () => {
+      userDropdown.classList.add('hidden');
+    });
+  }
+
+  // Logout function
+  function logoutUser() {
+    fetch('/accounts/ajax/logout/', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        'X-CSRFToken': getCookie('csrftoken')
+      }
+    })
+    .then(response => response.json())
+    .then(data => {
+      if (data.success) {
+        window.location.href = '/login/';
+      }
+    })
+    .catch(error => {
+      console.error('Logout error:', error);
+      window.location.href = '/login/';
+    });
+  }
 </script>
+>>>>>>> 6a16d5125c0992501184d9bdbd88a9e5221e6f6e
