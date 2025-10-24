@@ -18,7 +18,7 @@
                 </div>
                 {% if user.is_authenticated %}
                 <div class="mt-6 md:mt-0">
-                    <a href="{% url 'booking_venue:my_bookings' %}" class="rounded-xl px-7 py-3 font-semibold text-black transition-all duration-300 bg-[#2A2A2A] hover:bg-[#343434] text-[#EAEAEA] transition-all duration-300 bg-whitshadow-[0_0_15px_rgba(255,255,255,0.35)]e hover:bg-whitshadow-[0_0_24px_rgba(255,255,255,0.35)]e flex items-center gap-2">
+                    <a href="{% url 'booking_venue:my_bookings' %}" class="rounded-xl px-7 py-3 font-semibold text-white transition-all duration-300 bg-[#2A2A2A] hover:bg-[#343434] text-[#EAEAEA] transition-all duration-300 bg-whitshadow-[0_0_15px_rgba(255,255,255,0.35)]e hover:bg-whitshadow-[0_0_24px_rgba(255,255,255,0.35)]e flex items-center gap-2">
                         <span class="text-xl">📋</span>
                         <span>My Bookings</span>
                     </a>
@@ -51,7 +51,7 @@
                     </div>
 
                     <div class="flex gap-2">
-                        <button type="submit" class="rounded-xl px-7 py-3 font-semibold text-black transition-all duration-300 bg-[#2A2A2A] hover:bg-[#343434] text-[#EAEAEA] transition-all duration-300 bg-whitshadow-[0_0_15px_rgba(255,255,255,0.35)]e hover:bg-whitshadow-[0_0_24px_rgba(255,255,255,0.35)]e flex items-center gap-2">
+                        <button type="submit" class="rounded-xl px-7 py-3 font-semibold text-[#EAEAEA] transition-all duration-300 bg-[#2A2A2A] hover:bg-[#343434] text-[#EAEAEA] transition-all duration-300 bg-whitshadow-[0_0_15px_rgba(255,255,255,0.35)]e hover:bg-whitshadow-[0_0_24px_rgba(255,255,255,0.35)]e flex items-center gap-2">
                             <span>🔍</span>
                             <span>Apply Filters</span>
                         </button>
@@ -70,7 +70,7 @@
         {% if venues %}
         <div class="grid md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-8">
             {% for venue in venues %}
-            <div class="bg-[#161616] hover:bg-[#1F1F1F] border border-[#2A2A2A] rounded-2xl p-6 shadow-[0_0_10px_rgba(0,0,0,0.4)] transition hover:-translate-y-1 hover:shadow-[0_0_22px_rgba(0,255,148,0.16)]">
+            <div class="bg-[#161616] hover:bg-[#1F1F1F] border border-[#2A2A2A] rounded-2xl p-6 shadow-[0_0_10px_rgba(0,0,0,0.4)] transition hover:-translate-y-1 hover:shadow-[0_0_22px_rgba(0,255,148,0.16)] flex flex-col">
                 <!-- Venue Header -->
                 <div class="flex items-start justify-between mb-4">
                     <div class="flex-1">
@@ -103,13 +103,13 @@
                 </div>
 
                 <!-- Description -->
-                <p class="text-[#CFCFCF] text-sm leading-relaxed mb-6 line-clamp-3">
+                <p class="text-[#CFCFCF] text-sm leading-relaxed mb-4 line-clamp-3">
                     {{ venue.description|truncatechars:120 }}
                 </p>
 
                 <!-- Action Button -->
                 <a href="{% url 'booking_venue:book_venue' venue.id %}"
-                   class="w-full py-2.5 rounded-xl font-semibold text-black transition bg-[#2A2A2A] hover:bg-[#343434] text-[#EAEAEA] transition-all duration-300 bg-whitshadow-[0_0_15px_rgba(255,255,255,0.35)]e flex items-center justify-center gap-2">
+                   class="w-full py-2.5 rounded-xl font-semibold text-white transition bg-[#2A2A2A] hover:bg-[#343434] text-[#EAEAEA] transition-all duration-300 bg-whitshadow-[0_0_15px_rgba(255,255,255,0.35)]e flex items-center justify-center gap-2 mt-auto mb-2.5">
                     <span class="text-lg">🎫</span>
                     <span>Book Now</span>
                 </a>
