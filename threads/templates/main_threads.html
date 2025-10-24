@@ -273,10 +273,6 @@
 
     async function handleLikes(threadId) {
         const response = await fetch(`/threads/like-thread/${threadId}/`, { method: "POST" })
-        // if (!response.ok) {
-        //     console.error("Failed to like/unlike thread");
-        //     return;
-        // }
         const likeCount = await response.json()
 
         const count = document.getElementById(`likeCount-${threadId}`);
@@ -433,10 +429,6 @@
     }
     async function handleReplyLikes(replyId) {
         const response = await fetch(`/threads/like-reply/${replyId}/`, { method: "POST" })
-        // if (!response.ok) {
-        //     console.error("Failed to like/unlike thread");
-        //     return;
-        // }
         const likeCount = await response.json()
 
         const count = document.getElementById(`likeCount-${replyId}`);
