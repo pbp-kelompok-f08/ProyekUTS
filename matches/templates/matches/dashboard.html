@@ -23,7 +23,7 @@
         </div>
 
         <button type="button" id="open-create-modal" {% if not schema_ready %}disabled{% endif %}
-          class="group mt-2 md:mt-0 rounded-xl px-7 py-3 font-semibold text-black transition-all duration-300
+          class="group mt-2 md:mt-0 rounded-xl px-7 py-3 font-semibold text-white transition-all duration-300
                  bg-[#2A2A2A]hover:bg-[#343434] text-[#EAEAEA] transition-all duration-300
                  bg-whitshadow-[0_0_15px_rgba(255,255,255,0.35)]e hover:bg-whitshadow-[0_0_24px_rgba(255,255,255,0.35)]e
                  disabled:opacity-50 disabled:cursor-not-allowed flex items-center gap-2">
@@ -100,7 +100,7 @@
         <div id="empty" class="hidden text-center py-16">
           <div class="w-24 h-24 mx-auto mb-6 rounded-full flex items-center justify-center
                       bg-white shadow-[0_0_25px_rgba(0,255,148,0.35)]">
-            <svg class="w-12 h-12 text-black" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <svg class="w-12 h-12 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
               <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
                     d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z"></path>
             </svg>
@@ -108,7 +108,7 @@
           <h3 class="text-2xl font-bold mb-3">No matches found</h3>
           <p class="text-[#A1A1A1] mb-8 max-w-md mx-auto">Be the first to create a sports match and invite others to join!</p>
           <button id="empty-create-btn"
-                  class="rounded-xl px-7 py-3 font-semibold text-black transition-all duration-300
+                  class="rounded-xl px-7 py-3 font-semibold text-white transition-all duration-300
                          bg-[#2A2A2A]hover:bg-[#343434] text-[#EAEAEA] transition-all duration-300
                          bg-whitshadow-[0_0_15px_rgba(255,255,255,0.35)]e hover:bg-whitshadow-[0_0_24px_rgba(255,255,255,0.35)]e">
             Create First Match
@@ -189,7 +189,7 @@
 {% for match in recent_activity %}
   <div class="flex items-start space-x-3 p-3 bg-[#202020] rounded-lg border border-[#2A2A2A]">
     <div class="w-8 h-8 rounded-full flex items-center justify-center flex-shrink-0" style="background:#EAEAEA">
-      <svg class="w-4 h-4 text-black" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+      <svg class="w-4 h-4 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"></path>
       </svg>
     </div>
@@ -289,7 +289,7 @@
           Cancel
         </button>
         <button type="submit"
-                class="px-6 py-2.5 rounded-lg font-semibold text-black transition
+                class="px-6 py-2.5 rounded-lg font-semibold text-white transition
                        bg-[#2A2A2A]hover:bg-[#343434] text-[#EAEAEA] transition-all duration-300
                        bg-whitshadow-[0_0_15px_rgba(255,255,255,0.35)]e">
           Create Match
@@ -454,7 +454,7 @@
             <form class="booking-form mt-5" data-match-id="${id}" method="post" action="/matches/${id}/book/">
               ${csrfField}
               <button type="submit"
-                class="w-full py-2.5 rounded-xl font-semibold text-black transition
+                class="w-full py-2.5 rounded-xl font-semibold text-white transition
                        bg-[#2A2A2A]hover:bg-[#343434] text-[#EAEAEA] transition-all duration-300
                        bg-whitshadow-[0_0_15px_rgba(255,255,255,0.35)]e">
                 Join Match
