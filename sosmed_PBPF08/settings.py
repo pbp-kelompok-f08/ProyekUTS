@@ -25,6 +25,9 @@ STATICFILES_DIRS = [
     BASE_DIR / "static",
 ]
 
+STATIC_ROOT = BASE_DIR / "staticfiles"
+
+
 # Quick-start development settings - unsuitable for production
 # See https://docs.djangoproject.com/en/4.2/howto/deployment/checklist/
 
@@ -35,10 +38,10 @@ PRODUCTION = os.getenv('PRODUCTION', 'False').lower() == 'true'
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = True
 
-ALLOWED_HOSTS = ["localhost", "127.0.0.1", 'm-naufal41-hoppin.pbp.cs.ui.ac.id']
+ALLOWED_HOSTS = ["localhost", "127.0.0.1", 'm-naufal41-hoppin.pbp.cs.ui.ac.id', '.vercel.app']
 
 CSRF_TRUSTED_ORIGINS = [
-    'https://m-naufal41-hoppin.pbp.cs.ui.ac.id/'
+    'https://m-naufal41-hoppin.pbp.cs.ui.ac.id/', 'https://hoppin-lac.vercel.app',
 ]
 
 
@@ -72,6 +75,7 @@ MIDDLEWARE = [
     'django.contrib.messages.middleware.MessageMiddleware',
     'django.middleware.clickjacking.XFrameOptionsMiddleware',
     'accounts.middleware.UpdateLastActivityMiddleware',
+    'whitenoise.middleware.WhiteNoiseMiddleware',
 ]
 
 ROOT_URLCONF = 'sosmed_PBPF08.urls'
