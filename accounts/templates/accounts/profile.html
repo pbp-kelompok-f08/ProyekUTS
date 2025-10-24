@@ -15,7 +15,7 @@
   <div class="container mx-auto px-6 space-y-8">
 
     <!-- PROFILE HEADER BOX -->
-    <div class="bg-[#212842] backdrop-blur-sm rounded-xl p-10 border border-[#9DB4C0]/30 shadow-lg flex flex-col sm:flex-row sm:items-center sm:space-x-8 space-y-6 sm:space-y-0 transition-all">
+    <div class="bg-black backdrop-blur-sm rounded-xl p-10 border border-[#9DB4C0]/30 shadow-lg flex flex-col sm:flex-row sm:items-center sm:space-x-8 space-y-6 sm:space-y-0 transition-all">
       <div class="flex justify-center sm:justify-start">
         <img id="user-pic" 
              class="w-32 h-32 sm:w-40 sm:h-40 rounded-full object-cover border-4 border-[#9DB4C0]/40 shadow-md" 
@@ -36,7 +36,7 @@
     </div>
 
     <!-- DETAIL BOX -->
-    <div class="bg-[#212842] backdrop-blur-sm rounded-xl p-8 border border-[#9DB4C0]/30 shadow-lg">
+    <div class="bg-black backdrop-blur-sm rounded-xl p-8 border border-[#9DB4C0]/30 shadow-lg">
       <div class="mb-6">
         <h4 class="text-sm text-[#9DB4C0] uppercase tracking-wide mb-1">Bio</h4>
         <p id="bio" class="text-[#E6E8E6] italic">{{ request.user.bio|default:"Belum ada bio." }}</p>
@@ -60,7 +60,7 @@
 
     <!-- EDIT FORM (HIDDEN) -->
     <div id="edit-form" 
-        class="hidden bg-[#212842]/80 backdrop-blur-sm p-8 mt-10 rounded-xl border border-[#9DB4C0]/30 
+        class="hidden bg-black/80 backdrop-blur-sm p-8 mt-10 rounded-xl border border-[#9DB4C0]/30 
                 shadow-lg max-w-3xl w-full mx-auto transition-all duration-300">
       <form id="profileForm" enctype="multipart/form-data">
         {% csrf_token %}
@@ -141,7 +141,7 @@
 
     <!-- USER THREADS BOX -->
     <div id="user-threads-box"
-            class="bg-[#212842] rounded-xl border border-[#9DB4C0]/30 shadow-lg mt-8 p-6 max-h-[800px] overflow-y-auto">
+            class="bg-black rounded-xl border border-[#9DB4C0]/30 shadow-lg mt-8 p-6 max-h-[800px] overflow-y-auto">
         <h3 class="text-xl font-semibold mb-4 text-[#E6E8E6]">Your Threads</h3>
         <div id="userThreads" class="space-y-6"></div>
         <p id="emptyThreads" class="text-[#9DB4C0] hidden text-sm text-center italic">No threads yet.</p>

@@ -168,17 +168,22 @@
             "w-full border-b border-gray-700 py-4 flex justify-between text-white bg-neutral-900 hover:bg-neutral-800 transition-colors duration-300 px-5";
 
         threadCard.innerHTML = `
-        <!-- Left section: profile + username -->
+        <!-- Left section: profile (clickable) -->
         <div class="flex flex-col items-center">
-            <div class="w-10 h-10 rounded-full bg-gradient-to-br from-purple-500 to-pink-500 flex items-center justify-center text-white font-bold shadow-md">
-                ${username[0].toUpperCase()}
-            </div>
+            <a href="/profile/${username}/" class="block">
+                <div class="w-10 h-10 rounded-full bg-gradient-to-br from-purple-500 to-pink-500 flex items-center justify-center text-white font-bold shadow-md hover:scale-105 transition">
+                    ${username[0].toUpperCase()}
+                </div>
+            </a>
         </div>
 
         <!-- Middle section: post content -->
         <div class="flex flex-col flex-1 px-6">
             <div class="flex h-10 items-start justify-between">
-                <span class="font-semibold text-base">${username}</span>
+                <a href="/profile/${username}/"
+                    class="font-semibold text-base text-blue-400 hover:underline hover:text-blue-300 transition">
+                    ${username}
+                </a>
                 <p class="text-xs text-gray-500">${new Date(createdAt).toLocaleString()}</p>
             </div>
 

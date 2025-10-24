@@ -14,13 +14,24 @@ from .forms import RegisterForm
 def login_page(request):
     return render(request, 'accounts/login.html')
 
-
 def register_page(request):
     return render(request, 'accounts/register.html')
 
 @login_required
 def profile_page(request):
     return render(request, "accounts/profile.html")
+
+def public_profile(request, username):
+    # Handle special case for AnonymousUser
+    if username.lower() == "anonymous":
+        return render(request, "accounts/anonymous_profile.html", status=200)
+
+    user_profile = get_object_or_404(CustomUser, pk=username)
+    context = {
+        "user_profile": user_profile,
+        "is_own_profile": request.user.is_authenticated and request.user.username == username,
+    }
+    return render(request, "accounts/public_profile.html", context)
 
 @require_POST
 @csrf_exempt
