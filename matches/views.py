@@ -7,6 +7,7 @@ from django.views.decorators.http import require_http_methods
 from django.views.decorators.csrf import csrf_exempt
 from django.core import serializers
 from liveChat.models import Group
+from accounts.models import CustomUser  # ✅ pastikan pakai model user-mu
 import json, uuid
 from django.utils import timezone
 from datetime import timedelta
@@ -22,7 +23,6 @@ DEFAULT_CATEGORIES = [
 
 def _is_schema_ready() -> bool:
     """Check whether the tables required for the match feature exist."""
-
     try:
         existing_tables = set(connection.introspection.table_names())
     except (OperationalError, ProgrammingError):
@@ -66,24 +66,17 @@ def match_dashboard(request):
 
     if not schema_ready:
         categories = []
-                
-        # ========= Stats Sidebar Data =========
         total_matches = Match.objects.count()
         today_matches = Match.objects.filter(event_date__date=timezone.now().date()).count()
         total_players = Participation.objects.values('user').distinct().count()
         sports_count = SportCategory.objects.count()
 
-        # Popular sports (top 3)
         popular_sports = (
             SportCategory.objects.annotate(match_count=Count("matches"))
             .order_by("-match_count")[:3]
         )
+        recent_activity = Match.objects.select_related("category").order_by("-id")[:5]
 
-        # Recent activity (last 5 matches)
-        recent_activity = (
-            Match.objects.select_related("category")
-            .order_by("-id")[:5]
-        )
         context = {
             "schema_ready": False,
             "grouped_matches": [],
@@ -98,23 +91,15 @@ def match_dashboard(request):
             "sports_count": sports_count,
             "popular_sports": popular_sports,
             "recent_activity": recent_activity,
+            "players_online": 0,
+            "players_active_today": 0,
         }
 
-        if request.headers.get("x-requested-with") == "XMLHttpRequest":
-            return JsonResponse(
-                {
-                    "groups": [],
-                    "schema_ready": False,
-                    "message": "Database belum dimigrasikan. Jalankan python manage.py migrate.",
-                },
-                status=503,
-            )
-
-    
         return render(request, "matches/dashboard.html", context, status=503)
 
     _ensure_default_categories()
 
+    # ===================== MATCH FILTER =====================
     matches = (
         Match.objects.select_related("category")
         .annotate(participant_count=Count("participations"))
@@ -130,19 +115,15 @@ def match_dashboard(request):
         sport_value = request.GET.get("sport")
         if sport_value:
             matches = matches.filter(category__slug__iexact=sport_value)
-            
+
         when_value = request.GET.get("when")
+        today = timezone.now().date()
         if when_value == "today":
-            today = timezone.now().date()
             matches = matches.filter(event_date__date=today)
         elif when_value == "week":
-            today = timezone.now().date()
-            week_later = today + timedelta(days=7)
-            matches = matches.filter(event_date__date__range=(today, week_later))
+            matches = matches.filter(event_date__date__range=(today, today + timedelta(days=7)))
         elif when_value == "month":
-            today = timezone.now().date()
-            month_later = today + timedelta(days=30)
-            matches = matches.filter(event_date__date__range=(today, month_later))
+            matches = matches.filter(event_date__date__range=(today, today + timedelta(days=30)))
 
         if category:
             matches = matches.filter(category=category)
@@ -152,17 +133,13 @@ def match_dashboard(request):
                 | Q(description__icontains=keyword)
                 | Q(location__icontains=keyword)
             )
-
         if available_only:
             matches = matches.filter(participant_count__lt=F("max_members"))
-
-    else:
-        search_form = MatchSearchForm()
 
     match_list = list(matches)
     categories = list(SportCategory.objects.all().order_by('name'))
     categories = sorted(categories, key=lambda c: c.name == "Other")
-    
+
     grouped_matches = [
         (category, [m for m in match_list if m.category == category])
         for category in categories
@@ -183,24 +160,28 @@ def match_dashboard(request):
             )
         return JsonResponse({"groups": payload})
 
-    
-    # ========= Stats Sidebar Data =========
+    # ===================== SIDEBAR STATS =====================
+    now = timezone.now()
+    today = now.date()
+    ten_minutes_ago = now - timedelta(minutes=10)
+
+    # total matches, etc.
     total_matches = Match.objects.count()
-    today_matches = Match.objects.filter(event_date__date=timezone.now().date()).count()
+    today_matches = Match.objects.filter(event_date__date=today).count()
     total_players = Participation.objects.values('user').distinct().count()
     sports_count = SportCategory.objects.count()
 
-    # Popular sports (top 3)
+    # ✅ user online & active today
+    players_online = CustomUser.objects.filter(last_activity__gte=ten_minutes_ago).distinct().count()
+    players_active_today = CustomUser.objects.filter(last_activity__date=today).distinct().count()
+
+    # popular sports
     popular_sports = (
         SportCategory.objects.annotate(match_count=Count("matches"))
         .order_by("-match_count")[:3]
     )
-
-    # Recent activity (last 5 matches)
-    recent_activity = (
-        Match.objects.select_related("category")
-        .order_by("-id")[:5]
-    )
+    # recent activity
+    recent_activity = Match.objects.select_related("category").order_by("-id")[:5]
 
     context = {
         "grouped_matches": grouped_matches,
@@ -216,10 +197,12 @@ def match_dashboard(request):
         "sports_count": sports_count,
         "popular_sports": popular_sports,
         "recent_activity": recent_activity,
+        "players_online": players_online,
+        "players_active_today": players_active_today,
     }
-    
-    
+
     return render(request, "matches/dashboard.html", context)
+
 
 @require_http_methods(["POST"])
 @csrf_exempt
