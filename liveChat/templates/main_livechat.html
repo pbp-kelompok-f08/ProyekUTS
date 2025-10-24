@@ -102,20 +102,16 @@ let lastChatTime = null;
 let fetchChatsInterval = null;
 let currentGroupId = '';
 
-// Ganti grup
 async function changeCurrentGroup(group) {
     currentGroupId = group.id
-    // reset highlight grup sebelumnya
     currentGroupSection.className = "flex w-full h-[70px] hover:cursor-pointer hover:bg-neutral-800 items-center px-6";
     currentGroupSection = document.getElementById(`group-${group.id}-section`);
     currentGroupSection.className = "flex w-full h-[70px] hover:cursor-pointer hover:bg-neutral-800 items-center px-6 bg-neutral-800";
 
-    // update UI
     chatGroupNameElement.innerText = group.name;
     chatGroupMembersElement.innerText = group.members.join(", ");
     sendButton.onclick = () => sendChat(group.id);
 
-    // reset chat
     chatsSectionContainer.innerHTML = '';
     lastChat = null;
     lastChatTime = null;
@@ -123,18 +119,14 @@ async function changeCurrentGroup(group) {
     startFetchingChats(group.id);
 }
 
-// Start fetching chat dengan interval
 function startFetchingChats(groupId) {
     if (fetchChatsInterval) clearInterval(fetchChatsInterval);
 
-    // fetch pertama kali
     fetchChats(groupId);
 
-    // interval fetch setiap 5 detik
     fetchChatsInterval = setInterval(() => fetchChats(groupId), 5000);
 }
 
-// Fetch chat dari backend
 async function fetchChats(groupId) {
     try {
         const response = await fetch(`/liveChat/chat/${groupId}/`);
@@ -147,7 +139,6 @@ async function fetchChats(groupId) {
     }
 }
 
-// Build bubble chat
 function buildChatBubbleElement(chat) {
     const bubbleElement = document.createElement('div');
     const sameUserAsPrev = lastChat !== null && lastChat.username === chat.username;
@@ -165,7 +156,6 @@ function buildChatBubbleElement(chat) {
     });
     console.log()
 
-    // alignment
     bubbleElement.className = `flex flex-row ${sameUserAsCurrent ? "justify-end" : "justify-start"} mt-${sameUserAsPrev ? 1 : 2}`;
 
     const bubbleChatHtml = sameUserAsPrev
@@ -209,11 +199,9 @@ function buildChatBubbleElement(chat) {
     return bubbleElement;
 }
 
-// Tambahkan chat ke tampilan
 function addChatToPage(chats) {
     if (!chats || chats.length === 0) return;
 
-    // fetch pertama kali: tampilkan semua
     if (!lastChatTime) {
         for (let i = chats.length-1; i >= 0; i--) {
             const chat = chats[i];
@@ -224,7 +212,6 @@ function addChatToPage(chats) {
         return;
     }
 
-    // hanya chat baru
     const newChats = chats.filter(chat => chat.createdAt > lastChatTime);
     for (let i = newChats.length-1; i >= 0; i--) {
         const chat = newChats[i];
@@ -238,7 +225,6 @@ function addChatToPage(chats) {
     }
 }
 
-// Build group section
 function buildGroupSectionElement(group) {
     const sectionElement = document.createElement('div');
     sectionElement.className = "flex w-full h-[70px] hover:cursor-pointer hover:bg-neutral-800 items-center px-6";
@@ -249,7 +235,7 @@ function buildGroupSectionElement(group) {
     let dateString = '-';
     if (group.last_chat)
     {
-        localDate = new Date(group.last_chat.createdAt); // parse ISO UTC
+        localDate = new Date(group.last_chat.createdAt);
         timeString = localDate.toLocaleTimeString('id-ID', {
             hour: '2-digit',
             minute: '2-digit',
@@ -280,7 +266,6 @@ function buildGroupSectionElement(group) {
     return sectionElement;
 }
 
-// Tambahkan daftar grup
 function addGroupsToPage(groups, filter) {
     console.log("here");
     if (groups.length === 0 && !filter)
@@ -299,7 +284,6 @@ function addGroupsToPage(groups, filter) {
     }
 }
 
-// Fetch grup dari backend
 async function fetchGroups() {
     const response = await fetch("/liveChat/group/");
     const json = await response.json();
@@ -319,7 +303,6 @@ async function fetchGroupsSearch() {
     addGroupsToPage(groups, true);
 }
 
-// Kirim chat
 async function sendChat(group_id) {
     if (!chatTextArea.value.trim()) return;
 
@@ -333,7 +316,6 @@ async function sendChat(group_id) {
     await fetchChats(group_id);
 }
 
-// inisialisasi
 fetchGroups();
 
 chatTextArea.addEventListener("keydown", function (event) {
