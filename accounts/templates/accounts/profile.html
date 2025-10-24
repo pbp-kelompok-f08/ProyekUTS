@@ -211,18 +211,12 @@ async function fetchUserThreads() {
   threadsContainer.innerHTML = "";
 
   try {
-    // Ambil semua thread
     const res = await fetch("{% url 'threads:show_json' %}", { cache: "no-store" });
     const allThreads = await res.json();
-
-    // Ambil username aktif
     const username = "{{ request.user.username }}";
-    console.log("🧩 Filtering threads for:", username);
-    console.log("🧵 Threads received:", allThreads.length);
 
-    // Filter thread milik user login
-    const userThreads = allThreads.filter(t => t.username === username);
-    console.log("🎯 Found user threads:", userThreads.length);
+    // ✅ FIX: gunakan t.user.username
+    const userThreads = allThreads.filter(t => t.user.username === username);
 
     if (userThreads.length === 0) {
       empty.classList.remove("hidden");
@@ -230,10 +224,6 @@ async function fetchUserThreads() {
     }
     empty.classList.add("hidden");
 
-    // Foto profil user
-    const userPic = `{% if request.user.profile_picture %}{{ request.user.profile_picture.url }}{% else %}{% static 'accounts/img/default.png' %}{% endif %}`;
-
-    // Render setiap thread
     userThreads.forEach(thread => {
       const div = document.createElement("div");
       div.className =
@@ -243,10 +233,10 @@ async function fetchUserThreads() {
 
       div.innerHTML = `
         <div class="flex items-center space-x-3 mb-3">
-          <img src="${userPic}" alt="Profile picture"
+          <img src="${thread.user.profile_picture}" alt="Profile picture"
                class="w-10 h-10 rounded-full border border-[#9DB4C0]/40 object-cover">
           <div>
-            <h4 class="font-semibold text-[#E6E8E6] text-sm">${thread.username}</h4>
+            <h4 class="font-semibold text-[#E6E8E6] text-sm">${thread.user.username}</h4>
             <p class="text-xs text-[#9DB4C0]">${created}</p>
           </div>
         </div>
