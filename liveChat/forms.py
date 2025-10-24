@@ -4,7 +4,7 @@ from .models import Group, Chat
 try:
     from typing import override  
 except ImportError:
-    def override(func):  
+    def override(func): 
         return func
 
 

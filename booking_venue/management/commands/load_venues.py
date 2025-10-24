@@ -9,6 +9,8 @@ class Command(BaseCommand):
         with open('Football Stadiums.csv', 'r', encoding='utf-8') as file:
             reader = csv.DictReader(file)
             for row in reader:
+                if row['Confederation'] != 'AFC':
+                    continue
                 # Create venue with appropriate data
                 venue, created = Venue.objects.get_or_create(
                     name=row['Stadium'],
