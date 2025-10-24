@@ -26,7 +26,7 @@ def operate_group(request: HttpRequest, group_id: uuid = ''):
     print("fetch here!")
     match request.method:
         case "GET":
-            return operate_group_get(request.user, group_id)
+            return operate_group_get(request, group_id)
         case "PATCH":
             return operate_group_patch(request, group_id)
         case "DELETE":
@@ -34,8 +34,28 @@ def operate_group(request: HttpRequest, group_id: uuid = ''):
         case _:
             return HttpResponse(status=405)
 
-def operate_group_get(user: CustomUser, group_id: uuid):
-    if user.role != 'admin' and not group_id:
+def operate_group_get(request: HttpRequest, group_id: uuid):
+    user = request.user
+    search_name = request.GET.get("group_name", "").lower()
+    if user.role != 'admin' and group_id:
+        group = get_object_or_404(Group, id=group_id)
+        data = model_to_dict(group)
+        data["members"] = group.users
+        return JsonResponse({"data": data}, status=200)
+    elif user.role != 'admin' and search_name:
+        user_participations = user.participations.all()
+        data = []
+        for user_participation in user_participations:
+            match = user_participation.match
+            group = match.group
+            if group.name.lower().count(search_name):
+                group_dict = model_to_dict(group)
+                group_dict["members"] = group.users
+                group_dict["last_chat"] = group.last_chat
+                print(group_dict)
+                data.append(group_dict)
+        return JsonResponse({"data": data}, status=200)
+    elif user.role != 'admin':
         user_participations = user.participations.all()
         data = []
         for user_participation in user_participations:
@@ -46,12 +66,6 @@ def operate_group_get(user: CustomUser, group_id: uuid):
             group_dict["last_chat"] = group.last_chat
             print(group_dict)
             data.append(group_dict)
-        print(data)
-        return JsonResponse({"data": data}, status=200)
-    elif user.role != 'admin':
-        group = get_object_or_404(Group, id=group_id)
-        data = model_to_dict(group)
-        data["members"] = group.users
         return JsonResponse({"data": data}, status=200)
     elif group_id:
         group = get_object_or_404(Group, id=group_id)
