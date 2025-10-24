@@ -32,6 +32,12 @@ class CustomUser(AbstractUser):
                 "created_at":participation.created_at
             })
         return data
+    
+    last_activity = models.DateTimeField(null=True, blank=True)
+
+    def update_last_activity(self):
+        self.last_activity = timezone.now()
+        self.save(update_fields=["last_activity"])
 
     def __str__(self):
         return f"{self.username} ({self.role})"
