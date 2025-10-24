@@ -41,20 +41,6 @@ class Thread(models.Model):
         self.replyCount += 1 if isInc else -1
         self.save()
 
-# class Reply(models.Model):
-#     user = models.ForeignKey(CustomUser, on_delete=models.CASCADE, null=True)
-#     thread = models.ForeignKey(Thread, on_delete=models.CASCADE, related_name="replies")
-
-#     id = models.UUIDField(primary_key=True, default=uuid.uuid4, editable=False)
-#     content = models.TextField()
-#     image = models.URLField(blank=True, null=True)
-#     created_at = models.DateTimeField(auto_now_add=True)
-#     likeCount = models.PositiveIntegerField(default=0)
-
-#     def changeLike(self,isInc):
-#         self.likeCount += 1 if isInc else -1
-#         self.save()
-
 class ReplyChild(models.Model):
     thread = models.ForeignKey(Thread, on_delete=models.CASCADE, related_name="replies")
     content = models.TextField()
