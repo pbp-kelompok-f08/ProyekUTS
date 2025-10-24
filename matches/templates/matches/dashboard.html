@@ -36,44 +36,43 @@
 
       <!-- ============== SEARCH & FILTER BAR ============== -->
       <div class="mt-8 flex flex-col lg:flex-row gap-4">
-  <div class="flex-1">
-    <form id="match-search-form" method="get" action="" autocomplete="off">
-      <div class="relative">
-        <input
-          type="text"
-          name="q"
-          placeholder="Search matches..."
-          autocomplete="off"
-          class="w-full bg-transparent border-b border-[#3A3A3A] text-[#EAEAEA]
-                 placeholder-[#6B6B6B] focus:outline-none focus:border-white
-                 py-3 pr-4 pl-11 text-lg transition-all duration-300" />
-        <svg class="w-5 h-5 absolute left-1.5 top-3.5 text-[#6B6B6B]" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"></path>
-        </svg>
-      </div>
-    </form>
+<form id="match-search-form" method="get" action="" class="flex flex-col lg:flex-row gap-4 w-full" autocomplete="off">
+  <div class="relative flex-1">
+    <input
+      type="text"
+      name="keyword"
+      value="{{ request.GET.keyword }}"
+      placeholder="Search matches..."
+      class="w-full bg-transparent border-b border-[#3A3A3A] text-[#EAEAEA]
+             placeholder-[#6B6B6B] focus:outline-none focus:border-white
+             py-3 pr-4 pl-11 text-lg transition-all duration-300" />
+    <svg class="w-5 h-5 absolute left-1.5 top-3.5 text-[#6B6B6B]" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+      <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+            d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"></path>
+    </svg>
   </div>
 
-  <select id="sport-filter"
+  <select name="sport" id="sport-filter"
     class="bg-transparent border-b border-[#3A3A3A] text-[#EAEAEA] focus:outline-none focus:border-white
            px-2 py-2 rounded-none transition-colors">
     <option value="">All Sports</option>
-    <option value="football">Football</option>
-    <option value="basketball">Basketball</option>
-    <option value="tennis">Tennis</option>
-    <option value="badminton">Badminton</option>
-    <option value="volleyball">Volleyball</option>
+    {% for category in categories %}
+      <option value="{{ category.slug }}" {% if request.GET.sport == category.slug %}selected{% endif %}>
+        {{ category.name }}
+      </option>
+    {% endfor %}
   </select>
 
-  <select id="date-filter"
+  <select name="when" id="date-filter"
     class="bg-transparent border-b border-[#3A3A3A] text-[#EAEAEA] focus:outline-none focus:border-white
            px-2 py-2 rounded-none transition-colors">
     <option value="">Any Date</option>
-    <option value="today">Today</option>
-    <option value="week">This Week</option>
-    <option value="month">This Month</option>
+    <option value="today" {% if request.GET.when == "today" %}selected{% endif %}>Today</option>
+    <option value="week" {% if request.GET.when == "week" %}selected{% endif %}>This Week</option>
+    <option value="month" {% if request.GET.when == "month" %}selected{% endif %}>This Month</option>
   </select>
+</form>
+
 </div>
 
     </div>
@@ -588,17 +587,15 @@
     });
   }
 
-  // ========= Filters binding (optional basic hook) =========
-  document.getElementById('sport-filter')?.addEventListener('change', () => {
-    const fd = new FormData(searchForm);
-    fd.set('sport', document.getElementById('sport-filter').value || '');
-    loadMatches(fd);
+  ['sport-filter', 'date-filter'].forEach(id => {
+    const el = document.getElementById(id);
+    if (el) {
+      el.addEventListener('change', () => {
+        loadMatches(new FormData(searchForm));
+      });
+    }
   });
-  document.getElementById('date-filter')?.addEventListener('change', () => {
-    const fd = new FormData(searchForm);
-    fd.set('when', document.getElementById('date-filter').value || '');
-    loadMatches(fd);
-  });
+
 
   // ========= Init =========
   if (searchForm) {

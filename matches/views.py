@@ -64,6 +64,7 @@ def _serialize_match(match: Match) -> dict:
 
 @require_http_methods(["GET"])
 def match_dashboard(request):
+    print("DEBUG SPORT FILTER:", request.GET.get("sport"))
     schema_ready = _is_schema_ready()
 
     if not schema_ready:
@@ -74,7 +75,7 @@ def match_dashboard(request):
             "participation_form": ParticipationForm(),
             "search_form": MatchSearchForm(),
             "has_any_match": False,
-            "categories": SportCategory.objects.all(),
+            "categories": categories,
         }
 
         if request.headers.get("x-requested-with") == "XMLHttpRequest":
@@ -103,6 +104,26 @@ def match_dashboard(request):
         keyword = search_form.cleaned_data.get("keyword")
         available_only = search_form.cleaned_data.get("available_only")
 
+        sport_value = request.GET.get("sport")
+        if sport_value:
+            matches = matches.filter(category__slug__iexact=sport_value)
+
+        from django.utils import timezone
+        from datetime import timedelta
+
+        when_value = request.GET.get("when")
+        if when_value == "today":
+            today = timezone.now().date()
+            matches = matches.filter(event_date__date=today)
+        elif when_value == "week":
+            today = timezone.now().date()
+            week_later = today + timedelta(days=7)
+            matches = matches.filter(event_date__date__range=(today, week_later))
+        elif when_value == "month":
+            today = timezone.now().date()
+            month_later = today + timedelta(days=30)
+            matches = matches.filter(event_date__date__range=(today, month_later))
+
         if category:
             matches = matches.filter(category=category)
         if keyword:
@@ -111,13 +132,17 @@ def match_dashboard(request):
                 | Q(description__icontains=keyword)
                 | Q(location__icontains=keyword)
             )
+
         if available_only:
             matches = matches.filter(participant_count__lt=F("max_members"))
+
     else:
         search_form = MatchSearchForm()
 
     match_list = list(matches)
-    categories = SportCategory.objects.all()
+    categories = list(SportCategory.objects.all().order_by('name'))
+    categories = sorted(categories, key=lambda c: c.name == "Other")
+    
     grouped_matches = [
         (category, [m for m in match_list if m.category == category])
         for category in categories
@@ -145,7 +170,7 @@ def match_dashboard(request):
         "search_form": search_form,
         "has_any_match": has_any_match,
         "schema_ready": True,
-        "categories": SportCategory.objects.all(),
+        "categories": categories,
     }
     return render(request, "matches/dashboard.html", context)
 
