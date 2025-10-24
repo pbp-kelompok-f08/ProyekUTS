@@ -36,12 +36,23 @@ def public_profile(request, username):
 @require_POST
 @csrf_exempt
 def login_ajax(request):
-    data = json.loads(request.body)
-    user = authenticate(username=data['username'], password=data['password'])
+    try:
+        data = json.loads(request.body)
+    except json.JSONDecodeError:
+        return JsonResponse({'success': False, 'message': 'Invalid JSON body'}, status=400)
+
+    username = data.get('username')
+    password = data.get('password')
+
+    if not username or not password:
+        return JsonResponse({'success': False, 'message': 'Username dan password wajib diisi'}, status=400)
+
+    user = authenticate(username=username, password=password)
     if user:
         login(request, user)
         return JsonResponse({'success': True, 'role': user.role})
     return JsonResponse({'success': False, 'message': 'Username atau password salah'}, status=400)
+
 
 @require_POST
 @csrf_exempt
