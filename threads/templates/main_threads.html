@@ -10,10 +10,10 @@
 {% include 'navbar.html' %}
 
 
-<main class="pt-20 bg-gradient-to-br from-neutral-950 via-neutral-900 to-black text-gray-100 min-h-screen">
+<main class="pt-20 bg-[#1C1C1C]/80 border-b border-[#2A2A2A] text-gray-100 min-h-screen">
     <div class="flex justify-center gap-10 px-6 sm:px-12">
         <div class="flex flex-col lg:flex-row justify-center gap-10 lg:gap-20 w-full max-w-7xl">
-            <!-- Loading Spinner -->
+            <!-- Loading Spinner
             <div id="loading"
                 class="bg-neutral-900 rounded-lg border border-neutral-800 p-12 text-center hidden text-gray-300">
                 <svg class="animate-spin h-8 w-8 text-green-500 inline-block" xmlns="http://www.w3.org/2000/svg"
@@ -22,7 +22,7 @@
                     <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8v4a4 4 0 00-4 4H4z"></path>
                 </svg>
                 <p class="text-gray-400 mt-3">Loading Threads...</p>
-            </div>
+            </div> -->
 
             <div id="searchBar"
                 class="sticky top-24 w-full lg:w-1/4 bg-neutral-900/80 backdrop-blur border border-neutral-800 rounded-xl p-5 shadow-md shadow-black/30 self-start">
@@ -31,20 +31,36 @@
                     class="w-full bg-neutral-800 text-gray-200 rounded-lg px-3 py-2 mb-3 focus:outline-none focus:ring-2 focus:ring-blue-500 placeholder-gray-500">
 
                 <button id="tagSearchBtn"
-                    class="w-full bg-blue-600 hover:bg-blue-500 shadow-md shadow-blue-600/30 text-white py-2 rounded-md transition duration-200">
+                    class="w-full shadow-[0_0_12px_rgba(37,99,235,0.7),0_0_24px_rgba(37,99,235,0.4)] 
+                            hover:shadow-[0_0_20px_rgba(59,130,246,0.9),0_0_40px_rgba(59,130,246,0.5)] transition duration-300  bg-blue-600 hover:bg-blue-500 shadow-md shadow-blue-600/30 text-white py-2 rounded-md transition duration-200">
                     Search
                 </button>
 
                 <div id="searchResults" class="mt-4 space-y-2 text-sm text-gray-300"></div>
             </div>
             <!-- Threads Feed -->
-            <div class="w-full lg:w-2/5 border-x border-solid border-stone-700">
+            <div class="w-full h-screen lg:w-2/5 border-x border-solid border-stone-700">
                 <!-- Create Thread Button -->
                 <button onclick="showModal()"
                     class="w-full border border-gray-600 bg-neutral-900 text-left text-gray-400 px-4 py-6 rounded-lg hover:border-gray-400 hover:text-gray-200 transition">
                     + Create new Thread...
                 </button>
-                <div id="threadList" class="hidden"></div>
+                <!-- Empty State -->
+                <div id="empty" class="rounded-lg p-12 text-center hidden text-gray-300">
+                    <div class="w-32 h-32 mx-auto mb-4">
+                        <img src="{% static 'threads/img/no-thread.png' %}" alt="No threads available"
+                            class="w-32 h-32 mx-auto mb-4 invert brightness-150 drop-shadow-[0_0_10px_rgba(255,255,255,0.8)] hover:drop-shadow-[0_0_20px_rgba(255,255,255,1)] transition duration-300">
+                    </div>
+                    <h3 class="text-lg font-medium mb-2 text-white">No threads right now 💤</h3>
+                    <p class="text-gray-400 mb-6">Be the first to share something with the community!</p>
+                    <button onclick="showModal()" class=" inline-flex items-center px-4 py-2 bg-blue-600 hover:bg-blue-500 text-white rounded-md shadow-[0_0_12px_rgba(37,99,235,0.7),0_0_24px_rgba(37,99,235,0.4)] 
+    hover:shadow-[0_0_20px_rgba(59,130,246,0.9),0_0_40px_rgba(59,130,246,0.5)] transition duration-300">
+                        + Create your first Thread
+                    </button>
+                </div>
+                <div id="threadList" class="hidden">
+
+                </div>
             </div>
 
             <!-- thread Reply -->
@@ -86,20 +102,7 @@
 
 
 
-            <!-- Empty State -->
-            <div id="empty"
-                class="bg-neutral-900 rounded-lg border border-neutral-800 p-12 text-center hidden text-gray-300">
-                <div class="w-32 h-32 mx-auto mb-4">
-                    <img src="{% static 'image/no-news.png' %}" alt="No threads available"
-                        class="w-full h-full object-contain opacity-80">
-                </div>
-                <h3 class="text-lg font-medium mb-2 text-white">No Thread found</h3>
-                <p class="text-gray-400 mb-6">Be the first to share a football thread with the community.</p>
-                <button onclick="showModal()"
-                    class="inline-flex items-center px-4 py-2 bg-green-600 text-white rounded-md hover:bg-green-700 transition-colors">
-                    Create new Threads
-                </button>
-            </div>
+
         </div>
 </main>
 
@@ -138,9 +141,14 @@
     const threadsReplyList = document.getElementById('replyList');
     let allThreadsData = [];
 
-    function displayPageSection({ showLoading = false, showError = false, showEmpty = false, showGrid = false }) {
-        loadingSpinner.classList.toggle('hidden', !showLoading);
-        threadsGridContainer.classList.toggle('hidden', !showGrid);
+    function displayPageSection({ showLoading = false, showEmpty = false, showGrid = false }) {
+        const loadingSpinner = document.getElementById('loading');
+        const threadsGridContainer = document.getElementById('threadList');
+        const emptyState = document.getElementById('empty');
+
+        if (loadingSpinner) loadingSpinner.classList.toggle('hidden', !showLoading);
+        if (threadsGridContainer) threadsGridContainer.classList.toggle('hidden', !showGrid);
+        if (emptyState) emptyState.classList.toggle('hidden', !showEmpty);
     }
 
     function buildThreadsCardElement(item) {
@@ -279,8 +287,13 @@
     }
 
     function displayThreads() {
-        if (allThreadsData.length === 0) {
+        const emptyState = document.getElementById('empty');
+
+        if (!allThreadsData || allThreadsData.length === 0) {
+            // Show “no threads yet” message
             displayPageSection({ showEmpty: true });
+            emptyState.querySelector('h3').textContent = "No threads right now 💤";
+            emptyState.querySelector('p').textContent = "Be the first to share your thoughts!";
         } else {
             renderAllThreadsCards(allThreadsData);
             displayPageSection({ showGrid: true });
