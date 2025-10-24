@@ -15,7 +15,6 @@ class LiveChatGroupTestCase(TestCase):
     def setUp(self):
         self.client = Client()
         
-        # Create users
         self.user1 = CustomUser.objects.create_user(
             username='chat_user1',
             password='chat123',
@@ -34,8 +33,7 @@ class LiveChatGroupTestCase(TestCase):
             role='admin',
             email='admin@test.com'
         )
-        
-        # Create sport category and match
+
         self.category = SportCategory.objects.create(name='Basket')
         self.match1 = Match.objects.create(
             title='Basketball Game',
@@ -51,8 +49,7 @@ class LiveChatGroupTestCase(TestCase):
             event_date=timezone.now() + timedelta(days=10),
             max_members=10
         )
-        
-        # Create groups
+
         self.group1 = Group.objects.create(
             match=self.match1,
             name='Group Basketball Game'
@@ -61,11 +58,8 @@ class LiveChatGroupTestCase(TestCase):
             match=self.match2,
             name='Group Basketball Tournament'
         )
-        
-        # Add user1 to match1
+
         Participation.objects.create(match=self.match1, user=self.user1, message='')
-        
-        # Add user2 to match2
         Participation.objects.create(match=self.match2, user=self.user2, message='')
 
     def test_show_main_page(self):
@@ -78,7 +72,7 @@ class LiveChatGroupTestCase(TestCase):
     def test_show_main_requires_login(self):
         """Test main page requires authentication"""
         response = self.client.get(reverse('liveChat:show_main'))
-        self.assertEqual(response.status_code, 302)  # Redirect to login
+        self.assertEqual(response.status_code, 302)
 
     def test_get_user_groups(self):
         """Test regular user getting their groups"""
@@ -88,7 +82,7 @@ class LiveChatGroupTestCase(TestCase):
         data = json.loads(response.content)
         self.assertIn('data', data)
         self.assertIsInstance(data['data'], list)
-        self.assertEqual(len(data['data']), 1)  # user1 has 1 group
+        self.assertEqual(len(data['data']), 1)
         self.assertEqual(data['data'][0]['name'], 'Group Basketball Game')
 
     def test_get_all_groups_as_admin(self):
@@ -98,7 +92,6 @@ class LiveChatGroupTestCase(TestCase):
         self.assertEqual(response.status_code, 200)
         data = json.loads(response.content)
         self.assertIn('data', data)
-        # Admin gets all groups
         self.assertGreaterEqual(len(data['data']), 2)
 
     def test_get_specific_group_as_member(self):
@@ -190,7 +183,6 @@ class LiveChatMessageTestCase(TestCase):
     def setUp(self):
         self.client = Client()
         
-        # Create users
         self.user1 = CustomUser.objects.create_user(
             username='msg_user1',
             password='msg123',
@@ -209,8 +201,7 @@ class LiveChatMessageTestCase(TestCase):
             role='admin',
             email='msgadmin@test.com'
         )
-        
-        # Create match and group
+
         self.category = SportCategory.objects.create(name='Futsal')
         self.match = Match.objects.create(
             title='Futsal Night',
@@ -223,12 +214,10 @@ class LiveChatMessageTestCase(TestCase):
             match=self.match,
             name='Group Futsal Night'
         )
-        
-        # Add user1 to the match (becomes group member)
+
         Participation.objects.create(match=self.match, user=self.user1, message='')
 
     def test_get_chats_empty_group(self):
-        """Test getting chats from empty group"""
         self.client.login(username='msg_user1', password='msg123')
         response = self.client.get(
             reverse('liveChat:operate_chat_by_group', kwargs={'group_id': self.group.id})
@@ -238,8 +227,6 @@ class LiveChatMessageTestCase(TestCase):
         self.assertEqual(len(data['data']), 0)
 
     def test_get_chats_with_messages(self):
-        """Test getting chats with existing messages"""
-        # Create some messages
         Chat.objects.create(
             group_id=self.group,
             username=self.user1,
@@ -262,7 +249,6 @@ class LiveChatMessageTestCase(TestCase):
         self.assertIn('profile_picture', data['data'][0])
 
     def test_post_chat_message(self):
-        """Test posting a chat message"""
         self.client.login(username='msg_user1', password='msg123')
         response = self.client.post(
             reverse('liveChat:operate_chat_by_group', kwargs={'group_id': self.group.id}),
@@ -270,8 +256,6 @@ class LiveChatMessageTestCase(TestCase):
             content_type='application/json'
         )
         self.assertEqual(response.status_code, 201)
-        
-        # Verify message was created
         chat = Chat.objects.filter(
             group_id=self.group,
             username=self.user1.username,
@@ -280,11 +264,10 @@ class LiveChatMessageTestCase(TestCase):
         self.assertTrue(chat.exists())
 
     def test_post_chat_invalid_data(self):
-        """Test posting chat with invalid data"""
         self.client.login(username='msg_user1', password='msg123')
         response = self.client.post(
             reverse('liveChat:operate_chat_by_group', kwargs={'group_id': self.group.id}),
-            json.dumps({'message': ''}),  # Empty message
+            json.dumps({'message': ''}),
             content_type='application/json'
         )
         self.assertEqual(response.status_code, 400)
@@ -292,7 +275,6 @@ class LiveChatMessageTestCase(TestCase):
         self.assertIn('errors', data)
 
     def test_unauthorized_user_cannot_get_chats(self):
-        """Test user not in group cannot access chats"""
         self.client.login(username='msg_user2', password='msg123')
         response = self.client.get(
             reverse('liveChat:operate_chat_by_group', kwargs={'group_id': self.group.id})
@@ -300,7 +282,6 @@ class LiveChatMessageTestCase(TestCase):
         self.assertEqual(response.status_code, 401)
 
     def test_unauthorized_user_cannot_post_chat(self):
-        """Test user not in group cannot post chats"""
         self.client.login(username='msg_user2', password='msg123')
         response = self.client.post(
             reverse('liveChat:operate_chat_by_group', kwargs={'group_id': self.group.id}),
@@ -310,7 +291,6 @@ class LiveChatMessageTestCase(TestCase):
         self.assertEqual(response.status_code, 401)
 
     def test_admin_can_get_any_group_chats(self):
-        """Test admin can access any group's chats"""
         Chat.objects.create(
             group_id=self.group,
             username=self.user1,
@@ -326,7 +306,6 @@ class LiveChatMessageTestCase(TestCase):
         self.assertEqual(len(data['data']), 1)
 
     def test_admin_can_post_to_any_group(self):
-        """Test admin can post to any group"""
         self.client.login(username='msg_admin', password='admin123')
         response = self.client.post(
             reverse('liveChat:operate_chat_by_group', kwargs={'group_id': self.group.id}),
@@ -336,8 +315,6 @@ class LiveChatMessageTestCase(TestCase):
         self.assertEqual(response.status_code, 201)
 
     def test_delete_all_chats_as_admin(self):
-        """Test admin can delete all chats in a group"""
-        # Create multiple messages
         Chat.objects.create(group_id=self.group, username=self.user1, message='Message 1')
         Chat.objects.create(group_id=self.group, username=self.user1, message='Message 2')
         Chat.objects.create(group_id=self.group, username=self.user1, message='Message 3')
@@ -350,7 +327,6 @@ class LiveChatMessageTestCase(TestCase):
         self.assertEqual(Chat.objects.filter(group_id=self.group).count(), 0)
 
     def test_delete_chats_as_user_forbidden(self):
-        """Test regular user cannot delete chats"""
         Chat.objects.create(group_id=self.group, username=self.user1, message='Test')
         
         self.client.login(username='msg_user1', password='msg123')
@@ -361,7 +337,6 @@ class LiveChatMessageTestCase(TestCase):
         self.assertTrue(Chat.objects.filter(group_id=self.group).exists())
 
     def test_chat_404_invalid_group(self):
-        """Test posting to non-existent group returns 404"""
         self.client.login(username='msg_user1', password='msg123')
         fake_uuid = uuid.uuid4()
         response = self.client.post(
@@ -372,27 +347,22 @@ class LiveChatMessageTestCase(TestCase):
         self.assertEqual(response.status_code, 404)
 
     def test_multiple_users_chatting(self):
-        """Test multiple users can chat in same group"""
-        # Add user2 to the match
         Participation.objects.create(match=self.match, user=self.user2, message='')
-        
-        # User1 posts
+
         self.client.login(username='msg_user1', password='msg123')
         self.client.post(
             reverse('liveChat:operate_chat_by_group', kwargs={'group_id': self.group.id}),
             json.dumps({'message': 'Message from user1'}),
             content_type='application/json'
         )
-        
-        # User2 posts
+
         self.client.login(username='msg_user2', password='msg123')
         self.client.post(
             reverse('liveChat:operate_chat_by_group', kwargs={'group_id': self.group.id}),
             json.dumps({'message': 'Message from user2'}),
             content_type='application/json'
         )
-        
-        # Check both messages exist
+
         response = self.client.get(
             reverse('liveChat:operate_chat_by_group', kwargs={'group_id': self.group.id})
         )

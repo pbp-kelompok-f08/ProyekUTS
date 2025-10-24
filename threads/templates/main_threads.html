@@ -13,10 +13,8 @@
 <main class="pt-20  text-gray-100 min-h-screen">
     <div class="flex justify-center gap-10 px-6 sm:px-12">
         <div class="flex flex-col lg:flex-row justify-center gap-10 lg:gap-20 w-full max-w-7xl">
-            <!-- Loading Spinner -->
 
             <div class="lg:sticky lg:top-24  flex flex-col lg:w-1/4 w-full gap-4 self-start">
-                <!-- Search Bar -->
                 <div id="searchBar"
                     class="bg-neutral-900/80 backdrop-blur border border-neutral-800 rounded-xl p-5 shadow-md shadow-black/30">
                     <h2 class="text-lg font-semibold mb-4">🔎 Search by Tag</h2>
@@ -30,7 +28,6 @@
                     <div id="searchResults" class="mt-4 space-y-2 text-sm text-gray-300"></div>
                 </div>
 
-                <!-- Search Trend Card -->
                 <div id="searchTrendCard"
                     class="w-full bg-neutral-900 border border-gray-700 rounded-xl p-5 mt-4 text-white shadow-lg">
 
@@ -39,19 +36,15 @@
                     </h2>
 
                     <div id="trendTags" class="flex flex-col gap-3">
-                        <!-- Filled dynamically -->
                     </div>
                 </div>
             </div>
 
-            <!-- Threads Feed -->
             <div class="w-full lg:w-1/2 min-h-screen border-x border-solid border-stone-700">
-                <!-- Create Thread Button -->
                 <button onclick="showModal()"
                     class="w-full border border-gray-600 bg-neutral-900 text-left text-gray-400 px-4 py-6 rounded-lg hover:border-gray-400 hover:text-gray-200 transition">
                     + Create new Thread...
                 </button>
-                <!-- Empty State -->
                 <div id="empty" class="rounded-lg p-12 text-center hidden text-gray-300">
                     <div class="w-32 h-32 mx-auto mb-4">
                         <img src="{% static 'threads/img/no-thread.png' %}" alt="No threads available"
@@ -79,30 +72,25 @@
                 </div>
             </div>
 
-            <!-- thread Reply -->
             <div id="threadReply"
                 class="lg:w-1/3 fixed lg:hidden hidden inset-0 z-50 flex items-center justify-center bg-black/70 backdrop-blur-sm lg:static lg:inset-auto lg:z-auto lg:bg-transparent lg:backdrop-blur-none">
                 <div
                     class="fixed w-4/5 lg:w-1/3 bg-neutral-900 mt-10 top-10 bottom-10 rounded-xl border border-gray-700 flex flex-col">
 
-                    <!-- Header -->
                     <div class="p-4 border-b border-gray-700 flex items-center justify-between">
                         <div>
                             <h2 class="text-lg font-semibold text-white">Replies</h2>
                             <p id="replyToWho" class="text-sm text-gray-400"></p>
                         </div>
-                        <!-- Close button -->
                         <button id="closeReplyBtn" onclick="showReply()"
                             class="text-gray-400 hover:text-white text-xl font-bold focus:outline-none transition">
                             ✖
                         </button>
                     </div>
 
-                    <!-- Scrollable reply list -->
                     <div id="replyList" class="flex-1 overflow-y-auto px-4">
                     </div>
 
-                    <!-- Input section -->
                     <div class="flex items-center border-t border-gray-700 px-3">
                         <form id="replyForm" class="p-3 flex items-center w-full">
                             <input type="text" name="content" id="replyContent" placeholder="Write a reply..."
@@ -268,8 +256,8 @@
 
     function searchByTag(tag) {
         const input = document.getElementById('tagSearchInput');
-        input.value = tag; // set input value
-        document.getElementById('tagSearchBtn').click(); // trigger search
+        input.value = tag;
+        document.getElementById('tagSearchBtn').click();
     }
     function toggleMenu(threadId) {
         const menu = document.getElementById(`menu-${threadId}`);
@@ -325,7 +313,6 @@
             activeReplyThread = null;
             return;
         }
-
 
         activeReplyThread = threadId;
         threadsReplyContainer.classList.remove('hidden');
@@ -387,7 +374,6 @@
     fetchThreadsFromServer();
     document.addEventListener('ThreadsAdded', fetchThreadsFromServer);
 
-    //reply part
     function buildReplyCardElement(item) {
         const id = DOMPurify.sanitize(item.id);
 
@@ -496,6 +482,7 @@
         count.innerHTML = newReply.count
         showToast('reply added successfully!', '', 'success');
 
+        // document.dispatchEvent(new CustomEvent('ReplyAdded'));
         return false;
     }
     document.getElementById("replyForm").addEventListener("submit", function (e) {

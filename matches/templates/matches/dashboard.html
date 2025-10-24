@@ -6,11 +6,8 @@
 {% block content %}
 {% include "navbar.html" %}
 
-<!-- ============== PAGE WRAPPER ============== -->
 <div class="min-h-screen bg-[#0E0E0E] text-[#EAEAEA] pt-20">
 
-
-  <!-- ============== HEADER ============== -->
 <header class="bg-[#1C1C1C]/80 border-b border-[#2A2A2A] backdrop-blur-sm">
 
     <div class="container mx-auto px-6 py-10">
@@ -34,7 +31,6 @@
         </button>
       </div>
 
-      <!-- ============== SEARCH & FILTER BAR ============== -->
       <div class="mt-8 flex flex-col lg:flex-row gap-4">
 <form id="match-search-form" method="get" action="" class="flex flex-col lg:flex-row gap-4 w-full" autocomplete="off">
   <div class="relative flex-1">
@@ -78,25 +74,19 @@
     </div>
   </header>
 
-  <!-- ============== MAIN CONTENT ============== -->
   <main class="container mx-auto px-6 py-8">
     <div class="flex flex-col lg:flex-row gap-8">
 
-      <!-- ===== Matches Grid ===== -->
       <section class="flex-1">
 
-        <!-- Loading State -->
         <div id="loading" class="hidden flex flex-col items-center justify-center py-16">
           <div class="animate-spin rounded-full h-12 w-12 border-b-2 border-[#EAEAEA] mb-4"></div>
           <p class="text-[#A1A1A1]">Loading matches...</p>
         </div>
 
-        <!-- Matches Container -->
         <div id="match-list" class="grid md:grid-cols-2 xl:grid-cols-3 gap-6 items-stretch">
-          <!-- Cards rendered via JS -->
         </div>
 
-        <!-- Empty State -->
         <div id="empty" class="hidden text-center py-16">
           <div class="w-24 h-24 mx-auto mb-6 rounded-full flex items-center justify-center
                       bg-white shadow-[0_0_25px_rgba(0,255,148,0.35)]">
@@ -116,10 +106,8 @@
         </div>
       </section>
 
-      <!-- ===== Sidebar ===== -->
       <aside class="lg:w-80">
 
-        <!-- Quick Stats -->
         <div class="bg-[#1A1A1A]/80  border-[#2A2A2A] backdrop-blur-xl rounded-2xl p-6 border  mb-6
                     shadow-[0_0_10px_rgba(0,0,0,0.35)]">
           <h3 class="text-xl font-semibold mb-4 flex items-center text-white">
@@ -149,7 +137,6 @@
           </div>
         </div>
 
-        <!-- Popular Sports -->
         <div class="bg-[#1A1A1A]/80  border-[#2A2A2A] backdrop-blur-xl rounded-2xl p-6 border mb-6
                     shadow-[0_0_10px_rgba(0,0,0,0.35)]">
           <h3 class="text-xl font-semibold mb-4 flex items-center text-white">
@@ -175,7 +162,6 @@
           </div>
         </div>
 
-        <!-- Recent Activity -->
         <div class="bg-[#1A1A1A]/80  border-[#2A2A2A] backdrop-blur-xl rounded-2xl p-6 border 
                     shadow-[0_0_10px_rgba(0,0,0,0.35)]">
           <h3 class="text-xl font-semibold mb-4 flex items-center text-white">
@@ -214,7 +200,6 @@
   </main>
 </div>
 
-<!-- ============== CREATE MATCH MODAL (single source of truth) ============== -->
 <div id="create-match-modal" class="fixed inset-0 z-[1000] hidden" aria-hidden="true" data-open="false">
   <div class="absolute inset-0 bg-black/60"></div>
   <div class="relative max-w-2xl w-[92%] mx-auto my-10 bg-[#1A1A1A] text-[#EAEAEA]
@@ -299,7 +284,6 @@
   </div>
 </div>
 
-<!-- ============== INLINE STYLE for fallback (optional) ============== -->
 <style>
   body { background-color: #0E0E0E; color: #EAEAEA; font-family: 'Roboto Mono', monospace; letter-spacing: .3px; }
 </style>
@@ -310,7 +294,6 @@
 {% if schema_ready %}
 <script>
 (function() {
-  // ========= Helpers =========
   const body        = document.body;
   const searchForm  = document.getElementById('match-search-form');
   const createForm  = document.getElementById('match-create-form');
@@ -337,7 +320,6 @@
       .replace(/'/g, '&#x27;');
   }
   function showToast(msg, type) {
-    // Minimal toast without external libs (dark + glow)
     const t = document.createElement('div');
     t.textContent = msg || '';
     t.style.position = 'fixed';
@@ -361,7 +343,6 @@
     setTimeout(() => t.remove(), 2600);
   }
 
-  // ========= Modal Controls =========
   function openModal() {
     if (!modal) return;
     modal.classList.remove('hidden');
@@ -393,7 +374,6 @@
     createErrors.classList.remove('hidden');
     createErrors.removeAttribute('hidden');
   }
-  // Bind modal events
   if (openModalBtn) openModalBtn.addEventListener('click', openModal);
   if (emptyBtn) emptyBtn.addEventListener('click', openModal);
   if (modal) {
@@ -409,7 +389,6 @@
     });
   }
 
-  // ========= Render Matches =========
   function renderGroups(groups) {
     if (!Array.isArray(groups) || groups.length === 0) {
       matchList.innerHTML = '';
@@ -484,7 +463,6 @@
     attachBookingHandlers();
   }
 
-  // ========= Data Loading =========
   async function loadMatches(formData) {
     const endpoint = searchForm?.getAttribute('action') || window.location.pathname;
     const params   = new URLSearchParams(formData || new FormData(searchForm));
@@ -507,7 +485,6 @@
     }
   }
 
-  // ========= Create Match =========
   async function handleCreate(e) {
     e.preventDefault();
     if (!createForm) return;
@@ -542,7 +519,6 @@
     }
   }
 
-  // ========= Booking =========
   async function handleBooking(e) {
     e.preventDefault();
     const form = e.target;
@@ -587,13 +563,11 @@
     }
   });
 
-
-  // ========= Init =========
   if (searchForm) {
     searchForm.addEventListener('submit', (e) => { e.preventDefault(); loadMatches(new FormData(searchForm)); });
   }
   if (createForm) createForm.addEventListener('submit', handleCreate);
-  loadMatches(); // first render
+  loadMatches();
 })();
 </script>
 {% endif %}
