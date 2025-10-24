@@ -1,21 +1,25 @@
 {% extends 'base.html' %}
 {% block title %}My Bookings - Hoppin Sports Community{% endblock %}
+{% block head %}
+<link href="https://fonts.googleapis.com/css2?family=Roboto+Mono:wght@400;500;700&display=swap" rel="stylesheet">
+{% endblock head %}
 {% block content %}
 {% include 'navbar.html' %}
-<body class="min-h-screen bg-gradient-to-br from-gray-900 via-gray-800 to-black text-white">
+<body class="min-h-screen bg-[#0E0E0E] text-[#EAEAEA]" style="font-family: 'Roboto Mono', monospace;">
     <!-- Header Section -->
-    <div class="bg-gray-800/50 backdrop-blur-sm border-b border-gray-700 pt-20">
+    <div class="bg-[#1C1C1C]/80 border-b border-[#2A2A2A] backdrop-blur-sm pt-20">
         <div class="container mx-auto px-6 py-8">
             <div class="flex flex-col md:flex-row items-center justify-between">
                 <div>
-                    <h1 class="text-4xl font-bold mb-2 bg-gradient-to-r from-green-400 to-blue-500 bg-clip-text text-transparent">
+                    <h1 class="text-4xl md:text-5xl font-extrabold mb-2 tracking-tight text-white">
                         My Bookings
                     </h1>
-                    <p class="text-xl text-gray-300">Manage your venue reservations</p>
+                    <p class="text-lg md:text-xl text-[#A1A1A1]">Manage your venue reservations</p>
                 </div>
                 <div class="mt-6 md:mt-0">
-                    <a href="{% url 'booking_venue:main_page' %}" class="bg-gradient-to-r from-blue-500 to-purple-600 hover:from-blue-600 hover:to-purple-700 text-white px-6 py-3 rounded-xl font-semibold transition-all duration-300 transform hover:scale-105 shadow-lg">
-                        Book New Venue
+                    <a href="{% url 'booking_venue:main_page' %}" class="rounded-xl px-7 py-3 font-semibold text-black transition-all duration-300 bg-[#2A2A2A] hover:bg-[#343434] text-[#EAEAEA] transition-all duration-300 bg-whitshadow-[0_0_15px_rgba(255,255,255,0.35)]e hover:bg-whitshadow-[0_0_24px_rgba(255,255,255,0.35)]e flex items-center gap-2">
+                        <span class="text-xl">📋</span>
+                        <span>Book New Venue</span>
                     </a>
                 </div>
             </div>
@@ -27,11 +31,11 @@
         {% if bookings %}
         <div class="space-y-6">
             {% for booking in bookings %}
-            <div class="bg-gray-800/50 backdrop-blur-sm rounded-xl p-6 border border-gray-700 hover:border-green-500 transition-all duration-300">
+            <div class="bg-[#161616] hover:bg-[#1F1F1F] border border-[#2A2A2A] rounded-2xl p-6 shadow-[0_0_10px_rgba(0,0,0,0.4)] transition hover:-translate-y-1 hover:shadow-[0_0_22px_rgba(0,255,148,0.16)]">
                 <div class="flex flex-col lg:flex-row lg:items-center justify-between">
                     <div class="flex-1 mb-4 lg:mb-0">
                         <div class="flex items-start space-x-4">
-                            <div class="w-16 h-16 bg-gradient-to-r from-green-500 to-blue-600 rounded-xl flex items-center justify-center flex-shrink-0">
+                            <div class="w-16 h-16 bg-[#2A2A2A] rounded-xl flex items-center justify-center flex-shrink-0">
                                 <span class="text-2xl">🏟️</span>
                             </div>
                             <div class="flex-1">
@@ -39,21 +43,21 @@
                                 <div class="grid grid-cols-1 md:grid-cols-2 gap-4 text-sm">
                                     <div class="flex items-center space-x-2">
                                         <span class="text-lg">📍</span>
-                                        <span class="text-gray-300">{{ booking.venue.location }}</span>
+                                        <span class="text-[#CFCFCF]">{{ booking.venue.location }}</span>
                                     </div>
                                     <div class="flex items-center space-x-2">
                                         <span class="text-lg">📅</span>
-                                        <span class="text-gray-300">{{ booking.date }} at {{ booking.time }}</span>
+                                        <span class="text-[#CFCFCF]">{{ booking.date }} at {{ booking.time }}</span>
                                     </div>
                                 </div>
                                 <div class="mt-3">
                                     <span class="inline-flex items-center px-3 py-1 rounded-full text-xs font-medium
                                         {% if booking.status == 'confirmed' %}
-                                            bg-green-500/20 text-green-400 border border-green-500/30
+                                            bg-[#EAEAEA]/20 text-[#EAEAEA] border border-[#EAEAEA]/30
                                         {% elif booking.status == 'pending' %}
-                                            bg-yellow-500/20 text-yellow-400 border border-yellow-500/30
+                                            bg-[#FFB020]/20 text-[#FFB020] border border-[#FFB020]/30
                                         {% else %}
-                                            bg-red-500/20 text-red-400 border border-red-500/30
+                                            bg-[#FF6B6B]/20 text-[#FF6B6B] border border-[#FF6B6B]/30
                                         {% endif %}">
                                         {{ booking.get_status_display }}
                                     </span>
@@ -71,7 +75,7 @@
                             </button>
                         </form>
                         {% endif %}
-                        <a href="{% url 'booking_venue:book_venue' booking.venue.id %}" class="w-full sm:w-auto bg-gray-600 hover:bg-gray-700 text-white px-4 py-2 rounded-lg font-medium transition-colors text-center">
+                        <a href="{% url 'booking_venue:book_venue' booking.venue.id %}" class="w-full sm:w-auto bg-[#2A2A2A] hover:bg-[#343434] text-[#EAEAEA] px-4 py-2 rounded-lg font-medium transition-colors text-center">
                             Book Again
                         </a>
                     </div>
@@ -82,15 +86,15 @@
         {% else %}
         <!-- Empty State -->
         <div class="text-center py-16">
-            <div class="w-24 h-24 mx-auto mb-6 bg-gradient-to-r from-green-500 to-blue-600 rounded-full flex items-center justify-center">
+            <div class="w-24 h-24 mx-auto mb-6 rounded-full flex items-center justify-center bg-white shadow-[0_0_25px_rgba(0,255,148,0.35)]">
                 <span class="text-3xl">📋</span>
             </div>
-            <h3 class="text-2xl font-bold mb-4">No bookings yet</h3>
-            <p class="text-gray-400 mb-8 max-w-md mx-auto">You haven't made any venue bookings yet. Start exploring available venues and book your first one!</p>
-            <a href="{% url 'booking_venue:main_page' %}" class="inline-flex items-center px-6 py-3 bg-gradient-to-r from-green-500 to-blue-600 hover:from-green-600 hover:to-blue-700 text-white rounded-xl font-semibold transition-all duration-300 transform hover:scale-105 shadow-lg">
+            <h3 class="text-2xl font-bold mb-3">No bookings yet</h3>
+            <p class="text-[#A1A1A1] mb-8 max-w-md mx-auto">You haven't made any venue bookings yet. Start exploring available venues and book your first one!</p>
+            <button class="rounded-xl px-7 py-3 font-semibold text-black transition-all duration-300 bg-[#2A2A2A] hover:bg-[#343434] text-[#EAEAEA] transition-all duration-300 bg-whitshadow-[0_0_15px_rgba(255,255,255,0.35)]e hover:bg-whitshadow-[0_0_24px_rgba(255,255,255,0.35)]e">
                 <span class="text-lg mr-2">🔍</span>
                 Browse Venues
-            </a>
+            </button>
         </div>
         {% endif %}
     </div>
