@@ -1,11 +1,18 @@
 from django import forms
 from .models import Group, Chat
-from typing import override
+
+try:
+    from typing import override  
+except ImportError:
+    def override(func):  
+        return func
+
 
 class GroupForm(forms.ModelForm):
     class Meta:
         model = Group
         fields = ["match", "name"]
+
 
 class ChatForm(forms.ModelForm):
     class Meta:
