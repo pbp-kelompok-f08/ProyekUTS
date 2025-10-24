@@ -11,6 +11,7 @@ from django.views.decorators.csrf import csrf_exempt
 from django.views.decorators.http import require_POST
 from django.urls import reverse
 
+from django.templatetags.static import static
 
 
 
@@ -22,7 +23,14 @@ def show_json(request):
     thread_list = Thread.objects.all().order_by('-created_at')
     data = [
         {
-            'username': getattr(thread.user, 'username', 'Anonymous'),
+            'user':{
+                'username': getattr(thread.user, 'username', 'Anonymous'),
+                'profile_picture': (
+                    thread.user.profile_picture.url
+                    if getattr(thread.user, 'profile_picture', None) and hasattr(thread.user.profile_picture, 'url')
+                    else static('accounts/img/default.png')
+                )
+            },
             'id': str(thread.id),
             'content' :thread.content,
             'tags' : thread.tags,
@@ -70,7 +78,14 @@ def get_replies_by_threadId(request, threadId):
     # serialize the data manually (or you can use serializers)
     data = [
         {
-            'username': getattr(reply.user, 'username', 'Anonymous'),
+            'user':{
+                'username': getattr(reply.user, 'username', 'Anonymous'),
+                'profile_picture': (
+                    reply.user.profile_picture.url
+                    if getattr(reply.user, 'profile_picture', None) and hasattr(reply.user.profile_picture, 'url')
+                    else static('accounts/img/default.png')
+                )
+            },
             'id': str(reply.id),
             'thread_id': str(reply.thread.id),
             'content': reply.content,
@@ -106,7 +121,14 @@ def add_reply_entry_ajax(request, threadId):
         "created_at": reply.created_at.strftime("%Y-%m-%d %H:%M:%S"),
         "likeCount": reply.likeCount,
         "count":parent_thread.replyCount,
-        'username': getattr(reply.user, 'username', 'Anonymous'),
+        'user':{
+                'username': getattr(reply.user, 'username', 'Anonymous'),
+                'profile_picture': (
+                    reply.user.profile_picture.url
+                    if getattr(reply.user, 'profile_picture', None) and hasattr(reply.user.profile_picture, 'url')
+                    else static('accounts/img/default.png')
+                )
+            },
     }
 
     return JsonResponse(data, status=201)

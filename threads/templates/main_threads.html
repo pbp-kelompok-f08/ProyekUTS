@@ -155,9 +155,8 @@
         const shareCount = DOMPurify.sanitize(String(item.shareCount || 0));
         const replyCount = DOMPurify.sanitize(String(item.replyCount || 0));
 
-        const username = DOMPurify.sanitize(item.username || "Unknown");
-        console.log(username)
-        console.log(CURRENT_USERNAME)
+        const username = DOMPurify.sanitize(item.user.username || "Unknown");
+        const profileImg = DOMPurify.sanitize(item.user.profile_picture);
 
         const threadCard = document.createElement("div");
         threadCard.id = id;
@@ -167,9 +166,8 @@
         threadCard.innerHTML = `
         <!-- Left section: profile + username -->
         <div class="flex flex-col items-center">
-            <div class="w-10 h-10 rounded-full bg-gradient-to-br from-purple-500 to-pink-500 flex items-center justify-center text-white font-bold shadow-md">
-                ${username[0].toUpperCase()}
-            </div>
+            <img src="${profileImg}" alt="${username}" 
+           class="w-10 h-10 rounded-full object-cover border border-gray-600">
         </div>
 
         <!-- Middle section: post content -->
@@ -336,7 +334,9 @@
     function buildReplyCardElement(item) {
         const id = DOMPurify.sanitize(item.id);
 
-        const username = DOMPurify.sanitize(item.username);
+        const username = DOMPurify.sanitize(item.user.username || "Unknown");
+        const profileImg = DOMPurify.sanitize(item.user.profile_picture);
+
         const content = DOMPurify.sanitize(item.content);
         const likeCount = DOMPurify.sanitize(String(item.likeCount || 0));
         const createdAt = new Date(item.created_at);
@@ -365,9 +365,8 @@
             </div>`
                 : ""}
             <div class="flex flex-col items-center">
-                <div class="w-8 h-8 rounded-full bg-gradient-to-br from-purple-500 to-pink-500 flex items-center text-md  justify-center text-white font-bold shadow-md">
-                    ${username[0].toUpperCase()}
-                </div>
+                <img src="${profileImg}" alt="${username}" 
+                    class="w-8 h-8 rounded-full object-cover border border-gray-600">
             </div>
             <div class="flex-1">
                 <p class="font-semibold text-white">${username}</p>
