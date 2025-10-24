@@ -71,7 +71,9 @@
           <div>
             <label class="block text-sm text-[#CED0CE] mb-1">Username</label>
             <input type="text" name="username" id="edit-username" 
-                   class="w-full bg-[#253237] text-[#E6E8E6] p-2 rounded focus:outline-none focus:ring-2 focus:ring-[#9DB4C0]">
+                class="w-full bg-[#1b1f22] text-[#9DB4C0] p-2 rounded cursor-not-allowed opacity-60"
+                value="{{ request.user.username }}" disabled>
+            <p class="text-xs text-[#9DB4C0] italic mt-1">Username cannot be changed.</p>
           </div>
           <div>
             <label class="block text-sm text-[#CED0CE] mb-1">Email</label>
@@ -139,7 +141,7 @@
 
     <!-- USER THREADS BOX -->
     <div id="user-threads-box"
-            class="bg-[#262626] rounded-xl border border-[#9DB4C0]/30 shadow-lg mt-8 p-6 max-h-[500px] overflow-y-auto">
+            class="bg-[#212842] rounded-xl border border-[#9DB4C0]/30 shadow-lg mt-8 p-6 max-h-[800px] overflow-y-auto">
         <h3 class="text-xl font-semibold mb-4 text-[#E6E8E6]">Your Threads</h3>
         <div id="userThreads" class="space-y-6"></div>
         <p id="emptyThreads" class="text-[#9DB4C0] hidden text-sm text-center italic">No threads yet.</p>
@@ -154,16 +156,15 @@
 <script src="{% static 'accounts/js/toast.js' %}"></script>
 <script src="{% static 'accounts/js/auth.js' %}"></script>
 <script>
-
 document.addEventListener("DOMContentLoaded", () => {
-  const savedProfile = localStorage.getItem('userProfile');
+  const savedProfile = localStorage.getItem("userProfile");
   const currentUsername = "{{ request.user.username }}";
 
   if (savedProfile) {
     const parsed = JSON.parse(savedProfile);
 
-    if (parsed.username !== currentUsername) {
-      localStorage.removeItem('userProfile');
+    if (!parsed.id || parsed.username !== currentUsername) {
+      localStorage.removeItem("userProfile");
       fetchProfile();
     } else {
       renderProfile(parsed);
@@ -190,7 +191,7 @@ function renderProfile(user) {
 }
 
 function fetchProfile() {
-  fetch("{% url 'accounts:profile_detail' %}, { cache: 'no-store' }")
+  fetch("{% url 'accounts:profile_detail' %}", { cache: 'no-store' })
     .then(response => response.json())
     .then(data => {
       const user = data.data;
@@ -204,78 +205,83 @@ function toggleEditForm() {
 }
 
 async function fetchUserThreads() {
-  const threadsList = document.getElementById('threads-list');
-  const loading = document.getElementById('threads-loading');
-  const empty = document.getElementById('threads-empty');
+  const threadsContainer = document.getElementById("userThreads");
+  const empty = document.getElementById("emptyThreads");
 
-  threadsList.innerHTML = '';
-  loading.classList.remove('hidden');
-  empty.classList.add('hidden');
+  threadsContainer.innerHTML = "";
 
   try {
-    const res = await fetch("{% url 'threads:show_json' %}");
-    if (!res.ok) throw new Error("Failed to fetch threads");
+    // Ambil semua thread
+    const res = await fetch("{% url 'threads:show_json' %}", { cache: "no-store" });
     const allThreads = await res.json();
 
+    // Ambil username aktif
     const username = "{{ request.user.username }}";
-    const userThreads = allThreads.filter(t => t.username === username);
+    console.log("🧩 Filtering threads for:", username);
+    console.log("🧵 Threads received:", allThreads.length);
 
-    loading.classList.add('hidden');
+    // Filter thread milik user login
+    const userThreads = allThreads.filter(t => t.username === username);
+    console.log("🎯 Found user threads:", userThreads.length);
 
     if (userThreads.length === 0) {
-      empty.classList.remove('hidden');
+      empty.classList.remove("hidden");
       return;
     }
+    empty.classList.add("hidden");
 
+    // Foto profil user
     const userPic = `{% if request.user.profile_picture %}{{ request.user.profile_picture.url }}{% else %}{% static 'accounts/img/default.png' %}{% endif %}`;
 
+    // Render setiap thread
     userThreads.forEach(thread => {
-      const div = document.createElement('div');
-      div.className = "bg-[#262626] border border-[#9DB4C0]/20 rounded-xl p-6 shadow transition-all hover:bg-[#30363D]/50";
+      const div = document.createElement("div");
+      div.className =
+        "bg-[#262626] border border-[#9DB4C0]/20 rounded-xl p-6 shadow transition-all hover:bg-[#30363D]/50";
 
       const created = new Date(thread.created_at).toLocaleString();
 
       div.innerHTML = `
-        <div class="flex items-center mb-4 space-x-3">
-          <img src="${userPic}" 
-               class="w-10 h-10 rounded-full object-cover border border-[#9DB4C0]/30" 
-               alt="user profile picture">
+        <div class="flex items-center space-x-3 mb-3">
+          <img src="${userPic}" alt="Profile picture"
+               class="w-10 h-10 rounded-full border border-[#9DB4C0]/40 object-cover">
           <div>
-            <p class="font-semibold text-[#E6E8E6]">${DOMPurify.sanitize(thread.username || "{{ request.user.username }}")}</p>
+            <h4 class="font-semibold text-[#E6E8E6] text-sm">${thread.username}</h4>
             <p class="text-xs text-[#9DB4C0]">${created}</p>
           </div>
         </div>
 
         ${thread.image ? `
-          <div class="mb-3 rounded-lg overflow-hidden border border-[#9DB4C0]/30">
-            <img src="${DOMPurify.sanitize(thread.image)}" alt="Thread image" class="w-full object-cover max-h-72">
-          </div>` : ""
-        }
+        <div class="rounded-lg overflow-hidden border border-[#9DB4C0]/30 mb-3">
+          <img src="${thread.image}" 
+               alt="Thread image"
+               class="w-full object-contain max-h-[500px]">
+        </div>` : ""}
 
-        <p class="text-[#E6E8E6] mb-2 whitespace-pre-line">${DOMPurify.sanitize(thread.content || "")}</p>
-        ${thread.tags ? `<p class="text-sm text-[#9DB4C0]">#${DOMPurify.sanitize(thread.tags.replace(/,/g, " #"))}</p>` : ""}
+        <p class="text-[#E6E8E6] mb-2">${thread.content}</p>
+        ${thread.tags ? `<p class="text-sm text-[#9DB4C0]">#${thread.tags.replace(/,/g, " #")}</p>` : ""}
       `;
-
-      threadsList.appendChild(div);
+      threadsContainer.appendChild(div);
     });
 
   } catch (error) {
-    console.error(error);
-    loading.classList.add('hidden');
+    console.error("Error fetching threads:", error);
     empty.textContent = "Failed to load threads.";
-    empty.classList.remove('hidden');
+    empty.classList.remove("hidden");
   }
 }
+
 
 document.getElementById('profileForm').addEventListener('submit', function(e) {
   e.preventDefault();
   const formData = new FormData(this);
   const removePicture = document.getElementById('remove-picture').checked;
   formData.append('remove_picture', removePicture);
+  formData.delete("username");
 
   fetch("{% url 'accounts:update_profile' %}", {
     method: 'POST',
-    headers: { 'X-CSRFToken': '{{ csrf_token }}' },
+    headers: { "X-CSRFToken": getCookie("csrftoken") },
     body: formData
   })
   .then(res => res.json())
@@ -286,6 +292,9 @@ document.getElementById('profileForm').addEventListener('submit', function(e) {
       localStorage.setItem('userProfile', JSON.stringify(user));
       toggleEditForm();
       showToast("Profile updated successfully!", "success");
+      fetchUserThreads();
+
+      setTimeout(() => fetchUserThreads(), 500);
     } else {
       showToast(data.message || "Failed to update profile.", "error");
     }
@@ -295,5 +304,20 @@ document.getElementById('profileForm').addEventListener('submit', function(e) {
     showToast("An unexpected error occurred.", "error");
   });
 });
+
+function getCookie(name) {
+  let cookieValue = null;
+  if (document.cookie && document.cookie !== "") {
+    const cookies = document.cookie.split(";");
+    for (let i = 0; i < cookies.length; i++) {
+      const cookie = cookies[i].trim();
+      if (cookie.substring(0, name.length + 1) === (name + "=")) {
+        cookieValue = decodeURIComponent(cookie.substring(name.length + 1));
+        break;
+      }
+    }
+  }
+  return cookieValue;
+}
 </script>
 {% endblock %}

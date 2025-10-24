@@ -94,6 +94,7 @@ def profile_detail(request: HttpRequest):
         'username', 'email', 'bio', 'role',
         'favorite_sport', 'skill_level'
     ])
+    data["id"] = user.pk
     data["profile_picture"] = user.profile_picture.url if user.profile_picture else None
     return JsonResponse({"data": data}, status=200)
 
@@ -102,7 +103,7 @@ def profile_detail(request: HttpRequest):
 def update_profile(request):
     user = request.user
 
-    username = request.POST.get("username", "").strip()
+    username = user.username  
     email = request.POST.get("email", "").strip()
     bio = request.POST.get("bio", "").strip()
     favorite_sport = request.POST.get("favorite_sport", "").strip()
@@ -110,23 +111,19 @@ def update_profile(request):
     profile_picture = request.FILES.get("profile_picture")
     remove_picture = request.POST.get("remove_picture")
 
-    # --- Basic validation ---
-    if not username:
-        return JsonResponse({"status": "error", "message": "Username cannot be empty."}, status=400)
+    # --- Cek email duplikat  ---
+    if email and email != user.email and CustomUser.objects.filter(email=email).exists():
+        return JsonResponse({"status": "error", "message": "Email already taken."}, status=400)
 
-    # --- Update user fields ---
-    user.username = username
+    # --- Update field ---
     if email:
         user.email = email
     user.bio = bio
     user.favorite_sport = favorite_sport or None
     user.skill_level = skill_level or None
-    if profile_picture:
-        if user.profile_picture and user.profile_picture.name != profile_picture.name:
-            user.profile_picture.delete(save=False)
-        user.profile_picture = profile_picture
 
-    if remove_picture == "true": 
+    # --- Profile picture ---
+    if remove_picture == "true":
         if user.profile_picture:
             user.profile_picture.delete(save=False)
         user.profile_picture = None
@@ -137,9 +134,6 @@ def update_profile(request):
 
     user.save()
 
-    login(request, user)
-
-    # --- Return updated data ---
     return JsonResponse({
         "status": "success",
         "data": {
@@ -151,3 +145,4 @@ def update_profile(request):
             "profile_picture": user.profile_picture.url if user.profile_picture else None,
         }
     })
+
