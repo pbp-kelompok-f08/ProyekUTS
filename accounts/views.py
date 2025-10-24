@@ -21,6 +21,7 @@ def register_page(request):
 def profile_page(request):
     return render(request, "accounts/profile.html")
 
+@csrf_exempt
 def public_profile(request, username):
     # Handle special case for AnonymousUser
     if username.lower() == "anonymous":
@@ -122,6 +123,7 @@ def profile_detail(request: HttpRequest):
 
 @login_required
 @require_POST
+@csrf_exempt
 def update_profile(request):
     user = request.user
 

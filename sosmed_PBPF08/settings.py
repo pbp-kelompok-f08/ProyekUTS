@@ -41,7 +41,7 @@ DEBUG = True
 ALLOWED_HOSTS = ["localhost", "127.0.0.1", 'm-naufal41-hoppin.pbp.cs.ui.ac.id', '.vercel.app']
 
 CSRF_TRUSTED_ORIGINS = [
-    'https://m-naufal41-hoppin.pbp.cs.ui.ac.id/', 'https://hoppin-lac.vercel.app',
+    "https://m-naufal41-hoppin.pbp.cs.ui.ac.id", 'https://hoppin-lac.vercel.app',
 ]
 
 
