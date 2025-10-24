@@ -8,18 +8,15 @@ from django.views.decorators.csrf import csrf_exempt
 from django.core import serializers
 from liveChat.models import Group
 import json, uuid
+from django.utils import timezone
+from datetime import timedelta
 
 from .forms import MatchForm, MatchSearchForm, ParticipationForm
 from .models import Match, Participation, SportCategory
 
 
 DEFAULT_CATEGORIES = [
-    "Sepak Bola",
-    "Basket",
-    "Bulu Tangkis",
-    "Futsal",
-    "Lari",
-    "Bersepeda",
+    "Sepak Bola", "Basket", "Bulu Tangkis", "Futsal", "Lari", "Bersepeda", "Other"
 ]
 
 
@@ -68,6 +65,25 @@ def match_dashboard(request):
     schema_ready = _is_schema_ready()
 
     if not schema_ready:
+        categories = []
+                
+        # ========= Stats Sidebar Data =========
+        total_matches = Match.objects.count()
+        today_matches = Match.objects.filter(event_date__date=timezone.now().date()).count()
+        total_players = Participation.objects.values('user').distinct().count()
+        sports_count = SportCategory.objects.count()
+
+        # Popular sports (top 3)
+        popular_sports = (
+            SportCategory.objects.annotate(match_count=Count("matches"))
+            .order_by("-match_count")[:3]
+        )
+
+        # Recent activity (last 5 matches)
+        recent_activity = (
+            Match.objects.select_related("category")
+            .order_by("-id")[:5]
+        )
         context = {
             "schema_ready": False,
             "grouped_matches": [],
@@ -76,6 +92,12 @@ def match_dashboard(request):
             "search_form": MatchSearchForm(),
             "has_any_match": False,
             "categories": categories,
+            "total_matches": total_matches,
+            "today_matches": today_matches,
+            "total_players": total_players,
+            "sports_count": sports_count,
+            "popular_sports": popular_sports,
+            "recent_activity": recent_activity,
         }
 
         if request.headers.get("x-requested-with") == "XMLHttpRequest":
@@ -88,6 +110,7 @@ def match_dashboard(request):
                 status=503,
             )
 
+    
         return render(request, "matches/dashboard.html", context, status=503)
 
     _ensure_default_categories()
@@ -107,10 +130,7 @@ def match_dashboard(request):
         sport_value = request.GET.get("sport")
         if sport_value:
             matches = matches.filter(category__slug__iexact=sport_value)
-
-        from django.utils import timezone
-        from datetime import timedelta
-
+            
         when_value = request.GET.get("when")
         if when_value == "today":
             today = timezone.now().date()
@@ -163,6 +183,25 @@ def match_dashboard(request):
             )
         return JsonResponse({"groups": payload})
 
+    
+    # ========= Stats Sidebar Data =========
+    total_matches = Match.objects.count()
+    today_matches = Match.objects.filter(event_date__date=timezone.now().date()).count()
+    total_players = Participation.objects.values('user').distinct().count()
+    sports_count = SportCategory.objects.count()
+
+    # Popular sports (top 3)
+    popular_sports = (
+        SportCategory.objects.annotate(match_count=Count("matches"))
+        .order_by("-match_count")[:3]
+    )
+
+    # Recent activity (last 5 matches)
+    recent_activity = (
+        Match.objects.select_related("category")
+        .order_by("-id")[:5]
+    )
+
     context = {
         "grouped_matches": grouped_matches,
         "match_form": MatchForm(),
@@ -171,7 +210,15 @@ def match_dashboard(request):
         "has_any_match": has_any_match,
         "schema_ready": True,
         "categories": categories,
+        "total_matches": total_matches,
+        "today_matches": today_matches,
+        "total_players": total_players,
+        "sports_count": sports_count,
+        "popular_sports": popular_sports,
+        "recent_activity": recent_activity,
     }
+    
+    
     return render(request, "matches/dashboard.html", context)
 
 @require_http_methods(["POST"])
@@ -255,7 +302,7 @@ def book_match(request: HttpRequest, match_id: uuid):
             status=400,
         )
 
-    form = ParticipationForm({"user": request.user, "message": request.POST})
+    form = ParticipationForm({"user": request.user.id, "message": request.POST.get("message", "")})
     if form.is_valid():
         participation: Participation = form.save(commit=False)
         participation.match = match
@@ -283,8 +330,13 @@ def delete_match(request: HttpRequest, match_id: uuid = ''):
         Match.objects.all().delete()
     return HttpResponse(status=204)
 
-def get_match(requets: HttpRequest, match_id: uuid = ''):
-    matches = get_object_or_404(Match, match_id) if match_id else Match.objects.all()
-    data = serializers.serialize("json", matches)
+def get_match(request: HttpRequest, match_id: uuid = None):
+    if match_id:
+        match = get_object_or_404(Match, id=match_id)
+        data = serializers.serialize("json", [match])
+    else:
+        matches = Match.objects.all()
+        data = serializers.serialize("json", matches)
     return JsonResponse({"data": json.loads(data)})
+
     

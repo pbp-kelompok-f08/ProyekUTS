@@ -132,7 +132,7 @@
           <div class="space-y-4">
             <div class="flex justify-between items-center">
               <span class="text-[#A1A1A1]">Total Matches</span>
-              <span class="font-semibold text-[#EAEAEA]">247</span>
+              <span class="font-semibold text-[#EAEAEA]">{{ total_matches }}</span>
             </div>
             <div class="flex justify-between items-center">
               <span class="text-[#A1A1A1]">Active Today</span>
@@ -140,11 +140,11 @@
             </div>
             <div class="flex justify-between items-center">
               <span class="text-[#A1A1A1]">Players Online</span>
-              <span class="font-semibold text-[#EAEAEA]">156</span>
+              <span class="font-semibold text-[#EAEAEA]">{{ total_players }}</span>
             </div>
             <div class="flex justify-between items-center">
               <span class="text-[#A1A1A1]">Sports Types</span>
-              <span class="font-semibold text-[#EAEAEA]">8</span>
+              <span class="font-semibold text-[#EAEAEA]">{{ sports_count }}</span>
             </div>
           </div>
         </div>
@@ -160,27 +160,18 @@
             Popular Sports
           </h3>
           <div class="space-y-3">
-            <div class="flex items-center justify-between p-3 bg-[#202020] rounded-lg border border-[#2A2A2A]">
-              <span class="flex items-center">
-                <span class="w-3 h-3 rounded-full mr-3" style="background:#EAEAEA"></span>
-                Football
-              </span>
-              <span class="text-sm text-[#A1A1A1]">89 matches</span>
-            </div>
-            <div class="flex items-center justify-between p-3 bg-[#202020] rounded-lg border border-[#2A2A2A]">
-              <span class="flex items-center">
-                <span class="w-3 h-3 rounded-full mr-3" style="background:#EAEAEA"></span>
-                Basketball
-              </span>
-              <span class="text-sm text-[#A1A1A1]">67 matches</span>
-            </div>
-            <div class="flex items-center justify-between p-3 bg-[#202020] rounded-lg border border-[#2A2A2A]">
-              <span class="flex items-center">
-                <span class="w-3 h-3 rounded-full mr-3" style="background:#EAEAEA"></span>
-                Tennis
-              </span>
-              <span class="text-sm text-[#A1A1A1]">45 matches</span>
-            </div>
+            {% for sport in popular_sports %}
+          <div class="flex items-center justify-between p-3 bg-[#202020] rounded-lg border border-[#2A2A2A]">
+            <span class="flex items-center">
+              <span class="w-3 h-3 rounded-full mr-3" style="background:#EAEAEA"></span>
+              {{ sport.name }}
+            </span>
+            <span class="text-sm text-[#A1A1A1]">{{ sport.match_count }} matches</span>
+          </div>
+        {% empty %}
+          <p class="text-[#A1A1A1] text-sm">No popular sports yet.</p>
+        {% endfor %}
+
           </div>
         </div>
 
@@ -195,29 +186,25 @@
             Recent Activity
           </h3>
           <div class="space-y-4">
-            <div class="flex items-start space-x-3 p-3 bg-[#202020] rounded-lg border border-[#2A2A2A]">
-              <div class="w-8 h-8 rounded-full flex items-center justify-center flex-shrink-0" style="background:#EAEAEA">
-                <svg class="w-4 h-4 text-black" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                        d="M12 4v16m8-8H4"></path>
-                </svg>
-              </div>
-              <div class="flex-1">
-                <p class="text-sm text-white">New basketball match created</p>
-                <p class="text-xs text-[#A1A1A1]">2 hours ago</p>
-              </div>
-            </div>
-            <div class="flex items-start space-x-3 p-3 bg-[#202020] rounded-lg border border-[#2A2A2A]">
-              <div class="w-8 h-8 rounded-full flex items-center justify-center flex-shrink-0" style="background:#EAEAEA">
-                <svg class="w-4 h-4 text-black" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                        d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z"></path>
-                </svg>
-              </div>
-              <div class="flex-1">
-                <p class="text-sm text-white">5 players joined football match</p>
-                <p class="text-xs text-[#A1A1A1]">4 hours ago</p>
-              </div>
+{% for match in recent_activity %}
+  <div class="flex items-start space-x-3 p-3 bg-[#202020] rounded-lg border border-[#2A2A2A]">
+    <div class="w-8 h-8 rounded-full flex items-center justify-center flex-shrink-0" style="background:#EAEAEA">
+      <svg class="w-4 h-4 text-black" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"></path>
+      </svg>
+    </div>
+    <div class="flex-1">
+      <p class="text-sm text-white">
+        New {{ match.category.name|lower }} match: 
+        <span class="font-semibold">{{ match.title }}</span>
+      </p>
+      <p class="text-xs text-[#A1A1A1]">{{ match.event_date|date:"M d, H:i" }}</p>
+    </div>
+  </div>
+{% empty %}
+  <p class="text-[#A1A1A1] text-sm">No recent activity yet.</p>
+{% endfor %}
+
             </div>
           </div>
         </div>
