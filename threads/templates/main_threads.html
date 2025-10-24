@@ -64,9 +64,9 @@
             </div>
 
             <!-- thread Reply -->
-            <div id="threadReply" class="hidden lg:w-1/3">
+            <div id="threadReply" class="lg:w-1/3 fixed lg:hidden hidden inset-0 z-50 flex items-center justify-center bg-black/70 backdrop-blur-sm lg:static lg:inset-auto lg:z-auto lg:bg-transparent lg:backdrop-blur-none">
                 <div
-                    class="fixed w-1/3 bg-neutral-900 mt-10 top-10 bottom-10 rounded-xl border border-gray-700 flex flex-col">
+                    class="fixed w-4/5 lg:w-1/3 bg-neutral-900 mt-10 top-10 bottom-10 rounded-xl border border-gray-700 flex flex-col">
 
                     <!-- Header -->
                     <div class="p-4 border-b border-gray-700 flex items-center justify-between">
@@ -304,15 +304,19 @@
         // If the same thread is clicked again → hide the reply panel
         if (activeReplyThread === threadId && !threadsReplyContainer.classList.contains('hidden') || threadId == null && username == null) {
             threadsReplyContainer.classList.add('hidden');
+            threadsReplyContainer.classList.add('lg:hidden');
+            threadsReplyContainer.classList.remove('lg:block');
             serachBar.classList.remove('hidden')
             activeReplyThread = null;
             return;
         }
-
-
+        
+        
         // Otherwise, open the panel for the new thread
         activeReplyThread = threadId;
         threadsReplyContainer.classList.remove('hidden');
+        threadsReplyContainer.classList.remove('lg:hidden');
+        threadsReplyContainer.classList.add('lg:block');
         serachBar.classList.add('hidden')
 
         // Show username at the top
