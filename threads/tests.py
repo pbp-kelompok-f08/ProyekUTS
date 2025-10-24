@@ -20,6 +20,8 @@ class ThreadViewsTest(TestCase):
             content="Nice post!",
             user=self.user
         )
+        # ✅ Make sure the reply count starts at 1
+        self.thread.changeReply(True)
 
     def test_show_main_requires_login(self):
         response = self.client.get(reverse("threads:show_main"))
