@@ -285,7 +285,7 @@ def book_match(request: HttpRequest, match_id: uuid):
             status=400,
         )
 
-    form = ParticipationForm({"user": request.user.id, "message": request.POST.get("message", "")})
+    form = ParticipationForm({"user": request.user.pk, "message": request.POST.get("message", "")})
     if form.is_valid():
         participation: Participation = form.save(commit=False)
         participation.match = match
