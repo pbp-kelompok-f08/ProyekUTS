@@ -12,7 +12,7 @@ async function loginUser() {
   const msg = document.getElementById("login-msg");
 
   if (data.success) {
-    window.location.href = "/dashboard";
+    window.location.href = "/";
   } else {
     msg.textContent = data.message;
   }

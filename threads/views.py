@@ -138,37 +138,28 @@ def add_reply_entry_ajax(request, threadId):
 @require_POST
 def like_thread_ajax(request, thread_id):
 
-    try:
-        thread = Thread.objects.get(pk=thread_id)
-        user = request.user
-        isLiked = thread.changeLike(user)
-        data = {
-            "likeCount":thread.likeCount,
-            "isLiked": isLiked
-        }
-        return JsonResponse(data)
+    thread = Thread.objects.get(pk=thread_id)
+    user = request.user
+    isLiked = thread.changeLike(user)
+    data = {
+        "likeCount":thread.likeCount,
+        "isLiked": isLiked
+    }
+    return JsonResponse(data)
 
-    except Thread.DoesNotExist:
-        return JsonResponse({"success": False, "error": "Thread not found"}, status=404)
-    
 @login_required
 @csrf_exempt
 @require_POST
 def like_reply_ajax(request, replyId):
+    reply = ReplyChild.objects.get(pk=replyId)
+    user = request.user
+    isLiked = reply.changeLike(user)
+    data = {
+        "likeCount":reply.likeCount,
+        "isLiked": isLiked
+    }
+    return JsonResponse(data)
 
-    try:
-        reply = ReplyChild.objects.get(pk=replyId)
-        user = request.user
-        isLiked = reply.changeLike(user)
-        data = {
-            "likeCount":reply.likeCount,
-            "isLiked": isLiked
-        }
-        return JsonResponse(data)
-
-    except Thread.DoesNotExist:
-        return JsonResponse({"success": False, "error": "Thread not found"}, status=404)
-    
 
 def delete_reply(request, reply_id):
     reply = get_object_or_404(ReplyChild, pk=reply_id)
