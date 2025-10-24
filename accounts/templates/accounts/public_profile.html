@@ -66,13 +66,12 @@
 document.addEventListener("DOMContentLoaded", async () => {
   const threadsContainer = document.getElementById("userThreads");
   const empty = document.getElementById("emptyThreads");
-  const username = "{{ user_profile.username }}"; // username = PK
+  const username = "{{ user_profile.username }}";
 
   try {
     const res = await fetch("{% url 'threads:show_json' %}", { cache: "no-store" });
     const allThreads = await res.json();
 
-    // Filter berdasarkan username (karena itu PK di sistem kamu)
     const userThreads = allThreads.filter(t => t.username === username);
 
     if (userThreads.length === 0) {
