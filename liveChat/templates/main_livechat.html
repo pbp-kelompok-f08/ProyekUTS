@@ -9,7 +9,7 @@
 {% include 'modal.html' %}
 {% include 'navbar.html' %}
 
-<div class="relative w-full overflow-hidden mt-[20px] md:mt-[75px]">
+<div class="relative w-full overflow-hidden mt-[65px] md:mt-[75px]">
     <div class="grid grid-cols-1 md:grid-cols-[40%_60%] lg:grid-cols-[35%_65%] w-full">
         <!-- Loading Spinner -->
         <div id="loading" class="absolute inset-0 flex flex-col items-center justify-center bg-neutral-900 z-10 hidden text-gray-300">
@@ -24,7 +24,24 @@
 
         <!-- Groups -->
         <div id="groups-container" class="flex flex-col border-neutral-800 overflow-y-auto h-[calc(100dvh-75px)]">
-            <div class="hidden" id="dummy-section"></div>
+            <form id="group-search-form" method="get" action="" class="flex flex-col lg:flex-row gap-4 w-full" autocomplete="off">
+                <div class="relative flex flex-row items-center w-full">
+                    <svg class="absolute w-5 h-5 ml-5 text-[#6B6B6B]" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"></path>
+                    </svg>
+                    <input
+                    type="text"
+                    name="keyword"
+                    value="{{ request.GET.keyword }}"
+                    placeholder="Search group name"
+                    class="w-full bg-transparent border-b h-[70px] border-[#3A3A3A] text-[#EAEAEA]
+                        placeholder-[#6B6B6B] focus:outline-none focus:border-white
+                        py-3 pr-4 pl-12 text-lg transition-all duration-300" id="group-search-form-input"/>
+                </div>
+            </form>
+            <div class="flex flex-col" id="inner-groups-container">
+                <div id="dummy-section"></div>
+            </div>
         </div>
         <div id="empty-groups-container" class="hidden flex flex-col items-center justify-center border-neutral-800 overflow-y-auto h-[calc(100dvh-75px)]">
             <div class="flex flex-col gap-4 items-center justify-center m-auto">
@@ -68,6 +85,7 @@
 {% block extra_scripts %}
 <script>
 const groupsContainer = document.getElementById("groups-container");
+const innerGroupsContainer = document.getElementById("inner-groups-container");
 const emptyGroupsContainer = document.getElementById("empty-groups-container");
 const chatGroupNameElement = document.getElementById("chat-group-name");
 const chatGroupMembersElement = document.getElementById("chat-group-members");
@@ -76,6 +94,7 @@ const chatContainer = document.getElementById("chat-container");
 const chatsSectionContainer = document.getElementById("chats-section");
 const sendButton = document.getElementById("send-chat");
 const chatTextArea = document.getElementById("chat-textarea");
+const groupSearchFormInput = document.getElementById("group-search-form-input");
 
 let currentGroupSection = document.getElementById("dummy-section");
 let lastChat = null;
@@ -235,9 +254,9 @@ function buildGroupSectionElement(group) {
 }
 
 // Tambahkan daftar grup
-function addGroupsToPage(groups) {
+function addGroupsToPage(groups, filter) {
     console.log("here");
-    if (groups.length === 0)
+    if (groups.length === 0 && !filter)
     {
         groupsContainer.className = "hidden flex flex-col border-neutral-800 overflow-y-auto h-[calc(100dvh-75px)]";
         emptyGroupsContainer.className = "flex flex-col border-neutral-800 overflow-y-auto h-[calc(100dvh-75px)]";
@@ -248,8 +267,8 @@ function addGroupsToPage(groups) {
     {
         groupsContainer.className = "flex flex-col border-neutral-800 overflow-y-auto h-[calc(100dvh-75px)]";
         emptyGroupsContainer.className = "hidden flex flex-col border-neutral-800 overflow-y-auto h-[calc(100dvh-75px)]";
-        groupsContainer.innerHTML = '';
-        groups.forEach(group => groupsContainer.appendChild(buildGroupSectionElement(group)));
+        innerGroupsContainer.innerHTML = '';
+        groups.forEach(group => innerGroupsContainer.appendChild(buildGroupSectionElement(group)));
     }
 }
 
@@ -259,8 +278,18 @@ async function fetchGroups() {
     const json = await response.json();
     const groups = json.data;
     console.log("groups:", groups)
-    addGroupsToPage(groups);
+    addGroupsToPage(groups, false);
     if (groups.length > 0) await changeCurrentGroup(groups[0]);
+}
+
+async function fetchGroupsSearch() {
+    const response = await fetch(`/liveChat/group/?group_name=${groupSearchFormInput.value.trim()}`, {
+        method: "GET",
+    });
+    const json = await response.json();
+    const groups = json.data;
+    console.log("groups:", groups);
+    addGroupsToPage(groups, true);
 }
 
 // Kirim chat
@@ -286,5 +315,18 @@ chatTextArea.addEventListener("keydown", function (event) {
         sendChat(currentGroupId);
     }
 })
+
+groupSearchFormInput.addEventListener("keydown", function(event) {
+    if (event.key === "Enter") {
+        event.preventDefault();
+        fetchGroupsSearch();
+    }
+})
+
+groupSearchFormInput.addEventListener("input", function() {
+    if (!groupSearchFormInput.value.trim().length) {
+        fetchGroupsSearch();
+    }
+});
 </script>
 {% endblock extra_scripts %}
