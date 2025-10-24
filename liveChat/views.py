@@ -15,7 +15,10 @@ import json
 @login_required
 def show_main(request: HttpRequest):
     print("fetched group get")
-    return render(request, 'main_livechat.html', {"username": request.user.username})
+    return render(request, 'main_livechat.html', {
+        "username": request.user.username,
+        "profile_picture": request.user.profile_picture,
+    })
 
 @login_required
 @csrf_exempt

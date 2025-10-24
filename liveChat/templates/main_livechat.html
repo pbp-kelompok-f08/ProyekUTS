@@ -26,14 +26,21 @@
         <div id="groups-container" class="flex flex-col border-neutral-800 overflow-y-auto h-[calc(100dvh-75px)]">
             <div class="hidden" id="dummy-section"></div>
         </div>
+        <div id="empty-groups-container" class="hidden flex flex-col items-center justify-center border-neutral-800 overflow-y-auto h-[calc(100dvh-75px)]">
+            <div class="flex flex-col gap-4 items-center justify-center m-auto">
+                <img src="{% static 'image/group.png' %}" alt="" class="invert w-[100px]">
+                <p>You haven't joined any groups yet</p>
+                <p>Join a match to join its group</p>
+            </div>
+        </div>
 
         <!-- Chat -->
         <div id="chat-container" class="relative flex flex-col h-[calc(100dvh-75px)] border-l border-neutral-800 overflow-hidden">
             <div class="absolute flex flex-row w-full h-[70px] gap-4 top-0 bg-neutral-700 items-center px-4 md:px-10 z-10">
                 <div class="w-[50px] h-[50px] rounded-full bg-white"></div>
                 <div class="flex flex-col gap-[2px] overflow-hidden">
-                    <p id="chat-group-name" class="truncate">Group Name</p>
-                    <p id="chat-group-members" class="text-neutral-400 truncate">Members</p>
+                    <p id="chat-group-name" class="truncate"></p>
+                    <p id="chat-group-members" class="text-neutral-400 truncate"></p>
                 </div>
             </div>
 
@@ -41,11 +48,17 @@
             </div>
 
             <!-- Chat form -->
-            <div class="absolute flex flex-row w-full w-[370px] md:w-[480px] lg:w-[900px] h-[50px] bottom-3 bg-neutral-800 rounded-full items-center justify-center px-2 md:px-4 ml-[10px] md:ml-[10px]">
+            <div class="absolute flex flex-row w-full w-[370px] md:w-[480px] lg:w-[900px] h-[50px] bottom-3 bg-neutral-800 rounded-full items-center justify-center px-2 md:px-4 ml-[10px] md:ml-[10px] lg:ml-[55px]">
                 <textarea name="" id="chat-textarea" class="flex-1 bg-transparent w-[300px] resize-none focus:outline-none h-[25px] px-2" placeholder="Type your message"></textarea>
                 <button id="send-chat" class="ml-2 w-[30px]">
                     <img src="{% static 'image/paperplane.webp' %}" alt="" class=" size-[20px] md:size-[25px] invert">
                 </button>
+            </div>
+        </div>
+        <div id="chat-container-empty" class="hidden relative flex flex-col h-[calc(100dvh-75px)] border-l border-neutral-800 overflow-hidden">
+            <div class="flex flex-col gap-4 items-center justify-center m-auto">
+                <img src="{% static 'image/chat.png' %}" alt="" class="invert w-[150px]">
+                <p>Send a message to your group here!</p>
             </div>
         </div>
     </div>
@@ -55,8 +68,11 @@
 {% block extra_scripts %}
 <script>
 const groupsContainer = document.getElementById("groups-container");
+const emptyGroupsContainer = document.getElementById("empty-groups-container");
 const chatGroupNameElement = document.getElementById("chat-group-name");
 const chatGroupMembersElement = document.getElementById("chat-group-members");
+const chatContainerEmpty = document.getElementById("chat-container-empty");
+const chatContainer = document.getElementById("chat-container");
 const chatsSectionContainer = document.getElementById("chats-section");
 const sendButton = document.getElementById("send-chat");
 const chatTextArea = document.getElementById("chat-textarea");
@@ -115,6 +131,7 @@ function buildChatBubbleElement(chat) {
     const bubbleElement = document.createElement('div');
     const sameUserAsPrev = lastChat !== null && lastChat.username === chat.username;
     const sameUserAsCurrent = chat.username === "{{ username|escapejs }}";
+    console.log()
 
     // alignment
     bubbleElement.className = `flex flex-row ${sameUserAsCurrent ? "justify-end" : "justify-start"} mt-${sameUserAsPrev ? 1 : 2}`;
@@ -140,7 +157,7 @@ function buildChatBubbleElement(chat) {
                         <p>${chat.createdAt.substring(11,16)}</p>
                     </div>
                 </div>
-                <img src="https://cdn-icons-png.flaticon.com/512/847/847969.png" alt="" class="size-[30px] rounded-full">
+                <img src={{ profile_picture.url|escapejs }} alt="" class="size-[30px] rounded-full">
            </div>`
         : `<div class="flex flex-row gap-2 items-end">
                 <img src="https://cdn-icons-png.flaticon.com/512/847/847969.png" alt="" class="size-[30px] rounded-full">
@@ -217,8 +234,21 @@ function buildGroupSectionElement(group) {
 
 // Tambahkan daftar grup
 function addGroupsToPage(groups) {
-    groupsContainer.innerHTML = '';
-    groups.forEach(group => groupsContainer.appendChild(buildGroupSectionElement(group)));
+    console.log("here");
+    if (groups.length === 0)
+    {
+        groupsContainer.className = "hidden flex flex-col border-neutral-800 overflow-y-auto h-[calc(100dvh-75px)]";
+        emptyGroupsContainer.className = "flex flex-col border-neutral-800 overflow-y-auto h-[calc(100dvh-75px)]";
+        chatContainer.className = "hidden relative flex flex-col h-[calc(100dvh-75px)] border-l border-neutral-800 overflow-hidden";
+        chatContainerEmpty.className = "relative flex flex-col h-[calc(100dvh-75px)] border-l border-neutral-800 overflow-hidden";
+    }   
+    else
+    {
+        groupsContainer.className = "flex flex-col border-neutral-800 overflow-y-auto h-[calc(100dvh-75px)]";
+        emptyGroupsContainer.className = "hidden flex flex-col border-neutral-800 overflow-y-auto h-[calc(100dvh-75px)]";
+        groupsContainer.innerHTML = '';
+        groups.forEach(group => groupsContainer.appendChild(buildGroupSectionElement(group)));
+    }
 }
 
 // Fetch grup dari backend
@@ -226,6 +256,7 @@ async function fetchGroups() {
     const response = await fetch("/liveChat/group/");
     const json = await response.json();
     const groups = json.data;
+    console.log("groups:", groups)
     addGroupsToPage(groups);
     if (groups.length > 0) await changeCurrentGroup(groups[0]);
 }
