@@ -67,8 +67,14 @@
 
     <!-- Main Content -->
     <div class="container mx-auto px-6 py-12">
+        <!-- Loading State -->
+        <div id="loading" class="hidden flex flex-col items-center justify-center py-16">
+            <div class="animate-spin rounded-full h-12 w-12 border-b-2 border-[#EAEAEA] mb-4"></div>
+            <p class="text-[#A1A1A1]">Loading venues...</p>
+        </div>
+
         {% if venues %}
-        <div class="grid md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-8">
+        <div id="venues-grid" class="grid md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-8">
             {% for venue in venues %}
             <div class="bg-[#161616] hover:bg-[#1F1F1F] border border-[#2A2A2A] rounded-2xl p-6 shadow-[0_0_10px_rgba(0,0,0,0.4)] transition hover:-translate-y-1 hover:shadow-[0_0_22px_rgba(0,255,148,0.16)] flex flex-col">
                 <!-- Venue Header -->
@@ -118,7 +124,7 @@
         </div>
         {% else %}
         <!-- Empty State -->
-        <div class="text-center py-16">
+        <div id="empty" class="text-center py-16">
             <div class="w-24 h-24 mx-auto mb-6 rounded-full flex items-center justify-center bg-white shadow-[0_0_25px_rgba(0,255,148,0.35)]">
                 <span class="text-4xl">🏟️</span>
             </div>
@@ -127,6 +133,38 @@
         </div>
         {% endif %}
     </div>
+
+    <script>
+    document.addEventListener('DOMContentLoaded', function() {
+        // Show loading initially
+        const loadingEl = document.getElementById('loading');
+        const venuesGrid = document.getElementById('venues-grid');
+        const emptyEl = document.getElementById('empty');
+
+        // Check if venues exist
+        const hasVenues = venuesGrid && venuesGrid.children.length > 0;
+
+        if (!hasVenues) {
+            // Show loading if no venues are rendered yet
+            loadingEl.classList.remove('hidden');
+            if (venuesGrid) venuesGrid.classList.add('hidden');
+            if (emptyEl) emptyEl.classList.add('hidden');
+
+            // Simulate loading delay (you can remove this setTimeout in production)
+            setTimeout(() => {
+                loadingEl.classList.add('hidden');
+                if (venuesGrid) {
+                    venuesGrid.classList.remove('hidden');
+                } else if (emptyEl) {
+                    emptyEl.classList.remove('hidden');
+                }
+            }, 1000); // 1 second loading animation
+        } else {
+            // Hide loading if venues are already present
+            loadingEl.classList.add('hidden');
+        }
+    });
+    </script>
 
     <style>
     .line-clamp-2 {
