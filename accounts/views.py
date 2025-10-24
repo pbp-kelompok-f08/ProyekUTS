@@ -47,7 +47,7 @@ def login_ajax(request):
 @csrf_exempt
 def register_ajax(request: HttpRequest):
     data = json.loads(request.body)
-    if not request.user or request.user.role != 'admin':
+    if not hasattr(request.user, "role") or request.user.role != "admin":
         data["role"] = "user"
     form = RegisterForm(data)
     if form.is_valid():
