@@ -17,7 +17,7 @@ def show_main(request: HttpRequest):
     print("fetched group get")
     return render(request, 'main_livechat.html', {
         "username": request.user.username,
-        "profile_picture": request.user.profile_picture,
+        "profile_picture": request.user.profile_picture.url if request.user.profile_picture else "https://cdn-icons-png.flaticon.com/512/847/847969.png",
     })
 
 @login_required
@@ -99,6 +99,9 @@ def operate_chat_by_group_get(user: CustomUser, group_id: uuid):
     if user.role != 'admin' and not group.users.count(user.pk): 
         return HttpResponse(status=401)
     chats = list(group.chat.all().values("username", "message", "createdAt"))
+    for chat in chats:
+        user = CustomUser.objects.get(username=chat["username"])
+        chat["profile_picture"] = user.profile_picture.url if user.profile_picture else "https://cdn-icons-png.flaticon.com/512/847/847969.png"
     return JsonResponse({"data": chats}, status=200)
 
 def operate_chat_by_group_post(request: HttpRequest, group_id: uuid):
