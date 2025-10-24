@@ -10,12 +10,9 @@
 {% include 'navbar.html' %}
 
 
-<main class="pt-20 bg-neutral-950 text-gray-100 min-h-screen">
-    <!-- Main Container -->
+<main class="pt-20 bg-gradient-to-br from-neutral-950 via-neutral-900 to-black text-gray-100 min-h-screen">
     <div class="flex justify-center gap-10 px-6 sm:px-12">
-        <div class="w-full min-h-screen flex flex-col lg:flex-row justify-center gap-10 lg:gap-20 text-white">
-
-
+        <div class="flex flex-col lg:flex-row justify-center gap-10 lg:gap-20 w-full max-w-7xl">
             <!-- Loading Spinner -->
             <div id="loading"
                 class="bg-neutral-900 rounded-lg border border-neutral-800 p-12 text-center hidden text-gray-300">
@@ -28,13 +25,13 @@
             </div>
 
             <div id="searchBar"
-                class="w-full lg:w-1/4 bg-neutral-900 border border-neutral-800 rounded-xl p-4 h-fit self-start lg:mt-16">
-                <h2 class="text-lg font-semibold mb-4">Search by Tag</h2>
+                class="sticky top-24 w-full lg:w-1/4 bg-neutral-900/80 backdrop-blur border border-neutral-800 rounded-xl p-5 shadow-md shadow-black/30 self-start">
+                <h2 class="text-lg font-semibold mb-4">🔎 Search by Tag</h2>
                 <input id="tagSearchInput" type="text" placeholder="Enter tag... e.g. football,ai,tech"
-                    class="w-full bg-neutral-800 text-gray-200 rounded-md px-3 py-2 focus:outline-none focus:ring-1 focus:ring-green-500 mb-3">
+                    class="w-full bg-neutral-800 text-gray-200 rounded-lg px-3 py-2 mb-3 focus:outline-none focus:ring-2 focus:ring-blue-500 placeholder-gray-500">
 
                 <button id="tagSearchBtn"
-                    class="w-full bg-blue-600 hover:bg-blue-500 shadow-md shadow-blue-600/20 text-white py-2 rounded-md transition">
+                    class="w-full bg-blue-600 hover:bg-blue-500 shadow-md shadow-blue-600/30 text-white py-2 rounded-md transition duration-200">
                     Search
                 </button>
 
@@ -76,7 +73,7 @@
                     <div class="flex items-center border-t border-gray-700 px-3">
                         <form id="replyForm" class="p-3 flex items-center w-full">
                             <input type="text" name="content" id="replyContent" placeholder="Write a reply..."
-                                class="flex-1 bg-neutral-800 text-white text-sm rounded-lg px-3 py-2 focus:outline-none focus:ring-1 focus:ring-green-500"
+                                class="flex-1 bg-neutral-800 text-white text-sm rounded-lg px-3 py-2 focus:outline-none focus:ring-1 focus:ring-blue-500"
                                 required>
                         </form>
                         <button type="submit" form="replyForm"
@@ -158,9 +155,8 @@
         const shareCount = DOMPurify.sanitize(String(item.shareCount || 0));
         const replyCount = DOMPurify.sanitize(String(item.replyCount || 0));
 
-        const username = DOMPurify.sanitize(item.username || "Unknown");
-        console.log(username)
-        console.log(CURRENT_USERNAME)
+        const username = DOMPurify.sanitize(item.user.username || "Unknown");
+        const profileImg = DOMPurify.sanitize(item.user.profile_picture);
 
         const threadCard = document.createElement("div");
         threadCard.id = id;
@@ -170,32 +166,30 @@
         threadCard.innerHTML = `
         <!-- Left section: profile (clickable) -->
         <div class="flex flex-col items-center">
-            <a href="/profile/${username}/" class="block">
-                <div class="w-10 h-10 rounded-full bg-gradient-to-br from-purple-500 to-pink-500 flex items-center justify-center text-white font-bold shadow-md hover:scale-105 transition">
-                    ${username[0].toUpperCase()}
-                </div>
-            </a>
+            <img src="${profileImg}" alt="${username}" 
+           class="w-10 h-10 rounded-full object-cover border border-gray-600">
         </div>
 
         <!-- Middle section: post content -->
-        <div class="flex flex-col flex-1 px-6">
-            <div class="flex h-10 items-start justify-between">
-                <a href="/profile/${username}/"
-                    class="font-semibold text-base text-blue-400 hover:underline hover:text-blue-300 transition">
-                    ${username}
-                </a>
+        <div class="flex flex-col flex-1 px-5">
+            <div class="flex justify-between items-start">
+                <span class="font-semibold text-base">${username}</span>
                 <p class="text-xs text-gray-500">${new Date(createdAt).toLocaleString()}</p>
             </div>
-
-            ${image
-                ? `<img src="${image}" alt="Thread Image" class="w-full rounded-lg mb-3" />`
-                : ""
-            }
-            <p class="text-gray-300 mb-2">${content}</p>
+            ${image ? `<img src="${image}" alt="Thread Image" class="w-full rounded-lg mb-3 border border-gray-700/60 shadow-md shadow-black/20" />` : ""}
+            <p class="text-gray-200 leading-relaxed">${content}</p>
             ${tags
-                ? `<p class="text-sm text-gray-500 mt-auto">#${tags.replace(/, /g, " #")}</p>`
-                : ""
-            }
+                ? `<p class="text-sm text-blue-400 font-medium mt-auto flex flex-wrap gap-1">
+                ${tags
+                    .split(",")
+                    .map(
+                        t => `<button 
+                                class="hover:text-blue-300 hover:underline transition"
+                                onclick="searchByTag('${t.trim()}')">#${t.trim()}</button>`
+                    )
+                    .join(" ")}
+            </p>`
+                : ""}
         </div>
 
         <!-- Right section: icons -->
@@ -242,6 +236,12 @@
 
         return threadCard;
     }
+
+    function searchByTag(tag) {
+        const input = document.getElementById('tagSearchInput');
+        input.value = tag; // set input value
+        document.getElementById('tagSearchBtn').click(); // trigger search
+    }
     function toggleMenu(threadId) {
         const menu = document.getElementById(`menu-${threadId}`);
         menu.classList.toggle("hidden");
@@ -287,9 +287,9 @@
         }
     }
 
-    async function showReply(threadId=null, username=null) {
+    async function showReply(threadId = null, username = null) {
         // If the same thread is clicked again → hide the reply panel
-        if (activeReplyThread === threadId && !threadsReplyContainer.classList.contains('hidden') || threadId==null && username==null) {
+        if (activeReplyThread === threadId && !threadsReplyContainer.classList.contains('hidden') || threadId == null && username == null) {
             threadsReplyContainer.classList.add('hidden');
             serachBar.classList.remove('hidden')
             activeReplyThread = null;
@@ -334,7 +334,9 @@
     function buildReplyCardElement(item) {
         const id = DOMPurify.sanitize(item.id);
 
-        const username = DOMPurify.sanitize(item.username);
+        const username = DOMPurify.sanitize(item.user.username || "Unknown");
+        const profileImg = DOMPurify.sanitize(item.user.profile_picture);
+
         const content = DOMPurify.sanitize(item.content);
         const likeCount = DOMPurify.sanitize(String(item.likeCount || 0));
         const createdAt = new Date(item.created_at);
@@ -363,9 +365,8 @@
             </div>`
                 : ""}
             <div class="flex flex-col items-center">
-                <div class="w-8 h-8 rounded-full bg-gradient-to-br from-purple-500 to-pink-500 flex items-center text-md  justify-center text-white font-bold shadow-md">
-                    ${username[0].toUpperCase()}
-                </div>
+                <img src="${profileImg}" alt="${username}" 
+                    class="w-8 h-8 rounded-full object-cover border border-gray-600">
             </div>
             <div class="flex-1">
                 <p class="font-semibold text-white">${username}</p>
