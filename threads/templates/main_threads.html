@@ -13,32 +13,34 @@
 <main class="pt-20  text-gray-100 min-h-screen">
     <div class="flex justify-center gap-10 px-6 sm:px-12">
         <div class="flex flex-col lg:flex-row justify-center gap-10 lg:gap-20 w-full max-w-7xl">
-            <!-- Loading Spinner
-            <div id="loading"
-                class="bg-neutral-900 rounded-lg border border-neutral-800 p-12 text-center hidden text-gray-300">
-                <svg class="animate-spin h-8 w-8 text-green-500 inline-block" xmlns="http://www.w3.org/2000/svg"
-                    fill="none" viewBox="0 0 24 24">
-                    <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
-                    <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8v4a4 4 0 00-4 4H4z"></path>
-                </svg>
-                <p class="text-gray-400 mt-3">Loading Threads...</p>
-            </div> -->
 
-            <div id="searchBar"
-                class="sticky top-24 w-full lg:w-1/4 bg-neutral-900/80 backdrop-blur border border-neutral-800 rounded-xl p-5 shadow-md shadow-black/30 self-start">
-                <h2 class="text-lg font-semibold mb-4">🔎 Search by Tag</h2>
-                <input id="tagSearchInput" type="text" placeholder="Enter tag... e.g. football,ai,tech"
-                    class="w-full bg-neutral-800 text-gray-200 rounded-lg px-3 py-2 mb-3 focus:outline-none focus:ring-2 focus:ring-blue-500 placeholder-gray-500">
+            <div class="lg:sticky lg:top-24  flex flex-col lg:w-1/4 w-full gap-4 self-start">
+                <div id="searchBar"
+                    class="bg-neutral-900/80 backdrop-blur border border-neutral-800 rounded-xl p-5 shadow-md shadow-black/30">
+                    <h2 class="text-lg font-semibold mb-4">🔎 Search by Tag</h2>
+                    <input id="tagSearchInput" type="text" placeholder="Enter tag... e.g. football,ai,tech"
+                        class="w-full bg-neutral-800 text-gray-200 rounded-lg px-3 py-2 mb-3 focus:outline-none focus:ring-2 focus:ring-blue-500 placeholder-gray-500">
+                    <button id="tagSearchBtn" class="w-full shadow-[0_0_12px_rgba(37,99,235,0.7),0_0_24px_rgba(37,99,235,0.4)] 
+        hover:shadow-[0_0_20px_rgba(59,130,246,0.9),0_0_40px_rgba(59,130,246,0.5)] transition duration-300  
+        bg-blue-600 hover:bg-blue-500 shadow-md shadow-blue-600/30 text-white py-2 rounded-md transition duration-200">
+                        Search
+                    </button>
+                    <div id="searchResults" class="mt-4 space-y-2 text-sm text-gray-300"></div>
+                </div>
 
-                <button id="tagSearchBtn"
-                    class="w-full shadow-[0_0_12px_rgba(37,99,235,0.7),0_0_24px_rgba(37,99,235,0.4)] 
-                            hover:shadow-[0_0_20px_rgba(59,130,246,0.9),0_0_40px_rgba(59,130,246,0.5)] transition duration-300  bg-blue-600 hover:bg-blue-500 shadow-md shadow-blue-600/30 text-white py-2 rounded-md transition duration-200">
-                    Search
-                </button>
+                <div id="searchTrendCard"
+                    class="w-full bg-neutral-900 border border-gray-700 rounded-xl p-5 mt-4 text-white shadow-lg">
 
-                <div id="searchResults" class="mt-4 space-y-2 text-sm text-gray-300"></div>
+                    <h2 class="text-lg font-semibold mb-3 flex items-center gap-2">
+                        🔥 Search Trends
+                    </h2>
+
+                    <div id="trendTags" class="flex flex-col gap-3">
+                    </div>
+                </div>
             </div>
-            <div class="w-full lg:w-1/2 border-x border-solid border-stone-700">
+
+            <div class="w-full lg:w-1/2 min-h-screen border-x border-solid border-stone-700">
                 <button onclick="showModal()"
                     class="w-full border border-gray-600 bg-neutral-900 text-left text-gray-400 px-4 py-6 rounded-lg hover:border-gray-400 hover:text-gray-200 transition">
                     + Create new Thread...
@@ -55,14 +57,25 @@
                         + Create your first Thread
                     </button>
                 </div>
+                <!-- Loading Spinner -->
+                <div id="loading" class="rounded-lg  p-12 text-center hidden text-gray-300">
+                    <svg class="animate-spin h-8 w-8 text-blue-500 inline-block" xmlns="http://www.w3.org/2000/svg"
+                        fill="none" viewBox="0 0 24 24">
+                        <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4">
+                        </circle>
+                        <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8v4a4 4 0 00-4 4H4z"></path>
+                    </svg>
+                    <p class="text-gray-400 mt-3">Loading Threads...</p>
+                </div>
                 <div id="threadList" class="hidden">
 
                 </div>
             </div>
 
-            <div id="threadReply" class="hidden lg:w-1/3">
+            <div id="threadReply"
+                class="lg:w-1/3 fixed lg:hidden hidden inset-0 z-50 flex items-center justify-center bg-black/70 backdrop-blur-sm lg:static lg:inset-auto lg:z-auto lg:bg-transparent lg:backdrop-blur-none">
                 <div
-                    class="fixed w-1/3 bg-neutral-900 mt-10 top-10 bottom-10 rounded-xl border border-gray-700 flex flex-col">
+                    class="fixed w-4/5 lg:w-1/3 bg-neutral-900 mt-10 top-10 bottom-10 rounded-xl border border-gray-700 flex flex-col">
 
                     <div class="p-4 border-b border-gray-700 flex items-center justify-between">
                         <div>
@@ -138,6 +151,8 @@
         if (emptyState) emptyState.classList.toggle('hidden', !showEmpty);
     }
 
+
+    const tagCount = {}; //untuk ngitung tag
     function buildThreadsCardElement(item) {
         const id = DOMPurify.sanitize(item.id);
 
@@ -161,10 +176,10 @@
         threadCard.innerHTML = `
         <!-- Left section: profile (clickable) -->
         <div class="flex flex-col items-center">
-        <a href="/profile/${username}/" class="group">
-            <img src="${profileImg}" alt="${username}" 
-                class="w-10 h-10 rounded-full object-cover border border-gray-600 group-hover:border-blue-400 transition-all duration-200">
-        </a>
+            <a href="/profile/${username}/" class="group">
+                <img src="${profileImg}" alt="${username}" 
+                    class="w-10 h-10 rounded-full object-cover border border-gray-600 group-hover:border-blue-400 transition-all duration-200">
+            </a>
         </div>
 
         <!-- Middle section: post content -->
@@ -181,10 +196,13 @@
                 ? `<p class="text-sm text-blue-400 font-medium mt-auto flex flex-wrap gap-1">
                 ${tags
                     .split(",")
-                    .map(
-                        t => `<button 
+                    .map(tag => {
+                        const t = tag.trim()
+                        tagCount[t] = (tagCount[t] || 0) + 1
+                        return `<button 
                                 class="hover:text-blue-300 hover:underline transition"
-                                onclick="searchByTag('${t.trim()}')">#${t.trim()}</button>`
+                                onclick="searchByTag('${t}')">#${t}</button>`
+                    }
                     )
                     .join(" ")}
             </p>`
@@ -278,13 +296,14 @@
 
     function displayThreads() {
         const emptyState = document.getElementById('empty');
-
         if (!allThreadsData || allThreadsData.length === 0) {
             displayPageSection({ showEmpty: true });
             emptyState.querySelector('h3').textContent = "No threads right now 💤";
             emptyState.querySelector('p').textContent = "Be the first to share your thoughts!";
         } else {
             renderAllThreadsCards(allThreadsData);
+            renderSearchTrends()
+
             displayPageSection({ showGrid: true });
         }
     }
@@ -292,6 +311,8 @@
     async function showReply(threadId = null, username = null) {
         if (activeReplyThread === threadId && !threadsReplyContainer.classList.contains('hidden') || threadId == null && username == null) {
             threadsReplyContainer.classList.add('hidden');
+            threadsReplyContainer.classList.add('lg:hidden');
+            threadsReplyContainer.classList.remove('lg:block');
             serachBar.classList.remove('hidden')
             activeReplyThread = null;
             return;
@@ -299,6 +320,8 @@
 
         activeReplyThread = threadId;
         threadsReplyContainer.classList.remove('hidden');
+        threadsReplyContainer.classList.remove('lg:hidden');
+        threadsReplyContainer.classList.add('lg:block');
         serachBar.classList.add('hidden')
 
         document.getElementById('replyToWho').textContent = `Replying to ${username}`;
@@ -322,6 +345,34 @@
             console.error('Error loading thread:', error);
             displayPageSection({ showError: true });
         }
+    }
+    
+    function renderSearchTrends() {
+        const trendsContainer = document.getElementById("trendTags");
+        trendsContainer.innerHTML = "";
+
+        const topTags = Object.entries(tagCount)
+            .sort((a, b) => b[1] - a[1])
+            .slice(0, 5);
+
+        if (topTags.length === 0) {
+            trendsContainer.innerHTML = `<p class="text-gray-400 text-sm italic text-center">No trending tags yet</p>`;
+            return;
+        }
+
+        topTags.forEach(([tag, count], index) => {
+            const tagRow = document.createElement("div");
+            tagRow.className = "flex items-center justify-between bg-neutral-800/60 border border-neutral-700/80 rounded-lg px-4 py-2 hover:bg-neutral-800 transition-all duration-300 shadow-[0_0_8px_rgba(37,99,235,0.2)] hover:shadow-[0_0_16px_rgba(59,130,246,0.4)]";
+
+            const tagBtn = document.createElement("button");
+            tagBtn.className =
+                "text-blue-400 font-semibold hover:text-blue-300 transition text-base";
+            tagBtn.textContent = `#${tag}`;
+
+            tagRow.onclick = () => searchByTag(tag);
+            tagRow.appendChild(tagBtn);
+            trendsContainer.appendChild(tagRow);
+        });
     }
 
     fetchThreadsFromServer();
@@ -361,8 +412,10 @@
             </div>`
                 : ""}
             <div class="flex flex-col items-center">
-                <img src="${profileImg}" alt="${username}" 
-                    class="w-8 h-8 rounded-full object-cover border border-gray-600">
+                <a href="/profile/${username}/" class="group">
+                    <img src="${profileImg}" alt="${username}" 
+                        class="w-8 h-8 rounded-full object-cover border border-gray-600 group-hover:border-blue-400 transition-all duration-200">
+                </a>
             </div>
             <div class="flex-1">
                 <p class="font-semibold text-white">${username}</p>

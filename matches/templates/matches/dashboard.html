@@ -6,11 +6,8 @@
 {% block content %}
 {% include "navbar.html" %}
 
-<!-- ============== PAGE WRAPPER ============== -->
 <div class="min-h-screen bg-[#0E0E0E] text-[#EAEAEA] pt-20">
 
-
-  <!-- ============== HEADER ============== -->
 <header class="bg-[#1C1C1C]/80 border-b border-[#2A2A2A] backdrop-blur-sm">
 
     <div class="container mx-auto px-6 py-10">
@@ -24,7 +21,7 @@
 
         <button type="button" id="open-create-modal" {% if not schema_ready %}disabled{% endif %}
           class="group mt-2 md:mt-0 rounded-xl px-7 py-3 font-semibold text-white transition-all duration-300
-                 bg-[#2A2A2A]hover:bg-[#343434] text-[#EAEAEA] transition-all duration-300
+                 bg-[#2A2A2A] hover:bg-[#343434] text-[#EAEAEA] transition-all duration-300
                  bg-whitshadow-[0_0_15px_rgba(255,255,255,0.35)]e hover:bg-whitshadow-[0_0_24px_rgba(255,255,255,0.35)]e
                  disabled:opacity-50 disabled:cursor-not-allowed flex items-center gap-2">
           <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -34,7 +31,6 @@
         </button>
       </div>
 
-      <!-- ============== SEARCH & FILTER BAR ============== -->
       <div class="mt-8 flex flex-col lg:flex-row gap-4">
 <form id="match-search-form" method="get" action="" class="flex flex-col lg:flex-row gap-4 w-full" autocomplete="off">
   <div class="relative flex-1">
@@ -88,7 +84,7 @@
           <p class="text-[#A1A1A1]">Loading matches...</p>
         </div>
 
-        <div id="match-list" class="grid md:grid-cols-2 xl:grid-cols-3 gap-6">
+        <div id="match-list" class="grid md:grid-cols-2 xl:grid-cols-3 gap-6 items-stretch">
         </div>
 
         <div id="empty" class="hidden text-center py-16">
@@ -103,7 +99,7 @@
           <p class="text-[#A1A1A1] mb-8 max-w-md mx-auto">Be the first to create a sports match and invite others to join!</p>
           <button id="empty-create-btn"
                   class="rounded-xl px-7 py-3 font-semibold text-white transition-all duration-300
-                         bg-[#2A2A2A]hover:bg-[#343434] text-[#EAEAEA] transition-all duration-300
+                         bg-[#2A2A2A] hover:bg-[#343434] text-[#EAEAEA] transition-all duration-300
                          bg-whitshadow-[0_0_15px_rgba(255,255,255,0.35)]e hover:bg-whitshadow-[0_0_24px_rgba(255,255,255,0.35)]e">
             Create First Match
           </button>
@@ -279,8 +275,8 @@
         </button>
         <button type="submit"
                 class="px-6 py-2.5 rounded-lg font-semibold text-white transition
-                       bg-[#2A2A2A]hover:bg-[#343434] text-[#EAEAEA] transition-all duration-300
-                       bg-whitshadow-[0_0_15px_rgba(255,255,255,0.35)]e">
+                       bg-[#2A2A2A] hover:bg-[#343434] text-[#EAEAEA] transition-all duration-300
+                       bg-whitshadow-[0_0_15px_rgba(255,255,255,0.35)]e ">
           Create Match
         </button>
       </div>
@@ -410,7 +406,9 @@
         const id    = escapeHtml(match.id);
         const title = escapeHtml(match.title);
         const loc   = escapeHtml(match.location);
-        const desc  = match.description ? `<p class="text-[#CFCFCF] mt-1">${escapeHtml(match.description)}</p>` : '';
+        const desc  = match.description
+        ? `<p class="text-[#CFCFCF] mt-1 line-clamp-3 overflow-hidden text-ellipsis">${escapeHtml(match.description)}</p>`
+        : '';
         const date  = match.event_date ? new Date(match.event_date).toLocaleString('id-ID') : '';
         const slot  = `${escapeHtml(match.current_members)} / ${escapeHtml(match.max_members)}`;
         const avail = Number(match.available_slots || 0);
@@ -420,7 +418,9 @@
         return `
           <article class="bg-[#161616] hover:bg-[#1F1F1F] border border-[#2A2A2A] rounded-2xl p-6
                           shadow-[0_0_10px_rgba(0,0,0,0.4)] transition hover:-translate-y-1
-                          hover:shadow-[0_0_22px_rgba(0,255,148,0.16)]">
+                          hover:shadow-[0_0_22px_rgba(0,255,148,0.16)] 
+                          min-h-[320px] flex flex-col justify-between overflow-hidden">
+
             <div class="flex justify-between items-center mb-3">
               <h3 class="text-2xl font-semibold tracking-wide text-white">${title}</h3>
               <span class="text-xs md:text-sm text-[#CFCFCF] border border-[#2A2A2A] rounded-md px-2 py-0.5">
@@ -438,7 +438,7 @@
               ${csrfField}
               <button type="submit"
                 class="w-full py-2.5 rounded-xl font-semibold text-white transition
-                       bg-[#2A2A2A]hover:bg-[#343434] text-[#EAEAEA] transition-all duration-300
+                       bg-[#2A2A2A] hover:bg-[#343434] text-[#EAEAEA] transition-all duration-300
                        bg-whitshadow-[0_0_15px_rgba(255,255,255,0.35)]e">
                 Join Match
               </button>
