@@ -127,7 +127,6 @@
     document.getElementById('tagSearchBtn').addEventListener('click', () => {
         const searchTerm = document.getElementById('tagSearchInput').value.trim().toLowerCase();
         if (!searchTerm) {
-            // if input empty, show all
             renderAllThreadsCards(allThreadsData);
             return;
         }
@@ -276,7 +275,6 @@
         const menu = document.getElementById(`menu-${threadId}`);
         menu.classList.toggle("hidden");
 
-        // Hide if clicked outside
         document.addEventListener("click", function hideMenu(e) {
             if (!menu.contains(e.target) && !e.target.closest(`[onclick="toggleMenu('${threadId}')"]`)) {
                 menu.classList.add("hidden");
@@ -287,10 +285,6 @@
 
     async function handleLikes(threadId) {
         const response = await fetch(`/threads/like-thread/${threadId}/`, { method: "POST" })
-        // if (!response.ok) {
-        //     console.error("Failed to like/unlike thread");
-        //     return;
-        // }
         const likeCount = await response.json()
 
         const count = document.getElementById(`likeCount-${threadId}`);
@@ -311,7 +305,6 @@
     function displayThreads() {
         const emptyState = document.getElementById('empty');
         if (!allThreadsData || allThreadsData.length === 0) {
-            // Show “no threads yet” message
             displayPageSection({ showEmpty: true });
             emptyState.querySelector('h3').textContent = "No threads right now 💤";
             emptyState.querySelector('p').textContent = "Be the first to share your thoughts!";
@@ -324,7 +317,6 @@
     }
 
     async function showReply(threadId = null, username = null) {
-        // If the same thread is clicked again → hide the reply panel
         if (activeReplyThread === threadId && !threadsReplyContainer.classList.contains('hidden') || threadId == null && username == null) {
             threadsReplyContainer.classList.add('hidden');
             threadsReplyContainer.classList.add('lg:hidden');
@@ -335,17 +327,14 @@
         }
 
 
-        // Otherwise, open the panel for the new thread
         activeReplyThread = threadId;
         threadsReplyContainer.classList.remove('hidden');
         threadsReplyContainer.classList.remove('lg:hidden');
         threadsReplyContainer.classList.add('lg:block');
         serachBar.classList.add('hidden')
 
-        // Show username at the top
         document.getElementById('replyToWho').textContent = `Replying to ${username}`;
 
-        // Fetch and render replies
         const replyItems = await fetchReplyFromServer();
         threadsReplyList.innerHTML = '';
 
@@ -454,10 +443,6 @@
     }
     async function handleReplyLikes(replyId) {
         const response = await fetch(`/threads/like-reply/${replyId}/`, { method: "POST" })
-        // if (!response.ok) {
-        //     console.error("Failed to like/unlike thread");
-        //     return;
-        // }
         const likeCount = await response.json()
 
         const count = document.getElementById(`likeCount-${replyId}`);
@@ -467,7 +452,6 @@
         emoji.textContent = likeCount.isLiked ? "❤️" : "🤍";
     }
 
-    // Helper function to show "time ago" style text
     function timeSince(date) {
         const seconds = Math.floor((new Date() - date) / 1000);
         const intervals = [
@@ -510,11 +494,8 @@
 
         const count = document.getElementById(`replyCount-${activeReplyThread}`)
         count.innerHTML = newReply.count
-        // Show toast notification
         showToast('reply added successfully!', '', 'success');
 
-        // Dispatch custom event to notify main.html about new data
-        // document.dispatchEvent(new CustomEvent('ReplyAdded'));
         return false;
     }
     document.getElementById("replyForm").addEventListener("submit", function (e) {
