@@ -2,9 +2,9 @@ from django import forms
 from .models import Group, Chat
 
 try:
-    from typing import override  # Python 3.12+ (buat lokal kamu yang pakai 3.13)
+    from typing import override  
 except ImportError:
-    def override(func):  # fallback buat Python 3.11 (PWS)
+    def override(func):  
         return func
 
 
