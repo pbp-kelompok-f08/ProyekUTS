@@ -54,7 +54,7 @@
         <!-- Chat -->
         <div id="chat-container" class="relative flex flex-col h-[calc(100dvh-75px)] border-l border-neutral-800 overflow-hidden">
             <div class="absolute flex flex-row w-full h-[70px] gap-4 top-0 bg-neutral-700 items-center px-4 md:px-10 z-10">
-                <div class="w-[50px] h-[50px] rounded-full bg-white"></div>
+                <img src="{% static 'image/group.png' %}" alt="" class="invert w-[40px]">
                 <div class="flex flex-col gap-[2px] overflow-hidden">
                     <p id="chat-group-name" class="truncate"></p>
                     <p id="chat-group-members" class="text-neutral-400 truncate"></p>
@@ -95,6 +95,7 @@ const chatsSectionContainer = document.getElementById("chats-section");
 const sendButton = document.getElementById("send-chat");
 const chatTextArea = document.getElementById("chat-textarea");
 const groupSearchFormInput = document.getElementById("group-search-form-input");
+const username = "{{ username|escapejs }}"
 
 let currentGroupSection = document.getElementById("dummy-section");
 let lastChat = null;
@@ -160,7 +161,7 @@ function buildChatBubbleElement(chat) {
     const bubbleChatHtml = sameUserAsPrev
         ? `<div class="flex flex-row ${sameUserAsCurrent ? "bg-green-700" : "bg-neutral-800"} rounded-[8px] gap-10 py-1 px-4 ${sameUserAsCurrent ? "mr-[38px]" : "ml-[38px]"}">
                 <div class="flex flex-col gap-3">
-                    <p class="max-w-[500px]">${chat.message}</p>
+                    <a href="/profile/${username}/" class="max-w-[500px]">${chat.message}</a>
                 </div>
                 <div class="flex flex-col text-right text-[13px] pt-1">
                     <p>${chat.createdAt.substring(0,10)}</p>
@@ -181,10 +182,10 @@ function buildChatBubbleElement(chat) {
                 <img src={{ profile_picture|escapejs }} alt="" class="size-[30px] rounded-full">
            </div>`
         : `<div class="flex flex-row gap-2 items-end">
-                <img src="${chat.profile_picture}" alt="" class="size-[30px] rounded-full">
+                <a href="/profile/${username}/"><img src="${chat.profile_picture}" alt="" class="size-[30px] rounded-full"></a>
                 <div class="flex flex-row bg-neutral-800 rounded-[8px] gap-10 py-1 px-4">
                     <div class="flex flex-col gap-3">
-                        <p class="font-semibold">${chat.username}</p>
+                        <a href="/profile/${username}/" class="font-semibold">${chat.username}</a>
                         <p class="max-w-[500px]">${chat.message}</p>
                     </div>
                     <div class="flex flex-col text-right text-[13px] pt-1">
@@ -236,7 +237,7 @@ function buildGroupSectionElement(group) {
 
     const groupSectionHtml = `
         <div class="flex flex-row gap-4 w-full">
-            <div class="w-[60px] h-[50px] rounded-full bg-white"></div>
+            <img src="{% static 'image/group.png' %}" alt="" class="invert w-[40px]">
             <div class="grid grid-cols-[70%_30%] w-full">
                 <div class="flex flex-col gap-[2px]">
                     <p>${group.name}</p>
