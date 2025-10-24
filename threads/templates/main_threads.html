@@ -174,16 +174,20 @@
         threadCard.innerHTML = `
         <!-- Left section: profile (clickable) -->
         <div class="flex flex-col items-center">
+        <a href="/profile/${username}/" class="group">
             <img src="${profileImg}" alt="${username}" 
-           class="w-10 h-10 rounded-full object-cover border border-gray-600">
+                class="w-10 h-10 rounded-full object-cover border border-gray-600 group-hover:border-blue-400 transition-all duration-200">
+        </a>
         </div>
 
         <!-- Middle section: post content -->
         <div class="flex flex-col flex-1 px-5">
-            <div class="flex justify-between items-start">
-                <span class="font-semibold text-base">${username}</span>
-                <p class="text-xs text-gray-500">${new Date(createdAt).toLocaleString()}</p>
-            </div>
+        <div class="flex justify-between items-start">
+            <a href="/profile/${username}/" 
+            class="font-semibold text-base hover:text-blue-400 transition-colors">@${username}</a>
+            <p class="text-xs text-gray-500">${new Date(createdAt).toLocaleString()}</p>
+        </div>
+
             ${image ? `<img src="${image}" alt="Thread Image" class="w-full rounded-lg mb-3 border border-gray-700/60 shadow-md shadow-black/20" />` : ""}
             <p class="text-gray-200 leading-relaxed">${content}</p>
             ${tags

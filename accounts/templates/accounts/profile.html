@@ -11,11 +11,11 @@
 <!-- Toast Container -->
 <div id="toast-container" class="fixed top-5 right-5 space-y-3 z-50"></div>
 
-<div class="min-h-screen bg-[#262626] text-[#E6E8E6] flex flex-col pt-24" style="font-family: 'Roboto Mono', monospace;">
+<div class="min-h-screen bg-[#121212] text-[#E6E8E6] flex flex-col pt-24" style="font-family: 'Roboto Mono', monospace;">
   <div class="container mx-auto px-6 space-y-8">
 
     <!-- PROFILE HEADER BOX -->
-    <div class="bg-black backdrop-blur-sm rounded-xl p-10 border border-[#9DB4C0]/30 shadow-lg flex flex-col sm:flex-row sm:items-center sm:space-x-8 space-y-6 sm:space-y-0 transition-all">
+    <div class="bg-[#1E1E1E] backdrop-blur-sm rounded-xl p-10 border border-[#4A5568]/30 shadow-lg flex flex-col sm:flex-row sm:items-center sm:space-x-8 space-y-6 sm:space-y-0 transition-all">
       <div class="flex justify-center sm:justify-start">
         <img id="user-pic" 
              class="w-32 h-32 sm:w-40 sm:h-40 rounded-full object-cover border-4 border-[#9DB4C0]/40 shadow-md" 
@@ -27,7 +27,7 @@
         <h2 id="username" class="text-3xl sm:text-4xl font-semibold text-[#E6E8E6]"> {{ request.user.username }}</h2>
         <p class="text-[#CED0CE] text-sm">Member since {{ request.user.date_joined|date:"M Y" }}</p>
         <button onclick="toggleEditForm()" 
-                class="mt-4 bg-[#9DB4C0] hover:bg-[#E6E8E6] hover:text-[#253237] 
+                class="mt-4 bg-[#E6E8E6] hover:bg-[#E6E8E6] hover:text-[#253237] 
                        px-4 py-2 rounded text-[#262626] font-medium 
                        transition-all duration-300 transform hover:scale-105 shadow-sm">
           Edit Profile
@@ -36,7 +36,7 @@
     </div>
 
     <!-- DETAIL BOX -->
-    <div class="bg-black backdrop-blur-sm rounded-xl p-8 border border-[#9DB4C0]/30 shadow-lg">
+    <div class="bg-[#1E1E1E] backdrop-blur-sm rounded-xl p-8 border border-[#4A5568]/30 shadow-lg">
       <div class="mb-6">
         <h4 class="text-sm text-[#9DB4C0] uppercase tracking-wide mb-1">Bio</h4>
         <p id="bio" class="text-[#E6E8E6] italic">{{ request.user.bio|default:"Belum ada bio." }}</p>
@@ -60,7 +60,7 @@
 
     <!-- EDIT FORM (HIDDEN) -->
     <div id="edit-form" 
-        class="hidden bg-black/80 backdrop-blur-sm p-8 mt-10 rounded-xl border border-[#9DB4C0]/30 
+        class="hidden bg-[#1E1E1E]/80 backdrop-blur-sm p-8 mt-10 rounded-xl border border-[#4A5568]/30 
                 shadow-lg max-w-3xl w-full mx-auto transition-all duration-300">
       <form id="profileForm" enctype="multipart/form-data">
         {% csrf_token %}
@@ -141,7 +141,7 @@
 
     <!-- USER THREADS BOX -->
     <div id="user-threads-box"
-            class="bg-black rounded-xl border border-[#9DB4C0]/30 shadow-lg mt-8 p-6 max-h-[800px] overflow-y-auto">
+            class="bg-[#1E1E1E] rounded-xl border border-[#4A5568]/30 shadow-lg mt-8 p-6 max-h-[800px] overflow-y-auto">
         <h3 class="text-xl font-semibold mb-4 text-[#E6E8E6]">Your Threads</h3>
         <div id="userThreads" class="space-y-6"></div>
         <p id="emptyThreads" class="text-[#9DB4C0] hidden text-sm text-center italic">No threads yet.</p>
@@ -211,18 +211,12 @@ async function fetchUserThreads() {
   threadsContainer.innerHTML = "";
 
   try {
-    // Ambil semua thread
     const res = await fetch("{% url 'threads:show_json' %}", { cache: "no-store" });
     const allThreads = await res.json();
-
-    // Ambil username aktif
     const username = "{{ request.user.username }}";
-    console.log("🧩 Filtering threads for:", username);
-    console.log("🧵 Threads received:", allThreads.length);
 
-    // Filter thread milik user login
-    const userThreads = allThreads.filter(t => t.username === username);
-    console.log("🎯 Found user threads:", userThreads.length);
+    // ✅ FIX: gunakan t.user.username
+    const userThreads = allThreads.filter(t => t.user.username === username);
 
     if (userThreads.length === 0) {
       empty.classList.remove("hidden");
@@ -230,10 +224,6 @@ async function fetchUserThreads() {
     }
     empty.classList.add("hidden");
 
-    // Foto profil user
-    const userPic = `{% if request.user.profile_picture %}{{ request.user.profile_picture.url }}{% else %}{% static 'accounts/img/default.png' %}{% endif %}`;
-
-    // Render setiap thread
     userThreads.forEach(thread => {
       const div = document.createElement("div");
       div.className =
@@ -243,10 +233,10 @@ async function fetchUserThreads() {
 
       div.innerHTML = `
         <div class="flex items-center space-x-3 mb-3">
-          <img src="${userPic}" alt="Profile picture"
+          <img src="${thread.user.profile_picture}" alt="Profile picture"
                class="w-10 h-10 rounded-full border border-[#9DB4C0]/40 object-cover">
           <div>
-            <h4 class="font-semibold text-[#E6E8E6] text-sm">${thread.username}</h4>
+            <h4 class="font-semibold text-[#E6E8E6] text-sm">${thread.user.username}</h4>
             <p class="text-xs text-[#9DB4C0]">${created}</p>
           </div>
         </div>
