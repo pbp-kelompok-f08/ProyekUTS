@@ -1,21 +1,24 @@
 {% extends 'base.html' %}
 {% block title %}Available Venues - Hoppin Sports Community{% endblock %}
+{% block head %}
+<link href="https://fonts.googleapis.com/css2?family=Roboto+Mono:wght@400;500;700&display=swap" rel="stylesheet">
+{% endblock head %}
 {% block content %}
 {% include 'navbar.html' %}
-<body class="min-h-screen bg-gradient-to-br from-gray-900 via-gray-800 to-black text-white">
+<body class="min-h-screen bg-[#0E0E0E] text-[#EAEAEA]" style="font-family: 'Roboto Mono', monospace;">
     <!-- Header Section -->
-    <div class="bg-gray-800/50 backdrop-blur-sm border-b border-gray-700 pt-20">
+    <div class="bg-[#1C1C1C]/80 border-b border-[#2A2A2A] backdrop-blur-sm pt-20">
         <div class="container mx-auto px-6 py-8">
             <div class="flex flex-col md:flex-row items-center justify-between">
                 <div>
-                    <h1 class="text-4xl font-bold mb-2 bg-gradient-to-r from-green-400 to-blue-500 bg-clip-text text-transparent">
+                    <h1 class="text-4xl md:text-5xl font-extrabold mb-2 tracking-tight text-white">
                         Available Venues
                     </h1>
-                    <p class="text-xl text-gray-300">Discover and book amazing sports facilities for your games</p>
+                    <p class="text-lg md:text-xl text-[#A1A1A1]">Discover and book amazing sports facilities for your games</p>
                 </div>
                 {% if user.is_authenticated %}
                 <div class="mt-6 md:mt-0">
-                    <a href="{% url 'booking_venue:my_bookings' %}" class="bg-gradient-to-r from-purple-500 to-pink-600 hover:from-purple-600 hover:to-pink-700 text-white px-6 py-3 rounded-xl font-semibold transition-all duration-300 transform hover:scale-105 shadow-lg flex items-center space-x-2">
+                    <a href="{% url 'booking_venue:my_bookings' %}" class="rounded-xl px-7 py-3 font-semibold text-black transition-all duration-300 bg-[#2A2A2A] hover:bg-[#343434] text-[#EAEAEA] transition-all duration-300 bg-whitshadow-[0_0_15px_rgba(255,255,255,0.35)]e hover:bg-whitshadow-[0_0_24px_rgba(255,255,255,0.35)]e flex items-center gap-2">
                         <span class="text-xl">📋</span>
                         <span>My Bookings</span>
                     </a>
@@ -24,11 +27,11 @@
             </div>
 
             <!-- Filters Section -->
-            <div class="mt-8 bg-gray-700/30 rounded-xl p-6">
+            <div class="mt-8 bg-[#1A1A1A]/80 border-[#2A2A2A] backdrop-blur-xl rounded-2xl p-6 border shadow-[0_0_10px_rgba(0,0,0,0.35)]">
                 <form method="get" class="flex flex-col md:flex-row gap-4 items-end">
                     <div class="flex-1">
-                        <label class="block text-sm font-medium text-gray-300 mb-2">Filter by Region</label>
-                        <select name="region" class="w-full bg-gray-600 border border-gray-500 rounded-lg px-4 py-3 text-white focus:outline-none focus:ring-2 focus:ring-green-500 focus:border-transparent">
+                        <label class="block text-sm font-medium text-[#CFCFCF] mb-2">Filter by Region</label>
+                        <select name="region" class="w-full bg-[#161616] border border-[#2A2A2A] rounded-lg px-4 py-3 text-[#EAEAEA] focus:outline-none focus:ring-2 focus:ring-[#EAEAEA] focus:border-transparent">
                             <option value="">All Regions</option>
                             {% for region in regions %}
                             <option value="{{ region }}" {% if current_region == region %}selected{% endif %}>{{ region }}</option>
@@ -37,8 +40,8 @@
                     </div>
 
                     <div class="flex-1">
-                        <label class="block text-sm font-medium text-gray-300 mb-2">Filter by Alphabet</label>
-                        <select name="alphabet" class="w-full bg-gray-600 border border-gray-500 rounded-lg px-4 py-3 text-white focus:outline-none focus:ring-2 focus:ring-green-500 focus:border-transparent">
+                        <label class="block text-sm font-medium text-[#CFCFCF] mb-2">Filter by Alphabet</label>
+                        <select name="alphabet" class="w-full bg-[#161616] border border-[#2A2A2A] rounded-lg px-4 py-3 text-[#EAEAEA] focus:outline-none focus:ring-2 focus:ring-[#EAEAEA] focus:border-transparent">
                             <option value="">All Letters</option>
                             {% for letter in "ABCDEFGHIJKLMNOPQRSTUVWXYZ"|make_list %}
                             <option value="{{ letter }}" {% if current_alphabet == letter %}selected{% endif %}>{{ letter }}</option>
@@ -48,11 +51,11 @@
                     </div>
 
                     <div class="flex gap-2">
-                        <button type="submit" class="bg-gradient-to-r from-green-500 to-blue-600 hover:from-green-600 hover:to-blue-700 text-white px-6 py-3 rounded-lg font-semibold transition-all duration-300 transform hover:scale-105 shadow-lg flex items-center space-x-2">
+                        <button type="submit" class="rounded-xl px-7 py-3 font-semibold text-black transition-all duration-300 bg-[#2A2A2A] hover:bg-[#343434] text-[#EAEAEA] transition-all duration-300 bg-whitshadow-[0_0_15px_rgba(255,255,255,0.35)]e hover:bg-whitshadow-[0_0_24px_rgba(255,255,255,0.35)]e flex items-center gap-2">
                             <span>🔍</span>
                             <span>Apply Filters</span>
                         </button>
-                        <a href="{% url 'booking_venue:main_page' %}" class="bg-gray-600 hover:bg-gray-700 text-white px-6 py-3 rounded-lg font-semibold transition-all duration-300 flex items-center space-x-2">
+                        <a href="{% url 'booking_venue:main_page' %}" class="bg-[#2A2A2A] hover:bg-[#343434] text-[#EAEAEA] px-6 py-3 rounded-lg font-semibold transition-all duration-300 flex items-center space-x-2">
                             <span>🗑️</span>
                             <span>Clear All</span>
                         </a>
@@ -67,14 +70,14 @@
         {% if venues %}
         <div class="grid md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-8">
             {% for venue in venues %}
-            <div class="bg-gray-800/50 backdrop-blur-sm rounded-xl p-6 border border-gray-700 hover:border-purple-500 hover:bg-purple-900/20 transition-all duration-300 transform hover:scale-[1.02] hover:shadow-2xl group cursor-pointer">
+            <div class="bg-[#161616] hover:bg-[#1F1F1F] border border-[#2A2A2A] rounded-2xl p-6 shadow-[0_0_10px_rgba(0,0,0,0.4)] transition hover:-translate-y-1 hover:shadow-[0_0_22px_rgba(0,255,148,0.16)]">
                 <!-- Venue Header -->
                 <div class="flex items-start justify-between mb-4">
                     <div class="flex-1">
-                        <h3 class="text-xl font-semibold text-white mb-2 group-hover:text-green-400 transition-colors line-clamp-2">
+                        <h3 class="text-2xl font-semibold tracking-wide text-white mb-3">
                             {{ venue.name }}
                         </h3>
-                        <div class="flex items-center space-x-2 text-sm text-gray-400 mb-3">
+                        <div class="flex items-center space-x-2 text-sm text-[#A1A1A1] mb-3">
                             <span class="text-lg">📍</span>
                             <span class="truncate">{{ venue.location }}</span>
                         </div>
@@ -86,27 +89,27 @@
                     <div class="flex justify-between items-center">
                         <div class="flex items-center space-x-2">
                             <span class="text-lg">👥</span>
-                            <span class="text-gray-400 text-sm">Capacity:</span>
+                            <span class="text-[#A1A1A1] text-sm">Capacity:</span>
                         </div>
-                        <span class="text-white font-medium">{{ venue.capacity|floatformat:0 }} people</span>
+                        <span class="text-[#EAEAEA] font-medium">{{ venue.capacity|floatformat:0 }} people</span>
                     </div>
                     <div class="flex justify-between items-center">
                         <div class="flex items-center space-x-2">
                             <span class="text-lg">💰</span>
-                            <span class="text-gray-400 text-sm">Price per hour:</span>
+                            <span class="text-[#A1A1A1] text-sm">Price per hour:</span>
                         </div>
-                        <span class="text-2xl font-bold text-green-400">$100</span>
+                        <span class="text-2xl font-bold text-[#EAEAEA]">$100</span>
                     </div>
                 </div>
 
                 <!-- Description -->
-                <p class="text-gray-300 text-sm leading-relaxed mb-6 line-clamp-3">
+                <p class="text-[#CFCFCF] text-sm leading-relaxed mb-6 line-clamp-3">
                     {{ venue.description|truncatechars:120 }}
                 </p>
 
                 <!-- Action Button -->
                 <a href="{% url 'booking_venue:book_venue' venue.id %}"
-                   class="w-full bg-gradient-to-r from-green-500 to-blue-600 hover:from-green-600 hover:to-blue-700 text-white py-3 rounded-xl font-semibold text-center transition-all duration-300 transform hover:scale-105 shadow-lg flex items-center justify-center space-x-2">
+                   class="w-full py-2.5 rounded-xl font-semibold text-black transition bg-[#2A2A2A] hover:bg-[#343434] text-[#EAEAEA] transition-all duration-300 bg-whitshadow-[0_0_15px_rgba(255,255,255,0.35)]e flex items-center justify-center gap-2">
                     <span class="text-lg">🎫</span>
                     <span>Book Now</span>
                 </a>
@@ -116,11 +119,11 @@
         {% else %}
         <!-- Empty State -->
         <div class="text-center py-16">
-            <div class="w-24 h-24 mx-auto mb-6 bg-gradient-to-r from-green-500 to-blue-600 rounded-full flex items-center justify-center">
+            <div class="w-24 h-24 mx-auto mb-6 rounded-full flex items-center justify-center bg-white shadow-[0_0_25px_rgba(0,255,148,0.35)]">
                 <span class="text-4xl">🏟️</span>
             </div>
-            <h3 class="text-2xl font-bold mb-4">No venues available</h3>
-            <p class="text-gray-400 mb-8 max-w-md mx-auto">There are currently no venues available for booking. Please check back later.</p>
+            <h3 class="text-2xl font-bold mb-3">No venues found</h3>
+            <p class="text-[#A1A1A1] mb-8 max-w-md mx-auto">Be the first to create a sports venue and invite others to book!</p>
         </div>
         {% endif %}
     </div>

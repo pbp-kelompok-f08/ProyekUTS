@@ -1,21 +1,24 @@
 {% extends 'base.html' %}
 {% block title %}Book {{ venue.name }} - Hoppin{% endblock %}
+{% block head %}
+<link href="https://fonts.googleapis.com/css2?family=Roboto+Mono:wght@400;500;700&display=swap" rel="stylesheet">
+{% endblock head %}
 {% block content %}
 {% include 'navbar.html' %}
-<body class="min-h-screen bg-gradient-to-br from-gray-900 via-gray-800 to-black text-white">
+<body class="min-h-screen bg-[#0E0E0E] text-[#EAEAEA]" style="font-family: 'Roboto Mono', monospace;">
     <!-- Header Section -->
-    <div class="bg-gray-800/50 backdrop-blur-sm border-b border-gray-700 pt-20">
+    <div class="bg-[#1C1C1C]/80 border-b border-[#2A2A2A] backdrop-blur-sm pt-20">
         <div class="container mx-auto px-6 py-8">
             <div class="flex flex-col md:flex-row items-center justify-between">
                 <div>
-                    <h1 class="text-4xl font-bold mb-2 bg-gradient-to-r from-green-400 to-blue-500 bg-clip-text text-transparent">
+                    <h1 class="text-4xl md:text-5xl font-extrabold mb-2 tracking-tight text-white">
                         Available Venues
                     </h1>
-                    <p class="text-xl text-gray-300">Discover and book amazing sports facilities for your games</p>
+                    <p class="text-lg md:text-xl text-[#A1A1A1]">Discover and book amazing sports facilities for your games</p>
                 </div>
                 {% if user.is_authenticated %}
                 <div class="mt-6 md:mt-0">
-                    <a href="{% url 'booking_venue:my_bookings' %}" class="bg-gradient-to-r from-purple-500 to-pink-600 hover:from-purple-600 hover:to-pink-700 text-white px-6 py-3 rounded-xl font-semibold transition-all duration-300 transform hover:scale-105 shadow-lg flex items-center space-x-2">
+                    <a href="{% url 'booking_venue:my_bookings' %}" class="rounded-xl px-7 py-3 font-semibold text-black transition-all duration-300 bg-[#2A2A2A] hover:bg-[#343434] text-[#EAEAEA] transition-all duration-300 bg-whitshadow-[0_0_15px_rgba(255,255,255,0.35)]e hover:bg-whitshadow-[0_0_24px_rgba(255,255,255,0.35)]e flex items-center gap-2">
                         <span class="text-xl">📋</span>
                         <span>My Bookings</span>
                     </a>
@@ -28,17 +31,17 @@
     {% if not user.is_authenticated %}
     <div class="container mx-auto px-6 py-8">
         <div class="max-w-md mx-auto text-center">
-            <div class="bg-gray-800/50 backdrop-blur-sm rounded-xl p-8 border border-gray-700">
+            <div class="bg-[#1A1A1A]/80 backdrop-blur-xl rounded-2xl p-8 border border-[#2A2A2A] shadow-[0_0_10px_rgba(0,0,0,0.35)]">
                 <div class="w-16 h-16 mx-auto mb-6 bg-gradient-to-r from-red-500 to-pink-600 rounded-full flex items-center justify-center">
                     <span class="text-3xl">🔒</span>
                 </div>
                 <h2 class="text-2xl font-bold mb-4">Login Required</h2>
                 <p class="text-gray-300 mb-6">You need to be logged in to book a venue.</p>
                 <div class="space-y-3">
-                    <a href="/login/" class="block w-full bg-gradient-to-r from-blue-500 to-purple-600 hover:from-blue-600 hover:to-purple-700 text-white py-3 rounded-xl font-semibold transition-all duration-300 transform hover:scale-105 shadow-lg">
+                    <a href="/login/" class="block w-full rounded-xl py-3 font-semibold text-black transition-all duration-300 bg-[#2A2A2A] hover:bg-[#343434] text-[#EAEAEA] transition-all duration-300 bg-whitshadow-[0_0_15px_rgba(255,255,255,0.35)]e hover:bg-whitshadow-[0_0_24px_rgba(255,255,255,0.35)]e">
                         Login
                     </a>
-                    <a href="/register/" class="block w-full border-2 border-white text-white hover:bg-white hover:text-gray-900 py-3 rounded-xl font-semibold transition-all duration-300">
+                    <a href="/register/" class="block w-full border-2 border-[#EAEAEA] text-[#EAEAEA] hover:bg-[#EAEAEA] hover:text-black py-3 rounded-xl font-semibold transition-all duration-300">
                         Create Account
                     </a>
                 </div>
@@ -51,7 +54,7 @@
         <div class="max-w-4xl mx-auto">
             <!-- Back Button -->
             <a href="{% url 'booking_venue:main_page' %}"
-                class="inline-flex items-center text-gray-400 hover:text-white mb-6 transition-colors">
+                class="inline-flex items-center text-[#A1A1A1] hover:text-[#EAEAEA] mb-6 transition-colors">
                 <span class="text-lg mr-2">⬅️</span>
                 Back to Venues
             </a>
@@ -59,39 +62,39 @@
             <div class="grid lg:grid-cols-3 gap-8">
                 <!-- Venue Details -->
                 <div class="lg:col-span-2">
-                    <div class="bg-gray-800/50 backdrop-blur-sm rounded-xl p-8 border border-gray-700 mb-8">
+                    <div class="bg-[#1A1A1A]/80 backdrop-blur-xl rounded-2xl p-8 border border-[#2A2A2A] shadow-[0_0_10px_rgba(0,0,0,0.35)] mb-8">
                         <div class="flex items-start space-x-6 mb-6">
                             <div class="flex-1">
                                 <h1 class="text-3xl font-bold mb-2">{{ venue.name }}</h1>
-                                <div class="flex items-center space-x-2 text-gray-400 mb-4">
+                                <div class="flex items-center space-x-2 text-[#A1A1A1] mb-4">
                                     <span class="text-lg">📍</span>
                                     <span>{{ venue.location }}</span>
                                 </div>
-                                <span class="bg-gradient-to-r from-green-500 to-blue-600 text-white px-4 py-2 rounded-full text-sm font-medium">
+                                <span class="bg-gradient-to-r from-gray-500 to-gray-600 text-white px-4 py-2 rounded-full text-sm font-medium">
                                     ⚽ Football
                                 </span>
                             </div>
                         </div>
 
                         <div class="grid md:grid-cols-2 gap-6 mb-6">
-                            <div class="bg-gray-700/30 rounded-lg p-4">
-                                <div class="text-sm text-gray-400 mb-1">Capacity</div>
-                                <div class="text-2xl font-bold text-white">{{ venue.capacity }} people</div>
+                            <div class="bg-[#202020] rounded-lg p-4 border border-[#2A2A2A]">
+                                <div class="text-sm text-[#A1A1A1] mb-1">Capacity</div>
+                                <div class="text-2xl font-bold text-[#EAEAEA]">{{ venue.capacity }} people</div>
                             </div>
-                            <div class="bg-gray-700/30 rounded-lg p-4">
-                                <div class="text-sm text-gray-400 mb-1">Price per Hour</div>
-                                <div class="text-2xl font-bold text-green-400">$100</div>
+                            <div class="bg-[#202020] rounded-lg p-4 border border-[#2A2A2A]">
+                                <div class="text-sm text-[#A1A1A1] mb-1">Price per Hour</div>
+                                <div class="text-2xl font-bold text-[#EAEAEA]">$100</div>
                             </div>
                         </div>
 
                         <div>
                             <h3 class="text-lg font-semibold mb-3">Description</h3>
-                            <p class="text-gray-300 leading-relaxed">{{ venue.description }}</p>
+                            <p class="text-[#CFCFCF] leading-relaxed">{{ venue.description }}</p>
                         </div>
                     </div>
 
                     <!-- Booking Form -->
-                    <div class="bg-gray-800/50 backdrop-blur-sm rounded-xl p-8 border border-gray-700">
+                    <div class="bg-[#1A1A1A]/80 backdrop-blur-xl rounded-2xl p-8 border border-[#2A2A2A] shadow-[0_0_10px_rgba(0,0,0,0.35)]">
                         <h2 class="text-2xl font-bold mb-6">Book This Venue</h2>
 
                         <form method="post" id="booking-form">
@@ -99,49 +102,49 @@
 
                             <div class="grid md:grid-cols-2 gap-6 mb-6">
                                 <div>
-                                    <label class="block text-sm font-medium text-gray-300 mb-2">Date</label>
+                                    <label class="block text-sm font-medium text-[#CFCFCF] mb-2">Date</label>
                                     <input type="date" name="date" id="booking-date" required
-                                        class="w-full bg-gray-700 border border-gray-600 rounded-lg px-4 py-3 text-white focus:outline-none focus:ring-2 focus:ring-green-500 focus:border-transparent">
+                                        class="w-full bg-[#161616] border border-[#2A2A2A] rounded-lg px-4 py-3 text-[#EAEAEA] focus:outline-none focus:ring-2 focus:ring-[#EAEAEA] focus:border-transparent">
                                 </div>
                                 <div>
-                                    <label class="block text-sm font-medium text-gray-300 mb-2">Time</label>
+                                    <label class="block text-sm font-medium text-[#CFCFCF] mb-2">Time</label>
                                     <input type="time" name="time" id="booking-time" required
-                                        class="w-full bg-gray-700 border border-gray-600 rounded-lg px-4 py-3 text-white focus:outline-none focus:ring-2 focus:ring-green-500 focus:border-transparent">
+                                        class="w-full bg-[#161616] border border-[#2A2A2A] rounded-lg px-4 py-3 text-[#EAEAEA] focus:outline-none focus:ring-2 focus:ring-[#EAEAEA] focus:border-transparent">
                                 </div>
                             </div>
 
                             <!-- Duration Selection -->
                             <div class="mb-6">
-                                <label class="block text-sm font-medium text-gray-300 mb-3">Duration (hours)</label>
+                                <label class="block text-sm font-medium text-[#CFCFCF] mb-3">Duration (hours)</label>
                                 <div class="grid grid-cols-4 gap-3">
-                                    <button type="button" data-duration="1" class="duration-btn bg-gray-700 hover:bg-green-600 text-white py-3 rounded-lg transition-colors">1 hour</button>
-                                    <button type="button" data-duration="2" class="duration-btn bg-gray-700 hover:bg-green-600 text-white py-3 rounded-lg transition-colors">2 hours</button>
-                                    <button type="button" data-duration="3" class="duration-btn bg-gray-700 hover:bg-green-600 text-white py-3 rounded-lg transition-colors">3 hours</button>
-                                    <button type="button" data-duration="4" class="duration-btn bg-gray-700 hover:bg-green-600 text-white py-3 rounded-lg transition-colors">4 hours</button>
+                                    <button type="button" data-duration="1" class="duration-btn bg-[#2A2A2A] hover:bg-[#343434] text-[#EAEAEA] py-3 rounded-lg transition-colors">1 hour</button>
+                                    <button type="button" data-duration="2" class="duration-btn bg-[#2A2A2A] hover:bg-[#343434] text-[#EAEAEA] py-3 rounded-lg transition-colors">2 hours</button>
+                                    <button type="button" data-duration="3" class="duration-btn bg-[#2A2A2A] hover:bg-[#343434] text-[#EAEAEA] py-3 rounded-lg transition-colors">3 hours</button>
+                                    <button type="button" data-duration="4" class="duration-btn bg-[#2A2A2A] hover:bg-[#343434] text-[#EAEAEA] py-3 rounded-lg transition-colors">4 hours</button>
                                 </div>
                                 <input type="hidden" name="duration" id="selected-duration" value="1">
                             </div>
 
                             <!-- Price Summary -->
-                            <div class="bg-gray-700/30 rounded-lg p-4 mb-6">
+                            <div class="bg-[#202020] rounded-lg p-4 mb-6 border border-[#2A2A2A]">
                                 <div class="flex justify-between items-center mb-2">
-                                    <span class="text-gray-300">Price per hour:</span>
-                                    <span class="text-white">$100</span>
+                                    <span class="text-[#CFCFCF]">Price per hour:</span>
+                                    <span class="text-[#EAEAEA]">$100</span>
                                 </div>
                                 <div class="flex justify-between items-center mb-2">
-                                    <span class="text-gray-300">Duration:</span>
-                                    <span class="text-white" id="duration-display">1 hour</span>
+                                    <span class="text-[#CFCFCF]">Duration:</span>
+                                    <span class="text-[#EAEAEA]" id="duration-display">1 hour</span>
                                 </div>
-                                <hr class="border-gray-600 my-3">
+                                <hr class="border-[#2A2A2A] my-3">
                                 <div class="flex justify-between items-center">
-                                    <span class="text-lg font-semibold text-white">Total:</span>
-                                    <span class="text-2xl font-bold text-green-400" id="total-price">$100</span>
+                                    <span class="text-lg font-semibold text-[#EAEAEA]">Total:</span>
+                                    <span class="text-2xl font-bold text-[#EAEAEA]" id="total-price">$100</span>
                                 </div>
                             </div>
 
                             <!-- Submit Button -->
                             <button type="submit" id="submit-booking"
-                                class="w-full bg-gradient-to-r from-green-500 to-blue-600 hover:from-green-600 hover:to-blue-700 text-white py-4 rounded-xl font-semibold text-lg transition-all duration-300 transform hover:scale-105 shadow-lg">
+                                class="w-full py-4 rounded-xl font-semibold text-black transition bg-[#2A2A2A] hover:bg-[#343434] text-[#EAEAEA] transition-all duration-300 bg-whitshadow-[0_0_15px_rgba(255,255,255,0.35)]e">
                                 Confirm Booking
                             </button>
                         </form>
@@ -151,43 +154,43 @@
                 <!-- Sidebar -->
                 <div class="space-y-6">
                     <!-- Booking Rules -->
-                    <div class="bg-gray-800/50 backdrop-blur-sm rounded-xl p-6 border border-gray-700">
-                        <h3 class="text-lg font-semibold mb-4 flex items-center">
+                    <div class="bg-[#1A1A1A]/80 backdrop-blur-xl rounded-2xl p-6 border border-[#2A2A2A] shadow-[0_0_10px_rgba(0,0,0,0.35)]">
+                        <h3 class="text-lg font-semibold mb-4 flex items-center text-white">
                             <span class="text-lg mr-2">✅</span>
                             Booking Rules
                         </h3>
-                        <ul class="space-y-3 text-sm text-gray-300">
+                        <ul class="space-y-3 text-sm text-[#CFCFCF]">
                             <li class="flex items-start">
-                                <span class="w-2 h-2 bg-green-400 rounded-full mt-2 mr-3 flex-shrink-0"></span>
+                                <span class="w-2 h-2 bg-[#EAEAEA] rounded-full mt-2 mr-3 flex-shrink-0"></span>
                                 Bookings must be made at least 2 hours in advance
                             </li>
                             <li class="flex items-start">
-                                <span class="w-2 h-2 bg-green-400 rounded-full mt-2 mr-3 flex-shrink-0"></span>
+                                <span class="w-2 h-2 bg-[#EAEAEA] rounded-full mt-2 mr-3 flex-shrink-0"></span>
                                 Maximum booking duration is 4 hours per session
                             </li>
                             <li class="flex items-start">
-                                <span class="w-2 h-2 bg-green-400 rounded-full mt-2 mr-3 flex-shrink-0"></span>
+                                <span class="w-2 h-2 bg-[#EAEAEA] rounded-full mt-2 mr-3 flex-shrink-0"></span>
                                 Cancellations must be made 24 hours before booking time
                             </li>
                             <li class="flex items-start">
-                                <span class="w-2 h-2 bg-green-400 rounded-full mt-2 mr-3 flex-shrink-0"></span>
+                                <span class="w-2 h-2 bg-[#EAEAEA] rounded-full mt-2 mr-3 flex-shrink-0"></span>
                                 Bring your own equipment unless specified
                             </li>
                         </ul>
                     </div>
 
                     <!-- Contact Info -->
-                    <div class="bg-gray-800/50 backdrop-blur-sm rounded-xl p-6 border border-gray-700">
-                        <h3 class="text-lg font-semibold mb-4 flex items-center">
+                    <div class="bg-[#1A1A1A]/80 backdrop-blur-xl rounded-2xl p-6 border border-[#2A2A2A] shadow-[0_0_10px_rgba(0,0,0,0.35)]">
+                        <h3 class="text-lg font-semibold mb-4 flex items-center text-white">
                             <span class="text-lg mr-2">📞</span>
                             Need Help?
                         </h3>
                         <div class="space-y-3">
-                            <div class="flex items-center text-gray-300">
+                            <div class="flex items-center text-[#CFCFCF]">
                                 <span class="text-lg mr-3">📧</span>
                                 support@hoppin.com
                             </div>
-                            <div class="flex items-center text-gray-300">
+                            <div class="flex items-center text-[#CFCFCF]">
                                 <span class="text-lg mr-3">📱</span>
                                 +1 (555) 123-4567
                             </div>
@@ -208,9 +211,9 @@
         document.querySelectorAll('.duration-btn').forEach(btn => {
             btn.addEventListener('click', function() {
                 // Remove active class from all buttons
-                document.querySelectorAll('.duration-btn').forEach(b => b.classList.remove('bg-green-600'));
+                document.querySelectorAll('.duration-btn').forEach(b => b.classList.remove('bg-[#343434]'));
                 // Add active class to clicked button
-                this.classList.add('bg-green-600');
+                this.classList.add('bg-[#343434]');
 
                 selectedDuration = parseInt(this.dataset.duration);
                 document.getElementById('selected-duration').value = selectedDuration;
@@ -219,7 +222,7 @@
         });
 
         // Set default duration button as active
-        document.querySelector('.duration-btn[data-duration="1"]').classList.add('bg-green-600');
+        document.querySelector('.duration-btn[data-duration="1"]').classList.add('bg-[#343434]');
 
         function updatePrice() {
             const total = venuePrice * selectedDuration;
