@@ -74,6 +74,7 @@ def match_dashboard(request):
             "participation_form": ParticipationForm(),
             "search_form": MatchSearchForm(),
             "has_any_match": False,
+            "categories": SportCategory.objects.all(),
         }
 
         if request.headers.get("x-requested-with") == "XMLHttpRequest":
@@ -104,14 +105,12 @@ def match_dashboard(request):
 
         if category:
             matches = matches.filter(category=category)
-
         if keyword:
             matches = matches.filter(
                 Q(title__icontains=keyword)
                 | Q(description__icontains=keyword)
                 | Q(location__icontains=keyword)
             )
-
         if available_only:
             matches = matches.filter(participant_count__lt=F("max_members"))
     else:
@@ -146,9 +145,9 @@ def match_dashboard(request):
         "search_form": search_form,
         "has_any_match": has_any_match,
         "schema_ready": True,
+        "categories": SportCategory.objects.all(),
     }
     return render(request, "matches/dashboard.html", context)
-
 
 @require_http_methods(["POST"])
 @csrf_exempt
@@ -214,6 +213,18 @@ def book_match(request: HttpRequest, match_id: uuid):
                 "success": False,
                 "errors": {
                     "__all__": ["Match ini sudah penuh. Pilih match lain atau buat baru."]
+                },
+            },
+            status=400,
+        )
+
+    # 🚨 Tambahkan ini untuk mencegah user join dua kali
+    if Participation.objects.filter(match=match, user=request.user).exists():
+        return JsonResponse(
+            {
+                "success": False,
+                "errors": {
+                    "__all__": ["Kamu sudah bergabung pada match ini."]
                 },
             },
             status=400,
