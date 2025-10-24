@@ -1,24 +1,38 @@
 {% extends 'base.html' %}
-{%load static%}
+{% load static %}
 {% block title %}Register{% endblock %}
 
 {% block content %}
-<div class="max-w-md mx-auto bg-white shadow-lg rounded-lg p-8">
-  <h2 class="text-2xl font-bold mb-4 text-center">Register</h2>
+<link href="https://fonts.googleapis.com/css2?family=Roboto+Mono:wght@400;500;700&display=swap" rel="stylesheet">
 
-  <input id="username" class="w-full border p-2 mb-3 rounded" placeholder="Username" />
-  <input id="email" class="w-full border p-2 mb-3 rounded" placeholder="Email" />
-  <input id="password1" type="password" class="w-full border p-2 mb-3 rounded" placeholder="Password" />
-  <input id="password2" type="password" class="w-full border p-2 mb-3 rounded" placeholder="Konfirmasi Password" />
+<div class="min-h-screen flex items-center justify-center bg-[#1E1E1E]"
+     style="font-family: 'Roboto Mono', monospace;">
+  <div class="bg-white rounded-2xl shadow-2xl w-full max-w-md p-8">
+    <h2 class="text-3xl font-bold text-center text-[#262626] mb-8">Register</h2>
 
-  <button onclick="registerUser()" class="w-full bg-green-600 text-white py-2 rounded hover:bg-green-700 transition">
-    Register
-  </button>
+    <input id="username"
+           class="w-full border border-gray-300 p-3 mb-4 rounded-md text-[#262626] placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-[#262626]"
+           placeholder="Username" />
+    <input id="email"
+           class="w-full border border-gray-300 p-3 mb-4 rounded-md text-[#262626] placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-[#262626]"
+           placeholder="Email" />
+    <input id="password1" type="password"
+           class="w-full border border-gray-300 p-3 mb-4 rounded-md text-[#262626] placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-[#262626]"
+           placeholder="Password" />
+    <input id="password2" type="password"
+           class="w-full border border-gray-300 p-3 mb-6 rounded-md text-[#262626] placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-[#262626]"
+           placeholder="Konfirmasi Password" />
 
-  <p class="text-center text-sm mt-4">
-    Sudah punya akun?
-    <a href="{% url 'accounts:login' %}" class="text-blue-600 hover:underline">Login di sini</a>
-  </p>
+    <button onclick="registerUser()"
+            class="w-full bg-[#262626] text-white py-3 rounded-md font-semibold hover:bg-[#1A1A1A] transition">
+      Register
+    </button>
+
+    <p class="text-center text-sm mt-5 text-gray-600">
+      Sudah punya akun?
+      <a href="{% url 'accounts:login' %}" class="text-[#262626] font-medium hover:underline">Login di sini</a>
+    </p>
+  </div>
 </div>
 {% endblock %}
 

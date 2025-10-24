@@ -3,20 +3,30 @@
 {% block title %}Login{% endblock %}
 
 {% block content %}
-<div class="max-w-md mx-auto bg-white shadow-lg rounded-lg p-8">
-  <h2 class="text-2xl font-bold mb-4 text-center">Login</h2>
+<link href="https://fonts.googleapis.com/css2?family=Roboto+Mono:wght@400;500;700&display=swap" rel="stylesheet">
 
-  <input id="username" class="w-full border p-2 mb-3 rounded" placeholder="Username" />
-  <input id="password" type="password" class="w-full border p-2 mb-3 rounded" placeholder="Password" />
+<div class="min-h-screen flex items-center justify-center bg-[#1E1E1E]"
+     style="font-family: 'Roboto Mono', monospace;">
+  <div class="bg-white rounded-2xl shadow-2xl w-full max-w-md p-8">
+    <h2 class="text-3xl font-bold text-center text-[#262626] mb-8">Login</h2>
 
-  <button onclick="loginUser()" class="w-full bg-blue-600 text-white py-2 rounded hover:bg-blue-700 transition">
-    Login
-  </button>
+    <input id="username"
+           class="w-full border border-gray-300 p-3 mb-4 rounded-md focus:outline-none focus:ring-2 focus:ring-[#262626] text-[#262626] placeholder-gray-400"
+           placeholder="Username" />
+    <input id="password" type="password"
+           class="w-full border border-gray-300 p-3 mb-6 rounded-md focus:outline-none focus:ring-2 focus:ring-[#262626] text-[#262626] placeholder-gray-400"
+           placeholder="Password" />
 
-  <p class="text-center text-sm mt-4">
-    Belum punya akun?
-    <a href="{% url 'accounts:register' %}" class="text-blue-600 hover:underline">Daftar di sini</a>
-  </p>
+    <button onclick="loginUser()"
+            class="w-full bg-[#262626] text-white py-3 rounded-md font-semibold hover:bg-[#1A1A1A] transition">
+      Login
+    </button>
+
+    <p class="text-center text-sm mt-5 text-gray-600">
+      Belum punya akun?
+      <a href="{% url 'accounts:register' %}" class="text-[#262626] font-medium hover:underline">Daftar di sini</a>
+    </p>
+  </div>
 </div>
 {% endblock %}
 

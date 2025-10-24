@@ -1,0 +1,66 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}Anonymous User{% endblock %}
+
+{% block content %}
+{% include 'navbar.html' %}
+
+<!-- Font -->
+<link href="https://fonts.googleapis.com/css2?family=Roboto+Mono:wght@400;500;700&display=swap" rel="stylesheet">
+
+<!-- Main Wrapper -->
+<div class="min-h-screen flex flex-col items-center justify-center bg-[#1E1E1E] text-gray-200 text-center px-6 overflow-hidden relative"
+     style="font-family: 'Roboto Mono', monospace;">
+
+  <!-- Floating background blobs -->
+  <div class="absolute w-96 h-96 bg-gradient-to-r from-indigo-700/30 to-purple-600/20 rounded-full blur-3xl top-20 left-10 animate-pulse-slow"></div>
+  <div class="absolute w-96 h-96 bg-gradient-to-r from-teal-500/20 to-green-500/10 rounded-full blur-3xl bottom-10 right-10 animate-pulse-slow"></div>
+
+  <!-- Card -->
+  <div id="anonCard"
+       class="opacity-0 translate-y-8 transition-all duration-700 ease-out bg-black border border-[#9DB4C0]/30 rounded-2xl p-10 max-w-md shadow-2xl backdrop-blur-sm hover:scale-[1.02] hover:shadow-[#9DB4C0]/30">
+       
+    <img src="{% static 'accounts/img/anonymous.png' %}" alt="Anonymous"
+         class="w-24 h-24 mx-auto mb-4 rounded-full bg-gradient-to-br from-purple-500 to-pink-500 object-cover shadow-lg hover:rotate-3 transition-transform duration-500">
+
+    <h1 class="text-2xl font-semibold mb-2 text-[#E6E8E6]">@Anonymous</h1>
+    <p class="text-gray-400 mb-6 text-sm italic leading-relaxed">
+      This user posted <span class="text-[#6C6D74] font-medium">anonymously</span>.  
+      No public profile is available.
+    </p>
+
+    <a href="/threads/"
+        class="inline-flex items-center gap-2 px-5 py-2 bg-[#6C6D74] hover:bg-[#6C6D74] text-white rounded-lg shadow-md hover:shadow-green-500/20 transition-all">
+        <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7" />
+        </svg>
+        Back to Home
+    </a>
+  </div>
+</div>
+
+{% endblock %}
+
+{% block extra_scripts %}
+<script>
+// Fade-in animation for the anonymous card
+document.addEventListener("DOMContentLoaded", () => {
+  const card = document.getElementById("anonCard");
+  setTimeout(() => {
+    card.classList.remove("opacity-0", "translate-y-8");
+    card.classList.add("opacity-100", "translate-y-0");
+  }, 150);
+});
+</script>
+
+<style>
+@keyframes pulse-slow {
+  0%, 100% { opacity: 0.3; transform: scale(1); }
+  50% { opacity: 0.6; transform: scale(1.1); }
+}
+.animate-pulse-slow {
+  animation: pulse-slow 6s ease-in-out infinite;
+}
+</style>
+{% endblock %}

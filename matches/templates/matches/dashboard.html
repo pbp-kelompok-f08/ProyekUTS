@@ -23,7 +23,7 @@
         </div>
 
         <button type="button" id="open-create-modal" {% if not schema_ready %}disabled{% endif %}
-          class="group mt-2 md:mt-0 rounded-xl px-7 py-3 font-semibold text-black transition-all duration-300
+          class="group mt-2 md:mt-0 rounded-xl px-7 py-3 font-semibold text-white transition-all duration-300
                  bg-[#2A2A2A]hover:bg-[#343434] text-[#EAEAEA] transition-all duration-300
                  bg-whitshadow-[0_0_15px_rgba(255,255,255,0.35)]e hover:bg-whitshadow-[0_0_24px_rgba(255,255,255,0.35)]e
                  disabled:opacity-50 disabled:cursor-not-allowed flex items-center gap-2">
@@ -36,44 +36,43 @@
 
       <!-- ============== SEARCH & FILTER BAR ============== -->
       <div class="mt-8 flex flex-col lg:flex-row gap-4">
-  <div class="flex-1">
-    <form id="match-search-form" method="get" action="" autocomplete="off">
-      <div class="relative">
-        <input
-          type="text"
-          name="q"
-          placeholder="Search matches..."
-          autocomplete="off"
-          class="w-full bg-transparent border-b border-[#3A3A3A] text-[#EAEAEA]
-                 placeholder-[#6B6B6B] focus:outline-none focus:border-white
-                 py-3 pr-4 pl-11 text-lg transition-all duration-300" />
-        <svg class="w-5 h-5 absolute left-1.5 top-3.5 text-[#6B6B6B]" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"></path>
-        </svg>
-      </div>
-    </form>
+<form id="match-search-form" method="get" action="" class="flex flex-col lg:flex-row gap-4 w-full" autocomplete="off">
+  <div class="relative flex-1">
+    <input
+      type="text"
+      name="keyword"
+      value="{{ request.GET.keyword }}"
+      placeholder="Search matches..."
+      class="w-full bg-transparent border-b border-[#3A3A3A] text-[#EAEAEA]
+             placeholder-[#6B6B6B] focus:outline-none focus:border-white
+             py-3 pr-4 pl-11 text-lg transition-all duration-300" />
+    <svg class="w-5 h-5 absolute left-1.5 top-3.5 text-[#6B6B6B]" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+      <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+            d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"></path>
+    </svg>
   </div>
 
-  <select id="sport-filter"
+  <select name="sport" id="sport-filter"
     class="bg-transparent border-b border-[#3A3A3A] text-[#EAEAEA] focus:outline-none focus:border-white
            px-2 py-2 rounded-none transition-colors">
     <option value="">All Sports</option>
-    <option value="football">Football</option>
-    <option value="basketball">Basketball</option>
-    <option value="tennis">Tennis</option>
-    <option value="badminton">Badminton</option>
-    <option value="volleyball">Volleyball</option>
+    {% for category in categories %}
+      <option value="{{ category.slug }}" {% if request.GET.sport == category.slug %}selected{% endif %}>
+        {{ category.name }}
+      </option>
+    {% endfor %}
   </select>
 
-  <select id="date-filter"
+  <select name="when" id="date-filter"
     class="bg-transparent border-b border-[#3A3A3A] text-[#EAEAEA] focus:outline-none focus:border-white
            px-2 py-2 rounded-none transition-colors">
     <option value="">Any Date</option>
-    <option value="today">Today</option>
-    <option value="week">This Week</option>
-    <option value="month">This Month</option>
+    <option value="today" {% if request.GET.when == "today" %}selected{% endif %}>Today</option>
+    <option value="week" {% if request.GET.when == "week" %}selected{% endif %}>This Week</option>
+    <option value="month" {% if request.GET.when == "month" %}selected{% endif %}>This Month</option>
   </select>
+</form>
+
 </div>
 
     </div>
@@ -101,7 +100,7 @@
         <div id="empty" class="hidden text-center py-16">
           <div class="w-24 h-24 mx-auto mb-6 rounded-full flex items-center justify-center
                       bg-white shadow-[0_0_25px_rgba(0,255,148,0.35)]">
-            <svg class="w-12 h-12 text-black" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <svg class="w-12 h-12 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
               <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
                     d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z"></path>
             </svg>
@@ -109,7 +108,7 @@
           <h3 class="text-2xl font-bold mb-3">No matches found</h3>
           <p class="text-[#A1A1A1] mb-8 max-w-md mx-auto">Be the first to create a sports match and invite others to join!</p>
           <button id="empty-create-btn"
-                  class="rounded-xl px-7 py-3 font-semibold text-black transition-all duration-300
+                  class="rounded-xl px-7 py-3 font-semibold text-white transition-all duration-300
                          bg-[#2A2A2A]hover:bg-[#343434] text-[#EAEAEA] transition-all duration-300
                          bg-whitshadow-[0_0_15px_rgba(255,255,255,0.35)]e hover:bg-whitshadow-[0_0_24px_rgba(255,255,255,0.35)]e">
             Create First Match
@@ -133,7 +132,7 @@
           <div class="space-y-4">
             <div class="flex justify-between items-center">
               <span class="text-[#A1A1A1]">Total Matches</span>
-              <span class="font-semibold text-[#EAEAEA]">247</span>
+              <span class="font-semibold text-[#EAEAEA]">{{ total_matches }}</span>
             </div>
             <div class="flex justify-between items-center">
               <span class="text-[#A1A1A1]">Active Today</span>
@@ -141,11 +140,11 @@
             </div>
             <div class="flex justify-between items-center">
               <span class="text-[#A1A1A1]">Players Online</span>
-              <span class="font-semibold text-[#EAEAEA]">156</span>
+              <span class="font-semibold text-[#EAEAEA]">{{ total_players }}</span>
             </div>
             <div class="flex justify-between items-center">
               <span class="text-[#A1A1A1]">Sports Types</span>
-              <span class="font-semibold text-[#EAEAEA]">8</span>
+              <span class="font-semibold text-[#EAEAEA]">{{ sports_count }}</span>
             </div>
           </div>
         </div>
@@ -161,27 +160,18 @@
             Popular Sports
           </h3>
           <div class="space-y-3">
-            <div class="flex items-center justify-between p-3 bg-[#202020] rounded-lg border border-[#2A2A2A]">
-              <span class="flex items-center">
-                <span class="w-3 h-3 rounded-full mr-3" style="background:#EAEAEA"></span>
-                Football
-              </span>
-              <span class="text-sm text-[#A1A1A1]">89 matches</span>
-            </div>
-            <div class="flex items-center justify-between p-3 bg-[#202020] rounded-lg border border-[#2A2A2A]">
-              <span class="flex items-center">
-                <span class="w-3 h-3 rounded-full mr-3" style="background:#EAEAEA"></span>
-                Basketball
-              </span>
-              <span class="text-sm text-[#A1A1A1]">67 matches</span>
-            </div>
-            <div class="flex items-center justify-between p-3 bg-[#202020] rounded-lg border border-[#2A2A2A]">
-              <span class="flex items-center">
-                <span class="w-3 h-3 rounded-full mr-3" style="background:#EAEAEA"></span>
-                Tennis
-              </span>
-              <span class="text-sm text-[#A1A1A1]">45 matches</span>
-            </div>
+            {% for sport in popular_sports %}
+          <div class="flex items-center justify-between p-3 bg-[#202020] rounded-lg border border-[#2A2A2A]">
+            <span class="flex items-center">
+              <span class="w-3 h-3 rounded-full mr-3" style="background:#EAEAEA"></span>
+              {{ sport.name }}
+            </span>
+            <span class="text-sm text-[#A1A1A1]">{{ sport.match_count }} matches</span>
+          </div>
+        {% empty %}
+          <p class="text-[#A1A1A1] text-sm">No popular sports yet.</p>
+        {% endfor %}
+
           </div>
         </div>
 
@@ -196,29 +186,25 @@
             Recent Activity
           </h3>
           <div class="space-y-4">
-            <div class="flex items-start space-x-3 p-3 bg-[#202020] rounded-lg border border-[#2A2A2A]">
-              <div class="w-8 h-8 rounded-full flex items-center justify-center flex-shrink-0" style="background:#EAEAEA">
-                <svg class="w-4 h-4 text-black" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                        d="M12 4v16m8-8H4"></path>
-                </svg>
-              </div>
-              <div class="flex-1">
-                <p class="text-sm text-white">New basketball match created</p>
-                <p class="text-xs text-[#A1A1A1]">2 hours ago</p>
-              </div>
-            </div>
-            <div class="flex items-start space-x-3 p-3 bg-[#202020] rounded-lg border border-[#2A2A2A]">
-              <div class="w-8 h-8 rounded-full flex items-center justify-center flex-shrink-0" style="background:#EAEAEA">
-                <svg class="w-4 h-4 text-black" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                        d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z"></path>
-                </svg>
-              </div>
-              <div class="flex-1">
-                <p class="text-sm text-white">5 players joined football match</p>
-                <p class="text-xs text-[#A1A1A1]">4 hours ago</p>
-              </div>
+{% for match in recent_activity %}
+  <div class="flex items-start space-x-3 p-3 bg-[#202020] rounded-lg border border-[#2A2A2A]">
+    <div class="w-8 h-8 rounded-full flex items-center justify-center flex-shrink-0" style="background:#EAEAEA">
+      <svg class="w-4 h-4 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"></path>
+      </svg>
+    </div>
+    <div class="flex-1">
+      <p class="text-sm text-white">
+        New {{ match.category.name|lower }} match: 
+        <span class="font-semibold">{{ match.title }}</span>
+      </p>
+      <p class="text-xs text-[#A1A1A1]">{{ match.event_date|date:"M d, H:i" }}</p>
+    </div>
+  </div>
+{% empty %}
+  <p class="text-[#A1A1A1] text-sm">No recent activity yet.</p>
+{% endfor %}
+
             </div>
           </div>
         </div>
@@ -303,7 +289,7 @@
           Cancel
         </button>
         <button type="submit"
-                class="px-6 py-2.5 rounded-lg font-semibold text-black transition
+                class="px-6 py-2.5 rounded-lg font-semibold text-white transition
                        bg-[#2A2A2A]hover:bg-[#343434] text-[#EAEAEA] transition-all duration-300
                        bg-whitshadow-[0_0_15px_rgba(255,255,255,0.35)]e">
           Create Match
@@ -468,7 +454,7 @@
             <form class="booking-form mt-5" data-match-id="${id}" method="post" action="/matches/${id}/book/">
               ${csrfField}
               <button type="submit"
-                class="w-full py-2.5 rounded-xl font-semibold text-black transition
+                class="w-full py-2.5 rounded-xl font-semibold text-white transition
                        bg-[#2A2A2A]hover:bg-[#343434] text-[#EAEAEA] transition-all duration-300
                        bg-whitshadow-[0_0_15px_rgba(255,255,255,0.35)]e">
                 Join Match
@@ -588,17 +574,15 @@
     });
   }
 
-  // ========= Filters binding (optional basic hook) =========
-  document.getElementById('sport-filter')?.addEventListener('change', () => {
-    const fd = new FormData(searchForm);
-    fd.set('sport', document.getElementById('sport-filter').value || '');
-    loadMatches(fd);
+  ['sport-filter', 'date-filter'].forEach(id => {
+    const el = document.getElementById(id);
+    if (el) {
+      el.addEventListener('change', () => {
+        loadMatches(new FormData(searchForm));
+      });
+    }
   });
-  document.getElementById('date-filter')?.addEventListener('change', () => {
-    const fd = new FormData(searchForm);
-    fd.set('when', document.getElementById('date-filter').value || '');
-    loadMatches(fd);
-  });
+
 
   // ========= Init =========
   if (searchForm) {

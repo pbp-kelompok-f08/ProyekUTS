@@ -1,0 +1,115 @@
+{% extends 'base.html' %}
+{% load static %}
+{% block title %}{{ user_profile.username }} - Profile{% endblock %}
+
+{% block content %}
+{% include 'navbar.html' %}
+
+<!-- Font -->
+<link href="https://fonts.googleapis.com/css2?family=Roboto+Mono:wght@400;500;700&display=swap" rel="stylesheet">
+
+<div class="min-h-screen bg-[#262626] text-[#E6E8E6] flex flex-col pt-24" style="font-family: 'Roboto Mono', monospace;">
+  <div class="container mx-auto px-6 space-y-8">
+
+    <!-- PROFILE HEADER BOX -->
+    <div class="bg-black backdrop-blur-sm rounded-xl p-10 border border-[#9DB4C0]/30 shadow-lg flex flex-col sm:flex-row sm:items-center sm:space-x-8 space-y-6 sm:space-y-0 transition-all">
+      <div class="flex justify-center sm:justify-start">
+        <img class="w-32 h-32 sm:w-40 sm:h-40 rounded-full object-cover border-4 border-[#9DB4C0]/40 shadow-md"
+             src="{% if user_profile.profile_picture %}{{ user_profile.profile_picture.url }}{% else %}{% static 'accounts/img/default.png' %}{% endif %}"
+             alt="{{ user_profile.username }}">
+      </div>
+
+      <div class="flex flex-col justify-center text-center sm:text-left space-y-2">
+        <h2 class="text-3xl sm:text-4xl font-semibold text-[#E6E8E6]">@{{ user_profile.username }}</h2>
+        <p class="text-[#CED0CE] text-sm">Member since {{ user_profile.date_joined|date:"M Y" }}</p>
+      </div>
+    </div>
+
+    <!-- DETAIL BOX -->
+    <div class="bg-black backdrop-blur-sm rounded-xl p-8 border border-[#9DB4C0]/30 shadow-lg">
+      <div class="mb-6">
+        <h4 class="text-sm text-[#9DB4C0] uppercase tracking-wide mb-1">Bio</h4>
+        <p class="text-[#E6E8E6] italic">{{ user_profile.bio|default:"Belum ada bio." }}</p>
+      </div>
+
+      <div class="grid sm:grid-cols-2 gap-6">
+        <div>
+          <h4 class="text-sm text-[#9DB4C0] uppercase tracking-wide mb-1">Email</h4>
+          <p class="text-[#E6E8E6]">{{ user_profile.email }}</p>
+        </div>
+        <div>
+          <h4 class="text-sm text-[#9DB4C0] uppercase tracking-wide mb-1">Favorite Sport</h4>
+          <p class="text-[#E6E8E6]">{{ user_profile.favorite_sport|default:"-" }}</p>
+        </div>
+        <div>
+          <h4 class="text-sm text-[#9DB4C0] uppercase tracking-wide mb-1">Skill Level</h4>
+          <p class="text-[#E6E8E6] capitalize">{{ user_profile.skill_level|default:"-" }}</p>
+        </div>
+      </div>
+    </div>
+
+    <!-- USER THREADS BOX -->
+    <div id="user-threads-box"
+         class="bg-black rounded-xl border border-[#9DB4C0]/30 shadow-lg mt-8 p-6 max-h-[800px] overflow-y-auto">
+      <h3 class="text-xl font-semibold mb-4 text-[#E6E8E6]">@{{ user_profile.username }}'s Threads</h3>
+      <div id="userThreads" class="space-y-6"></div>
+      <p id="emptyThreads" class="text-[#9DB4C0] hidden text-sm text-center italic">No threads yet.</p>
+    </div>
+
+  </div>
+</div>
+
+{% endblock %}
+
+{% block extra_scripts %}
+<script>
+document.addEventListener("DOMContentLoaded", async () => {
+  const threadsContainer = document.getElementById("userThreads");
+  const empty = document.getElementById("emptyThreads");
+  const username = "{{ user_profile.username }}";
+
+  try {
+    const res = await fetch("{% url 'threads:show_json' %}", { cache: "no-store" });
+    const allThreads = await res.json();
+
+    const userThreads = allThreads.filter(t => t.username === username);
+
+    if (userThreads.length === 0) {
+      empty.classList.remove("hidden");
+      return;
+    }
+
+    empty.classList.add("hidden");
+
+    userThreads.forEach(thread => {
+      const div = document.createElement("div");
+      div.className = "bg-[#262626] border border-[#9DB4C0]/20 rounded-xl p-6 shadow hover:bg-[#30363D]/50 transition";
+      div.innerHTML = `
+      <div class="flex items-center space-x-3 mb-3">
+            <img src="{% if user_profile.profile_picture %}{{ user_profile.profile_picture.url }}{% else %}{% static 'accounts/img/default.png' %}{% endif %}"
+                alt="Profile picture"
+                class="w-10 h-10 rounded-full object-cover border border-[#9DB4C0]/30">
+            <div>
+                <h4 class="font-semibold text-[#E6E8E6] text-sm">@${thread.username}</h4>
+                <p class="text-xs text-[#9DB4C0]">${new Date(thread.created_at).toLocaleString()}</p>
+            </div>
+      </div>
+
+      ${thread.image ? `
+      <div class="rounded-lg overflow-hidden border border-[#9DB4C0]/30 mb-3">
+         <img src="${thread.image}" alt="Thread Image" class="w-full object-contain max-h-[500px]">
+      </div>
+      ` : ""}
+
+    <p class="text-[#E6E8E6] mb-2">${thread.content}</p>
+    ${thread.tags ? `<p class="text-sm text-[#9DB4C0]">#${thread.tags.replace(/,/g, " #")}</p>` : ""}`;
+      threadsContainer.appendChild(div);
+    });
+  } catch (error) {
+    console.error("Error fetching threads:", error);
+    empty.textContent = "Failed to load threads.";
+    empty.classList.remove("hidden");
+  }
+});
+</script>
+{% endblock %}
